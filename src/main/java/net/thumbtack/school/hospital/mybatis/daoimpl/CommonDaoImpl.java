@@ -15,7 +15,7 @@ public class CommonDaoImpl extends DaoImplBase implements CommonDao {
         LOGGER.debug("Clear Database");
         try (SqlSession sqlSession = getSession()) {
             try {
-                getAdminMapper(sqlSession).deleteAll();
+                getAdminMapper(sqlSession).deleteAllExceptOne();
             } catch (RuntimeException ex) {
                 LOGGER.info("Can't clear database");
                 sqlSession.rollback();

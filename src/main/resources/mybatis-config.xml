@@ -24,9 +24,10 @@
     </environments>
 
     <mappers>
+        <mapper class="net.thumbtack.school.hospital.mybatis.mappers.UserMapper"/>
         <mapper class="net.thumbtack.school.hospital.mybatis.mappers.AdminMapper"/>
-
-<!--        <mapper resource="net/thumbtack/school/database/mybatis/mappers/SchoolMapper.xml"/>-->
+        <mapper class="net.thumbtack.school.hospital.mybatis.mappers.DoctorMapper"/>
+        <mapper class="net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper"/>
     </mappers>
 
 </configuration>
