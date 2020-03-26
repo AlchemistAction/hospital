@@ -1,15 +1,9 @@
 package net.thumbtack.school.hospital.daoTest;
 
 
-import net.thumbtack.school.hospital.model.Admin;
-import net.thumbtack.school.hospital.model.Doctor;
-import net.thumbtack.school.hospital.model.DaySchedule;
-import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
-import net.thumbtack.school.hospital.mybatis.dao.DayScheduleDao;
-import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
-import net.thumbtack.school.hospital.mybatis.daoimpl.AdminDaoImpl;
-import net.thumbtack.school.hospital.mybatis.daoimpl.DayScheduleDaoImpl;
-import net.thumbtack.school.hospital.mybatis.daoimpl.DoctorDaoImpl;
+import net.thumbtack.school.hospital.model.*;
+import net.thumbtack.school.hospital.mybatis.dao.*;
+import net.thumbtack.school.hospital.mybatis.daoimpl.*;
 import net.thumbtack.school.hospital.mybatis.utils.MyBatisUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -23,7 +17,9 @@ public class TestBase {
 
     protected AdminDao adminDao = new AdminDaoImpl();
     protected DoctorDao doctorDao = new DoctorDaoImpl();
+    protected UserDao userDao = new UserDaoImpl();
     protected DayScheduleDao dayScheduleDao = new DayScheduleDaoImpl();
+    protected PatientDao patientDao = new PatientDaoImpl();
 
     private static boolean setUpIsDone = false;
 
@@ -43,9 +39,10 @@ public class TestBase {
         adminDao.deleteAllExceptOne();
         dayScheduleDao.deleteAll();
         doctorDao.deleteAll();
+        patientDao.deleteAll();
     }
 
-    protected Admin insertAdmin(String userType, String firstName, String lastName, String patronymic,
+    protected Admin insertAdmin(UserType userType, String firstName, String lastName, String patronymic,
                                 String login, String password, String position) {
         Admin admin = new Admin(userType, firstName, lastName, patronymic, login, password, position);
         adminDao.insert(admin);
@@ -53,7 +50,7 @@ public class TestBase {
         return admin;
     }
 
-    protected Doctor insertDoctor(String userType, String firstName, String lastName, String patronymic,
+    protected Doctor insertDoctor(UserType userType, String firstName, String lastName, String patronymic,
                                   String login, String password, String speciality, String room,
                                   String dateStart, String dateEnd) {
         Doctor doctor = new Doctor(userType, firstName, lastName, patronymic, login, password,
@@ -63,7 +60,7 @@ public class TestBase {
         return doctor;
     }
 
-    protected Doctor insertDoctorWithSchedule(String userType, String firstName, String lastName, String patronymic,
+    protected Doctor insertDoctorWithSchedule(UserType userType, String firstName, String lastName, String patronymic,
                                               String login, String password, String speciality, String room,
                                               String dateStart, String dateEnd) {
         Doctor doctor = new Doctor(userType, firstName, lastName, patronymic, login, password,
@@ -79,6 +76,15 @@ public class TestBase {
 
         doctor.setWeekDaysSchedule(weekDaysSchedule);
         return doctor;
+    }
+
+    protected Patient insertPatient(UserType userType, String firstName, String lastName, String patronymic,
+                                  String login, String password, String email, String address, String phone) {
+        Patient patient = new Patient(userType, firstName, lastName, patronymic,
+                login, password, email, address, phone);
+        patientDao.insert(patient);
+        assertNotEquals(0, patient.getId());
+        return patient;
     }
 
 }

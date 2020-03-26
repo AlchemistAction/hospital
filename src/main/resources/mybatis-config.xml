@@ -28,6 +28,7 @@
         <mapper class="net.thumbtack.school.hospital.mybatis.mappers.AdminMapper"/>
         <mapper class="net.thumbtack.school.hospital.mybatis.mappers.DoctorMapper"/>
         <mapper class="net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper"/>
+        <mapper class="net.thumbtack.school.hospital.mybatis.mappers.PatientMapper"/>
     </mappers>
 
 </configuration>

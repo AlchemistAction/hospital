@@ -18,7 +18,8 @@ public interface AdminMapper {
     })
     Admin getById(int id);
 
-    @Delete("DELETE FROM user where id not in (1) and userType = 'admin'")
+    @Delete("DELETE FROM user where id not in (1) and userType = 'ADMIN'")
     void deleteAllExceptOne();
+
 
 }

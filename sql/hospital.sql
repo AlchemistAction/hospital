@@ -4,13 +4,14 @@ USE hospital;
 
 CREATE TABLE user (
 id INT(11) NOT NULL AUTO_INCREMENT,
-userType ENUM('admin', 'doctor', 'patient') NOT NULL,
+userType ENUM('ADMIN', 'DOCTOR', 'PATIENT') NOT NULL,
 firstName VARCHAR(50) NOT NULL,
 lastName VARCHAR(50) NOT NULL,
 patronymic VARCHAR(50),
 login VARCHAR(50) NOT NULL,
 `password` VARCHAR(50) NOT NULL,
 PRIMARY KEY (id),
+UNIQUE KEY user (login),
 constraint user_AltPK unique (id, userType)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
@@ -58,7 +59,9 @@ FOREIGN KEY (id) REFERENCES user (id) ON DELETE CASCADE
 
 begin;
 INSERT INTO user
- VALUES(NULL,'admin',"admin","Иванов",null,"SuperAdmin", "SuperAdminPassword");
+ VALUES(NULL,'admin',"Admin","admin",null,"SuperAdmin", "SuperAdminPassword");
  insert into admin
  VALUES(LAST_INSERT_ID(),"admin","superAdmin");
 commit;
+
+

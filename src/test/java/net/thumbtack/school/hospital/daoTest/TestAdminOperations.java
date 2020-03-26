@@ -1,6 +1,7 @@
 package net.thumbtack.school.hospital.daoTest;
 
 import net.thumbtack.school.hospital.model.Admin;
+import net.thumbtack.school.hospital.model.UserType;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -10,10 +11,10 @@ public class TestAdminOperations extends TestBase {
     @Test
     public void testInsertAdmin() {
         try {
-            Admin admin1 = insertAdmin("admin", "name1", "sename1",
-                    "patronimic1", "adminLogin", "adminPass", "regularAdmin");
-            Admin admin1FromDB = adminDao.getById(admin1.getId());
-            assertEquals(admin1, admin1FromDB);
+            Admin admin = insertAdmin(UserType.ADMIN, "name", "surname",
+                    "patronymic", "adminLogin", "adminPass", "regularAdmin");
+            Admin adminFromDB = adminDao.getById(admin.getId());
+            assertEquals(admin, adminFromDB);
         } catch (RuntimeException e) {
             fail();
         }
@@ -21,11 +22,37 @@ public class TestAdminOperations extends TestBase {
 
     @Test(expected = RuntimeException.class)
     public void testInsertAdminWithNullFirstName() {
-        Admin admin1 = new Admin("admin", null, "sename1", "patronimic1",
+        Admin admin = new Admin(UserType.ADMIN, null, "surname", "patronymic",
                 "adminLogin", "adminPass", "admin");
-        adminDao.insert(admin1);
+        adminDao.insert(admin);
     }
 
+    @Test
+    public void testUpdateAdmin() {
+        try {
+            Admin admin = insertAdmin(UserType.ADMIN, "name", "surname",
+                    "patronymic", "adminLogin", "adminPass", "regularAdmin");
+            admin.setPassword("newPassword");
+            userDao.update(admin);
+            Admin adminFromDB = adminDao.getById(admin.getId());
+            assertEquals(admin, adminFromDB);
+        } catch (RuntimeException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testDeleteAdmin() {
+        try {
+            Admin admin = insertAdmin(UserType.ADMIN, "name", "surname",
+                    "patronymic", "adminLogin", "adminPass", "regularAdmin");
+            userDao.delete(admin);
+            Admin adminFromDB = adminDao.getById(admin.getId());
+            assertNull(adminFromDB);
+        } catch (RuntimeException e) {
+            fail();
+        }
+    }
 }
 
 

@@ -12,7 +12,7 @@ public class Doctor extends User {
     private String dateEnd;
     private List<DaySchedule> weekDaysSchedule;
 
-    public Doctor(int id, String userType, String firstName, String lastName, String patronymic, String login,
+    public Doctor(int id, UserType userType, String firstName, String lastName, String patronymic, String login,
                   String password, String speciality, String room, String dateStart, String dateEnd) {
         super(id, userType, firstName, lastName, patronymic, login, password);
         this.speciality = speciality;
@@ -22,7 +22,7 @@ public class Doctor extends User {
         this.weekDaysSchedule = new ArrayList<>();
     }
 
-    public Doctor(String userType, String firstName, String lastName, String patronymic, String login, String password,
+    public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login, String password,
                   String speciality, String room, String dateStart, String dateEnd) {
         super(userType, firstName, lastName, patronymic, login, password);
         this.speciality = speciality;

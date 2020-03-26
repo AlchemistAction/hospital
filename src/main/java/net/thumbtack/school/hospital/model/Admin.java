@@ -7,13 +7,13 @@ public class Admin extends User {
 
     private String position;
 
-    public Admin(int id, String userType, String firstName, String lastName, String patronymic, String login,
+    public Admin(int id, UserType userType, String firstName, String lastName, String patronymic, String login,
                  String password, String position) {
         super(id, userType, firstName, lastName, patronymic, login, password);
         this.position = position;
     }
 
-    public Admin(String userType, String firstName, String lastName, String patronymic, String login,
+    public Admin(UserType userType, String firstName, String lastName, String patronymic, String login,
                  String password, String position) {
         super(userType, firstName, lastName, patronymic, login, password);
         this.position = position;

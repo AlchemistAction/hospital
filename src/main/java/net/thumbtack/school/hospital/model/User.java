@@ -5,13 +5,13 @@ import java.util.Objects;
 public abstract class User {
     private int id;
     private String firstName;
-    private String userType;
+    private UserType userType;
     private String lastName;
     private String patronymic;
     private String login;
     private String password;
 
-    public User(int id, String userType, String firstName, String lastName, String patronymic, String login,
+    public User(int id, UserType userType, String firstName, String lastName, String patronymic, String login,
                 String password) {
         this.id = id;
         this.userType = userType;
@@ -22,7 +22,7 @@ public abstract class User {
         this.password = password;
     }
 
-    public User(String userType, String firstName, String lastName, String patronymic,
+    public User(UserType userType, String firstName, String lastName, String patronymic,
                 String login, String password) {
         this.id = 0;
         this.userType = userType;
@@ -41,11 +41,11 @@ public abstract class User {
         this.id = id;
     }
 
-    public String getUserType() {
+    public UserType getUserType() {
         return userType;
     }
 
-    public void setUserType(String userType) {
+    public void setUserType(UserType userType) {
         this.userType = userType;
     }
 
@@ -96,7 +96,7 @@ public abstract class User {
         User user = (User) o;
         return getId() == user.getId() &&
                 Objects.equals(getFirstName(), user.getFirstName()) &&
-                Objects.equals(getUserType(), user.getUserType()) &&
+                getUserType() == user.getUserType() &&
                 Objects.equals(getLastName(), user.getLastName()) &&
                 Objects.equals(getPatronymic(), user.getPatronymic()) &&
                 Objects.equals(getLogin(), user.getLogin()) &&
