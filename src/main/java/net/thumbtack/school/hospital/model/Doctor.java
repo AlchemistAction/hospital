@@ -24,7 +24,8 @@ public class Doctor extends User {
 
     public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login, String password,
                   String speciality, String room, String dateStart, String dateEnd) {
-        super(userType, firstName, lastName, patronymic, login, password);
+    	// REVU this(0, ...);
+       super(userType, firstName, lastName, patronymic, login, password);
         this.speciality = speciality;
         this.room = room;
         this.dateStart = dateStart;

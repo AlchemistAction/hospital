@@ -24,6 +24,7 @@ public abstract class User {
 
     public User(UserType userType, String firstName, String lastName, String patronymic,
                 String login, String password) {
+    	// REVU this(0,...);
         this.id = 0;
         this.userType = userType;
         this.firstName = firstName;
