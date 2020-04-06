@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.*;
 
 public interface AdminMapper {
 
-    @Insert("INSERT INTO admin (id, userType, position) VALUES (LAST_INSERT_ID(), default, #{admin.position})")
+    @Insert("INSERT INTO admin (id, position) VALUES (LAST_INSERT_ID(), #{admin.position})")
     Integer insert(@Param("admin") Admin admin);
 
 

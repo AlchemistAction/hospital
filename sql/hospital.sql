@@ -18,38 +18,61 @@ constraint user_AltPK unique (id, userType)
 
 CREATE TABLE admin (
 id INT(11) NOT NULL,
-userType VARCHAR(50) NOT NULL default 'admin' check (userType = 'admin'),
 position VARCHAR(50) NOT NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+
+CREATE TABLE speciality (
+id INT(11) NOT NULL AUTO_INCREMENT,
+speciality VARCHAR(50) NOT NULL,
+PRIMARY KEY (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+INSERT INTO speciality
+ VALUES (NULL,'хирург'),
+        (NULL,'лор');
+        
+CREATE TABLE room (
+id INT(11) NOT NULL AUTO_INCREMENT,
+room VARCHAR(50) NOT NULL,
+PRIMARY KEY (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+INSERT INTO room
+ VALUES (NULL,'100'),
+        (NULL,'300');
+
+
 CREATE TABLE doctor (
 id INT(11) NOT NULL,
-userType VARCHAR(50) NOT NULL default 'doctor' check (userType = 'doctor'),
-speciality VARCHAR(50) NOT NULL,
-room VARCHAR(50) NOT NULL,
+speciality_id INT(11) NOT NULL,
+room_id INT(11) NOT NULL,
 dateStart VARCHAR(50) NOT NULL,
 dateEnd VARCHAR(50) NOT NULL,
 PRIMARY KEY (id),
-FOREIGN KEY (id) REFERENCES user (id) ON DELETE CASCADE
+FOREIGN KEY (id) REFERENCES user (id) ON DELETE CASCADE,
+FOREIGN KEY (speciality_id) REFERENCES speciality (id),
+FOREIGN KEY (room_id) REFERENCES room (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
-CREATE TABLE day_schedule (
+            
+CREATE TABLE appointment (
 id INT(11) NOT NULL AUTO_INCREMENT,
 doctor_id INT(11) NOT NULL,
-weekDay VARCHAR(50) NOT NULL,
+date_of_appointment VARCHAR(50) NOT NULL,
 timeStart VARCHAR(50) NOT NULL,
 timeEnd VARCHAR(50) NOT NULL,
-duration VARCHAR(50) NOT NULL,
+is_free BOOLEAN default true,
+is_locked_for_commission BOOLEAN default true,
 PRIMARY KEY (id),
-FOREIGN KEY (doctor_id) REFERENCES user (id) 
+FOREIGN KEY (doctor_id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
  
 
 CREATE TABLE patient (
 id INT(11) NOT NULL,
-userType VARCHAR(50) NOT NULL default 'patient' check (userType = 'patient'),
 email VARCHAR(50) NOT NULL,
 address VARCHAR(50) NOT NULL,
 phone VARCHAR(50) NOT NULL,
@@ -59,9 +82,7 @@ FOREIGN KEY (id) REFERENCES user (id) ON DELETE CASCADE
 
 begin;
 INSERT INTO user
- VALUES(NULL,'admin',"Admin","admin",null,"SuperAdmin", "SuperAdminPassword");
+ VALUES(NULL,'ADMIN',"Admin","admin",null,"SuperAdmin", "SuperAdminPassword");
  insert into admin
- VALUES(LAST_INSERT_ID(),"admin","superAdmin");
+ VALUES(LAST_INSERT_ID(),"superAdmin");
 commit;
-
-

@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class AdminDaoImpl extends DaoImplBase implements AdminDao {
+public class AdminDaoImpl extends BaseDaoImpl implements AdminDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminDaoImpl.class);
 

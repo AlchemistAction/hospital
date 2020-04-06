@@ -15,9 +15,7 @@ public class Admin extends User {
 
     public Admin(UserType userType, String firstName, String lastName, String patronymic, String login,
                  String password, String position) {
-    	// REVU this(0, ...);
-        super(userType, firstName, lastName, patronymic, login, password);
-        this.position = position;
+        this(0, userType, firstName, lastName, patronymic, login, password, position);
     }
 
     public String getPosition() {

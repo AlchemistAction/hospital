@@ -18,11 +18,7 @@ public class Patient extends User {
 
     public Patient(UserType userType, String firstName, String lastName, String patronymic,
                    String login, String password, String email, String address, String phone) {
-    	// REVU this(0, ...);
-       super(userType, firstName, lastName, patronymic, login, password);
-        this.email = email;
-        this.address = address;
-        this.phone = phone;
+        this(0, userType, firstName, lastName, patronymic, login, password, email, address, phone);
     }
 
     public String getEmail() {

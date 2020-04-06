@@ -1,8 +1,6 @@
 package net.thumbtack.school.hospital.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Doctor extends User {
 
@@ -10,27 +8,36 @@ public class Doctor extends User {
     private String room;
     private String dateStart;
     private String dateEnd;
-    private List<DaySchedule> weekDaysSchedule;
+    private List<Appointment> schedule;
 
     public Doctor(int id, UserType userType, String firstName, String lastName, String patronymic, String login,
-                  String password, String speciality, String room, String dateStart, String dateEnd) {
+                  String password, String speciality, String room, String dateStart, String dateEnd,
+                  List<Appointment> schedule) {
         super(id, userType, firstName, lastName, patronymic, login, password);
         this.speciality = speciality;
         this.room = room;
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
-        this.weekDaysSchedule = new ArrayList<>();
+        this.schedule = schedule;
     }
 
-    public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login, String password,
-                  String speciality, String room, String dateStart, String dateEnd) {
-    	// REVU this(0, ...);
-       super(userType, firstName, lastName, patronymic, login, password);
-        this.speciality = speciality;
-        this.room = room;
-        this.dateStart = dateStart;
-        this.dateEnd = dateEnd;
-        this.weekDaysSchedule = new ArrayList<>();
+    public Doctor(int id, UserType userType, String firstName, String lastName, String patronymic, String login,
+                  String password, String speciality, String room, String dateStart, String dateEnd) {
+        this(id, userType, firstName, lastName, patronymic, login, password, speciality, room,
+                dateStart, dateEnd, new ArrayList<>());
+    }
+
+    public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login,
+                  String password, String speciality, String room, String dateStart, String dateEnd,
+                  List<Appointment> schedule) {
+        this(0, userType, firstName, lastName, patronymic, login, password, speciality, room,
+                dateStart, dateEnd, schedule);
+    }
+
+    public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login,
+                  String password, String speciality, String room, String dateStart, String dateEnd) {
+        this(0, userType, firstName, lastName, patronymic, login, password, speciality, room,
+                dateStart, dateEnd, new ArrayList<>());
     }
 
     public String getSpeciality() {
@@ -65,12 +72,12 @@ public class Doctor extends User {
         this.dateEnd = dateEnd;
     }
 
-    public List<DaySchedule> getWeekDaysSchedule() {
-        return weekDaysSchedule;
+    public List<Appointment> getSchedule() {
+        return schedule;
     }
 
-    public void setWeekDaysSchedule(List<DaySchedule> weekDaysSchedule) {
-        this.weekDaysSchedule = weekDaysSchedule;
+    public void setSchedule(List<Appointment> schedule) {
+        this.schedule = schedule;
     }
 
     @Override
@@ -83,11 +90,11 @@ public class Doctor extends User {
                 Objects.equals(getRoom(), doctor.getRoom()) &&
                 Objects.equals(getDateStart(), doctor.getDateStart()) &&
                 Objects.equals(getDateEnd(), doctor.getDateEnd()) &&
-                Objects.equals(getWeekDaysSchedule(), doctor.getWeekDaysSchedule());
+                Objects.equals(getSchedule(), doctor.getSchedule());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getSpeciality(), getRoom(), getDateStart(), getDateEnd(), getWeekDaysSchedule());
+        return Objects.hash(super.hashCode(), getSpeciality(), getRoom(), getDateStart(), getDateEnd(), getSchedule());
     }
 }

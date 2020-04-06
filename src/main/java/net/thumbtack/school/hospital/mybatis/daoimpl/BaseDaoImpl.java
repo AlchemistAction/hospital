@@ -5,7 +5,7 @@ import net.thumbtack.school.hospital.mybatis.mappers.*;
 import net.thumbtack.school.hospital.mybatis.utils.MyBatisUtils;
 import org.apache.ibatis.session.SqlSession;
 
-public class DaoImplBase {
+public class BaseDaoImpl {
 
     protected SqlSession getSession() {
         return MyBatisUtils.getSqlSessionFactory().openSession();
@@ -23,8 +23,8 @@ public class DaoImplBase {
         return sqlSession.getMapper(DoctorMapper.class);
     }
 
-    protected DayScheduleMapper getDayScheduleMapper(SqlSession sqlSession) {
-        return sqlSession.getMapper(DayScheduleMapper.class);
+    protected AppointmentMapper getAppointmentMapper(SqlSession sqlSession) {
+        return sqlSession.getMapper(AppointmentMapper.class);
     }
 
     protected PatientMapper getPatientMapper(SqlSession sqlSession) {

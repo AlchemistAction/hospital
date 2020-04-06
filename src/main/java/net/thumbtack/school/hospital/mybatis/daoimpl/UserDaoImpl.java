@@ -6,7 +6,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UserDaoImpl extends DaoImplBase implements UserDao {
+public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminDaoImpl.class);
 

@@ -5,8 +5,8 @@ import org.apache.ibatis.annotations.*;
 
 public interface PatientMapper {
 
-    @Insert("INSERT INTO patient (id, userType, email, address, phone)" +
-            " VALUES (LAST_INSERT_ID(), default, #{patient.email}, #{patient.address}, #{patient.phone})")
+    @Insert("INSERT INTO patient (id, email, address, phone)" +
+            " VALUES (LAST_INSERT_ID(), #{patient.email}, #{patient.address}, #{patient.phone})")
     Integer insert(@Param("patient") Patient patient);
 
     @Select("SELECT user.id, user.userType, firstName, lastName, patronymic, login, password, email, address, phone"
