@@ -70,6 +70,15 @@ PRIMARY KEY (id),
 FOREIGN KEY (doctor_id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
  
+CREATE TABLE ticket (
+id INT(11) NOT NULL AUTO_INCREMENT,
+ticket VARCHAR(50) NOT NULL,
+patient_id INT(11) NOT NULL,
+appointment_id INT(11) NOT NULL,
+PRIMARY KEY (id),
+FOREIGN KEY (appointment_id) REFERENCES appointment (id) ON DELETE CASCADE,
+constraint ticket_AltPK unique (patient_id, appointment_id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE patient (
 id INT(11) NOT NULL,
