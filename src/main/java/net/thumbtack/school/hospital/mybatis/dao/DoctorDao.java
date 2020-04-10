@@ -9,5 +9,7 @@ public interface DoctorDao {
 
     Doctor getById(int id);
 
+    void delete(Doctor doctor);
+
     void deleteAll();
 }

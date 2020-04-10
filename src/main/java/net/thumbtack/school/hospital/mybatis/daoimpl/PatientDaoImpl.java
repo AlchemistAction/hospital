@@ -1,5 +1,6 @@
 package net.thumbtack.school.hospital.mybatis.daoimpl;
 
+import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Patient;
 import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
 import org.apache.ibatis.session.SqlSession;
@@ -39,6 +40,22 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
     }
 
     @Override
+    public void addPersonToAppointment(Appointment appointment, Patient patient) {
+        LOGGER.debug("DAO add Patient to Appointment {}, {}", appointment, patient);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+                getAppointmentMapper(sqlSession).isOccupied(appointment);
+                getTicketMapper(sqlSession).insert(appointment, patient);
+            } catch (RuntimeException ex) {
+                LOGGER.info("Can't add Patient to Appointment {}, {}, {}", appointment, patient, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
+            sqlSession.commit();
+        }
+    }
+
+    @Override
     public void deleteAll() {
         LOGGER.debug("DAO delete all Patients {}");
         try (SqlSession sqlSession = getSession()) {
@@ -52,4 +69,6 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
             sqlSession.commit();
         }
     }
+
+
 }

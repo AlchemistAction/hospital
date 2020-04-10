@@ -41,6 +41,21 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
     }
 
     @Override
+    public void delete(Doctor doctor) {
+        LOGGER.debug("DAO delete Doctor {} ", doctor);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+                getDoctorMapper(sqlSession).delete(doctor);
+            } catch (RuntimeException ex) {
+                LOGGER.info("Can't delete Doctor {} {}", doctor, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
+            sqlSession.commit();
+        }
+    }
+
+    @Override
     public void deleteAll() {
         LOGGER.debug("DAO delete all Doctors {}");
         try (SqlSession sqlSession = getSession()) {

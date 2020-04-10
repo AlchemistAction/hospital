@@ -65,16 +65,16 @@ date_of_appointment VARCHAR(50) NOT NULL,
 timeStart VARCHAR(50) NOT NULL,
 timeEnd VARCHAR(50) NOT NULL,
 is_free BOOLEAN default true,
-is_locked_for_commission BOOLEAN default true,
+is_locked_for_commission BOOLEAN default false,
 PRIMARY KEY (id),
 FOREIGN KEY (doctor_id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
  
 CREATE TABLE ticket (
 id INT(11) NOT NULL AUTO_INCREMENT,
-ticket VARCHAR(50) NOT NULL,
-patient_id INT(11) NOT NULL,
-appointment_id INT(11) NOT NULL,
+ticket VARCHAR(50) NULL,
+patient_id INT(11) NULL,
+appointment_id INT(11) NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (appointment_id) REFERENCES appointment (id) ON DELETE CASCADE,
 constraint ticket_AltPK unique (patient_id, appointment_id)
@@ -95,3 +95,6 @@ INSERT INTO user
  insert into admin
  VALUES(LAST_INSERT_ID(),"superAdmin");
 commit;
+
+
+ 

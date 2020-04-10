@@ -27,6 +27,9 @@ public interface DoctorMapper {
     })
     Doctor getById(int id);
 
+    @Delete("DELETE FROM user WHERE id = #{doctor.id}")
+    void delete(@Param("doctor") Doctor doctor);
+
     @Delete("delete from user WHERE userType = 'DOCTOR'")
     void deleteAll();
 }

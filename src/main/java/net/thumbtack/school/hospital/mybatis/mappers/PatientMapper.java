@@ -1,5 +1,6 @@
 package net.thumbtack.school.hospital.mybatis.mappers;
 
+import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Patient;
 import org.apache.ibatis.annotations.*;
 

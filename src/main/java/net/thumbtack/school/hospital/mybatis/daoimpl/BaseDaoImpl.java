@@ -30,4 +30,8 @@ public class BaseDaoImpl {
     protected PatientMapper getPatientMapper(SqlSession sqlSession) {
         return sqlSession.getMapper(PatientMapper.class);
     }
+
+    protected TicketMapper getTicketMapper(SqlSession sqlSession) {
+        return sqlSession.getMapper(TicketMapper.class);
+    }
 }

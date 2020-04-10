@@ -9,6 +9,7 @@ public class Appointment {
     private String timeEnd;
     private boolean isFree;
     private boolean isLockedForCommission;
+    private String ticket;
 
     public Appointment(String dateOfAppointment, String timeStart, String timeEnd, boolean isFree,
                        boolean isLockedForCommission) {
@@ -17,6 +18,16 @@ public class Appointment {
         this.timeEnd = timeEnd;
         this.isFree = isFree;
         this.isLockedForCommission = isLockedForCommission;
+    }
+
+    public Appointment(String dateOfAppointment, String timeStart, String timeEnd,
+                       boolean isFree, boolean isLockedForCommission, String ticket) {
+        this.dateOfAppointment = dateOfAppointment;
+        this.timeStart = timeStart;
+        this.timeEnd = timeEnd;
+        this.isFree = isFree;
+        this.isLockedForCommission = isLockedForCommission;
+        this.ticket = ticket;
     }
 
     public String getDateOfAppointment() {
@@ -59,6 +70,15 @@ public class Appointment {
         isLockedForCommission = lockedForCommission;
     }
 
+
+    public String getTicket() {
+        return ticket;
+    }
+
+    public void setTicket(String ticket) {
+        this.ticket = ticket;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -68,11 +88,12 @@ public class Appointment {
                 isLockedForCommission() == that.isLockedForCommission() &&
                 Objects.equals(getDateOfAppointment(), that.getDateOfAppointment()) &&
                 Objects.equals(getTimeStart(), that.getTimeStart()) &&
-                Objects.equals(getTimeEnd(), that.getTimeEnd());
+                Objects.equals(getTimeEnd(), that.getTimeEnd()) &&
+                Objects.equals(getTicket(), that.getTicket());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDateOfAppointment(), getTimeStart(), getTimeEnd(), isFree(), isLockedForCommission());
+        return Objects.hash(getDateOfAppointment(), getTimeStart(), getTimeEnd(), isFree(), isLockedForCommission(), getTicket());
     }
 }
