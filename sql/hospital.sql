@@ -57,17 +57,22 @@ FOREIGN KEY (speciality_id) REFERENCES speciality (id),
 FOREIGN KEY (room_id) REFERENCES room (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+CREATE TABLE day_schedule (
+id INT(11) NOT NULL AUTO_INCREMENT,
+doctor_id INT(11) NOT NULL,
+date_of_appointment datetime NOT NULL,
+PRIMARY KEY (id),
+FOREIGN KEY (doctor_id) REFERENCES user (id) ON DELETE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
             
 CREATE TABLE appointment (
 id INT(11) NOT NULL AUTO_INCREMENT,
-doctor_id INT(11) NOT NULL,
-date_of_appointment VARCHAR(50) NOT NULL,
+day_schedule_id INT(11) NOT NULL,
 timeStart VARCHAR(50) NOT NULL,
 timeEnd VARCHAR(50) NOT NULL,
-is_free BOOLEAN default true,
-is_locked_for_commission BOOLEAN default false,
+state ENUM('IS_FREE', 'IS_LOCKED_FOR_APPOINTMENT', 'IS_LOCKED_FOR_COMMISSION') NOT NULL,
 PRIMARY KEY (id),
-FOREIGN KEY (doctor_id) REFERENCES user (id) ON DELETE CASCADE
+FOREIGN KEY (day_schedule_id) REFERENCES day_schedule (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
  
 CREATE TABLE ticket (

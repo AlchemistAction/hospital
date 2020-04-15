@@ -1,28 +1,24 @@
 package net.thumbtack.school.hospital.mybatis.mappers;
 
 import net.thumbtack.school.hospital.model.Appointment;
-import net.thumbtack.school.hospital.model.Doctor;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import net.thumbtack.school.hospital.model.DaySchedule;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
 public interface AppointmentMapper {
-    @Insert("INSERT INTO appointment (doctor_id, date_of_appointment, timeStart, timeEnd, is_free," +
-            " is_locked_for_commission) VALUES (#{doctor.id}, #{appointment.dateOfAppointment}, #{appointment.timeStart},"
-            + " #{appointment.timeEnd}, #{appointment.isFree}, #{appointment.isLockedForCommission})")
-    Integer insert(@Param("doctor") Doctor doctor, @Param("appointment") Appointment appointment);
 
+    @Insert("INSERT INTO appointment (day_schedule_id, timeStart, timeEnd, state)" +
+            " VALUES (#{daySchedule.id}, #{appointment.timeStart}, #{appointment.timeEnd}, #{appointment.state})")
+    @Options(useGeneratedKeys = true, keyProperty = "appointment.id")
+    Integer insert(@Param("daySchedule") DaySchedule daySchedule, @Param("appointment") Appointment appointment);
 
-    @Select("SELECT date_of_appointment, timeStart, timeEnd, is_free, is_locked_for_commission, ticket"
-            + " FROM appointment left join ticket on appointment.id = ticket.appointment_id where doctor_id = #{doctor.id}")
-    List<Appointment> getByDoctor(Doctor doctor);
+    @Select("SELECT appointment.id, timeStart, timeEnd, state, ticket FROM appointment" +
+            " left join ticket on appointment.id = ticket.appointment_id where" +
+            " appointment.day_schedule_id = #{daySchedule.id}")
+    List<Appointment> getByDaySchedule(DaySchedule daySchedule);
 
-    @Update("UPDATE appointment SET is_free = false WHERE timeStart = #{appointment.timeStart} and" +
-            " date_of_appointment = #{appointment.dateOfAppointment}")
-    void isOccupied(@Param("appointment") Appointment appointment);
-
+    @Update("UPDATE appointment SET state = #{appointment.state} WHERE appointment.id = #{appointment.id}")
+    void changeState(@Param("appointment") Appointment appointment);
 }
 

@@ -22,7 +22,7 @@ public interface DoctorMapper {
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "schedule", column = "id", javaType = List.class,
-                    many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.AppointmentMapper.getByDoctor",
+                    many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper.getByDoctor",
                             fetchType = FetchType.LAZY)),
     })
     Doctor getById(int id);

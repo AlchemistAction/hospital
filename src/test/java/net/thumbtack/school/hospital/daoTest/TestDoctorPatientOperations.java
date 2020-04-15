@@ -1,15 +1,13 @@
 package net.thumbtack.school.hospital.daoTest;
 
-import net.thumbtack.school.hospital.model.Appointment;
-import net.thumbtack.school.hospital.model.Doctor;
-import net.thumbtack.school.hospital.model.Patient;
-import net.thumbtack.school.hospital.model.UserType;
+import net.thumbtack.school.hospital.model.*;
 import org.junit.Test;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -19,17 +17,13 @@ public class TestDoctorPatientOperations extends TestBase {
     @Test
     public void testAddPatientToAppointment() {
         try {
-            List<Appointment> schedule = Arrays.asList(
-                    new Appointment("01-01", "10:00", "10:19",
-                            true, true),
-                    new Appointment("01-01", "10:20", "10:39",
-                            true, true),
-                    new Appointment("11-01", "11:00", "11:19",
-                            true, true),
-                    new Appointment("11-01", "11:20", "11:39",
-                            true, true));
-            schedule.sort(Comparator.comparing(Appointment::getTimeStart));
-
+            List<DaySchedule> schedule = new LinkedList<>(Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                            new Appointment("10:00", "10:19", AppointmentState.IS_FREE),
+                            new Appointment("10:20", "10:39", AppointmentState.IS_FREE)))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), new LinkedList<>(Arrays.asList(
+                            new Appointment("11:00", "11:19", AppointmentState.IS_FREE),
+                            new Appointment("11:20", "11:39", AppointmentState.IS_FREE))))));
             Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
                     "patronymic", "doctorLogin", "doctorPass", "хирург",
                     "100", "20-03", "20-05", schedule);
@@ -42,14 +36,16 @@ public class TestDoctorPatientOperations extends TestBase {
             Patient patientFromDB = patientDao.getById(patient.getId());
             assertEquals(patient, patientFromDB);
 
-            Appointment appointment = new Appointment("01-01", "10:00", "10:19",
-                    false, true, "fakeTicket");
+            Appointment appointmentFromDb = doctorFromDB.getSchedule().get(0).getAppointmentList().get(0);
 
-            List<Appointment> schedule2 = schedule.stream().skip(1).collect(Collectors.toList());
-            schedule2.add(appointment);
-            schedule2.sort(Comparator.comparing(Appointment::getTimeStart));
+            Appointment appointment = new Appointment(appointmentFromDb.getId(), appointmentFromDb.getTimeStart(),
+                    appointmentFromDb.getTimeEnd(), AppointmentState.IS_LOCKED_FOR_APPOINTMENT, "fakeTicket");
 
-            doctor.setSchedule(schedule2);
+            schedule.get(0).getAppointmentList().remove(0);
+            schedule.get(0).getAppointmentList().add(appointment);
+            schedule.get(0).getAppointmentList().sort(Comparator.comparing(Appointment::getTimeStart));
+
+            doctor.setSchedule(schedule);
 
             patientDao.addPersonToAppointment(appointment, patient);
 

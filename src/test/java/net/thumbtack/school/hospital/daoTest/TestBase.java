@@ -49,7 +49,7 @@ public class TestBase {
 
     protected Doctor insertDoctor(UserType userType, String firstName, String lastName, String patronymic,
                                   String login, String password, String speciality, String room,
-                                  String dateStart, String dateEnd, List<Appointment> schedule) {
+                                  String dateStart, String dateEnd, List<DaySchedule> schedule) {
         Doctor doctor = new Doctor(userType, firstName, lastName, patronymic, login, password,
                 speciality, room, dateStart, dateEnd, schedule);
 

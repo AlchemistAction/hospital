@@ -1,13 +1,13 @@
 package net.thumbtack.school.hospital.daoTest;
 
-import net.thumbtack.school.hospital.model.Appointment;
-import net.thumbtack.school.hospital.model.Doctor;
-import net.thumbtack.school.hospital.model.UserType;
+import net.thumbtack.school.hospital.model.*;
 import org.junit.Test;
 
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -17,15 +17,13 @@ public class TestDoctorOperations extends TestBase {
     @Test
     public void testInsertDoctor() {
         try {
-            List<Appointment> schedule = Arrays.asList(
-                    new Appointment("01-01", "10:00", "10:19",
-                            true, false),
-                    new Appointment("01-01", "10:20", "10:39",
-                            true, false),
-                    new Appointment("11-01", "11:00", "11:19",
-                            true, false),
-                    new Appointment("11-01", "11:20", "11:39",
-                            true, false));
+            List<DaySchedule> schedule = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
+                            new Appointment("10:00", "10:19", AppointmentState.IS_FREE),
+                            new Appointment("10:20", "10:39", AppointmentState.IS_FREE))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
+                            new Appointment("11:00", "11:19", AppointmentState.IS_FREE),
+                            new Appointment("11:20", "11:39", AppointmentState.IS_FREE))));
 
             Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
                     "patronymic", "doctorLogin", "doctorPass", "хирург",

@@ -4,38 +4,39 @@ import java.util.Objects;
 
 public class Appointment {
 
-    private String dateOfAppointment;
+    private int id;
     private String timeStart;
     private String timeEnd;
-    private boolean isFree;
-    private boolean isLockedForCommission;
+    private AppointmentState state;
     private String ticket;
 
-    public Appointment(String dateOfAppointment, String timeStart, String timeEnd, boolean isFree,
-                       boolean isLockedForCommission) {
-        this.dateOfAppointment = dateOfAppointment;
+    public Appointment(int id, String timeStart, String timeEnd, AppointmentState state) {
+        this.id = id;
         this.timeStart = timeStart;
         this.timeEnd = timeEnd;
-        this.isFree = isFree;
-        this.isLockedForCommission = isLockedForCommission;
+        this.state = state;
     }
 
-    public Appointment(String dateOfAppointment, String timeStart, String timeEnd,
-                       boolean isFree, boolean isLockedForCommission, String ticket) {
-        this.dateOfAppointment = dateOfAppointment;
-        this.timeStart = timeStart;
-        this.timeEnd = timeEnd;
-        this.isFree = isFree;
-        this.isLockedForCommission = isLockedForCommission;
+    public Appointment(int id, String timeStart, String timeEnd, AppointmentState state, String ticket) {
+        this(id, timeStart, timeEnd, state);
         this.ticket = ticket;
     }
 
-    public String getDateOfAppointment() {
-        return dateOfAppointment;
+    public Appointment(String timeStart, String timeEnd, AppointmentState state) {
+        this(0, timeStart, timeEnd, state);
     }
 
-    public void setDateOfAppointment(String dateOfAppointment) {
-        this.dateOfAppointment = dateOfAppointment;
+    public Appointment(String timeStart, String timeEnd, AppointmentState state, String ticket) {
+        this(0, timeStart, timeEnd, state, ticket);
+
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getTimeStart() {
@@ -54,22 +55,13 @@ public class Appointment {
         this.timeEnd = timeEnd;
     }
 
-    public boolean isFree() {
-        return isFree;
+    public AppointmentState getState() {
+        return state;
     }
 
-    public void setFree(boolean free) {
-        isFree = free;
+    public void setState(AppointmentState state) {
+        this.state = state;
     }
-
-    public boolean isLockedForCommission() {
-        return isLockedForCommission;
-    }
-
-    public void setLockedForCommission(boolean lockedForCommission) {
-        isLockedForCommission = lockedForCommission;
-    }
-
 
     public String getTicket() {
         return ticket;
@@ -84,16 +76,15 @@ public class Appointment {
         if (this == o) return true;
         if (!(o instanceof Appointment)) return false;
         Appointment that = (Appointment) o;
-        return isFree() == that.isFree() &&
-                isLockedForCommission() == that.isLockedForCommission() &&
-                Objects.equals(getDateOfAppointment(), that.getDateOfAppointment()) &&
+        return getId() == that.getId() &&
                 Objects.equals(getTimeStart(), that.getTimeStart()) &&
                 Objects.equals(getTimeEnd(), that.getTimeEnd()) &&
+                getState() == that.getState() &&
                 Objects.equals(getTicket(), that.getTicket());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDateOfAppointment(), getTimeStart(), getTimeEnd(), isFree(), isLockedForCommission(), getTicket());
+        return Objects.hash(getId(), getTimeStart(), getTimeEnd(), getState(), getTicket());
     }
 }

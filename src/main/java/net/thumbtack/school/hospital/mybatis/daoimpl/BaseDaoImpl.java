@@ -23,6 +23,10 @@ public class BaseDaoImpl {
         return sqlSession.getMapper(DoctorMapper.class);
     }
 
+    protected DayScheduleMapper getDayScheduleMapper(SqlSession sqlSession) {
+        return sqlSession.getMapper(DayScheduleMapper.class);
+    }
+
     protected AppointmentMapper getAppointmentMapper(SqlSession sqlSession) {
         return sqlSession.getMapper(AppointmentMapper.class);
     }

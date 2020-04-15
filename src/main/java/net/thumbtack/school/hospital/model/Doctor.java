@@ -8,11 +8,11 @@ public class Doctor extends User {
     private String room;
     private String dateStart;
     private String dateEnd;
-    private List<Appointment> schedule;
+    private List<DaySchedule> schedule;
 
     public Doctor(int id, UserType userType, String firstName, String lastName, String patronymic, String login,
                   String password, String speciality, String room, String dateStart, String dateEnd,
-                  List<Appointment> schedule) {
+                  List<DaySchedule> schedule) {
         super(id, userType, firstName, lastName, patronymic, login, password);
         this.speciality = speciality;
         this.room = room;
@@ -29,7 +29,7 @@ public class Doctor extends User {
 
     public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login,
                   String password, String speciality, String room, String dateStart, String dateEnd,
-                  List<Appointment> schedule) {
+                  List<DaySchedule> schedule) {
         this(0, userType, firstName, lastName, patronymic, login, password, speciality, room,
                 dateStart, dateEnd, schedule);
     }
@@ -72,11 +72,11 @@ public class Doctor extends User {
         this.dateEnd = dateEnd;
     }
 
-    public List<Appointment> getSchedule() {
+    public List<DaySchedule> getSchedule() {
         return schedule;
     }
 
-    public void setSchedule(List<Appointment> schedule) {
+    public void setSchedule(List<DaySchedule> schedule) {
         this.schedule = schedule;
     }
 
