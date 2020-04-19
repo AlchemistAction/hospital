@@ -19,11 +19,11 @@ public class TestDoctorOperations extends TestBase {
         try {
             List<DaySchedule> schedule = Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.IS_FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.IS_FREE))),
+                            new Appointment("10:00", "10:19", AppointmentState.FREE),
+                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
                     new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.IS_FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.IS_FREE))));
+                            new Appointment("11:00", "11:19", AppointmentState.FREE),
+                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
 
             Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
                     "patronymic", "doctorLogin", "doctorPass", "хирург",

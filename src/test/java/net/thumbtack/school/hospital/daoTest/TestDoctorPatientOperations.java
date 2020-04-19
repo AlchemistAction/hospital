@@ -19,11 +19,11 @@ public class TestDoctorPatientOperations extends TestBase {
         try {
             List<DaySchedule> schedule = new LinkedList<>(Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.IS_FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.IS_FREE)))),
+                            new Appointment("10:00", "10:19", AppointmentState.FREE),
+                            new Appointment("10:20", "10:39", AppointmentState.FREE)))),
                     new DaySchedule(LocalDate.of(2020, 2, 2), new LinkedList<>(Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.IS_FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.IS_FREE))))));
+                            new Appointment("11:00", "11:19", AppointmentState.FREE),
+                            new Appointment("11:20", "11:39", AppointmentState.FREE))))));
             Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
                     "patronymic", "doctorLogin", "doctorPass", "хирург",
                     "100", "20-03", "20-05", schedule);
@@ -39,7 +39,8 @@ public class TestDoctorPatientOperations extends TestBase {
             Appointment appointmentFromDb = doctorFromDB.getSchedule().get(0).getAppointmentList().get(0);
 
             Appointment appointment = new Appointment(appointmentFromDb.getId(), appointmentFromDb.getTimeStart(),
-                    appointmentFromDb.getTimeEnd(), AppointmentState.IS_LOCKED_FOR_APPOINTMENT, "fakeTicket");
+                    appointmentFromDb.getTimeEnd(), AppointmentState.APPOINTMENT,
+                    new Ticket("ticketName", patient.getId(), doctor.getId()));
 
             schedule.get(0).getAppointmentList().remove(0);
             schedule.get(0).getAppointmentList().add(appointment);
@@ -47,7 +48,7 @@ public class TestDoctorPatientOperations extends TestBase {
 
             doctor.setSchedule(schedule);
 
-            patientDao.addPersonToAppointment(appointment, patient);
+            patientDao.addPersonToAppointment(appointment);
 
             doctorFromDB = doctorDao.getById(doctor.getId());
             assertEquals(doctor, doctorFromDB);

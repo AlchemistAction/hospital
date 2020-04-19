@@ -11,5 +11,5 @@ public interface PatientDao {
 
     void deleteAll();
 
-    void addPersonToAppointment(Appointment appointment, Patient patient);
+    void addPersonToAppointment(Appointment appointment);
 }

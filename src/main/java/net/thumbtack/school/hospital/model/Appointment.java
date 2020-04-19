@@ -8,7 +8,7 @@ public class Appointment {
     private String timeStart;
     private String timeEnd;
     private AppointmentState state;
-    private String ticket;
+    private Ticket ticket;
 
     public Appointment(int id, String timeStart, String timeEnd, AppointmentState state) {
         this.id = id;
@@ -17,7 +17,7 @@ public class Appointment {
         this.state = state;
     }
 
-    public Appointment(int id, String timeStart, String timeEnd, AppointmentState state, String ticket) {
+    public Appointment(int id, String timeStart, String timeEnd, AppointmentState state, Ticket ticket) {
         this(id, timeStart, timeEnd, state);
         this.ticket = ticket;
     }
@@ -26,7 +26,7 @@ public class Appointment {
         this(0, timeStart, timeEnd, state);
     }
 
-    public Appointment(String timeStart, String timeEnd, AppointmentState state, String ticket) {
+    public Appointment(String timeStart, String timeEnd, AppointmentState state, Ticket ticket) {
         this(0, timeStart, timeEnd, state, ticket);
 
     }
@@ -63,11 +63,11 @@ public class Appointment {
         this.state = state;
     }
 
-    public String getTicket() {
+    public Ticket getTicket() {
         return ticket;
     }
 
-    public void setTicket(String ticket) {
+    public void setTicket(Ticket ticket) {
         this.ticket = ticket;
     }
 

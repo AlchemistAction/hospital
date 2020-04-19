@@ -10,7 +10,7 @@ import java.util.List;
 public interface DayScheduleMapper {
 
     @Insert("INSERT INTO day_schedule (doctor_id, date_of_appointment)" +
-            " VALUES (#{doctor.id}, #{daySchedule.dateOfAppointment})")
+            " VALUES (#{doctor.id}, #{daySchedule.date})")
     @Options(useGeneratedKeys = true, keyProperty = "daySchedule.id")
     Integer insert(@Param("doctor") Doctor doctor, @Param("daySchedule") DaySchedule daySchedule);
 

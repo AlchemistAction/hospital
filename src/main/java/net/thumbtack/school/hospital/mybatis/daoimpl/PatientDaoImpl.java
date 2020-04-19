@@ -40,14 +40,14 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
     }
 
     @Override
-    public void addPersonToAppointment(Appointment appointment, Patient patient) {
-        LOGGER.debug("DAO add Patient to Appointment {}, {}", appointment, patient);
+    public void addPersonToAppointment(Appointment appointment) {
+        LOGGER.debug("DAO add Patient to Appointment {}, {}", appointment, appointment.getTicket());
         try (SqlSession sqlSession = getSession()) {
             try {
                 getAppointmentMapper(sqlSession).changeState(appointment);
-                getTicketMapper(sqlSession).insert(appointment, patient);
+                getTicketMapper(sqlSession).insert(appointment, appointment.getTicket());
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't add Patient to Appointment {}, {}, {}", appointment, patient, ex);
+                LOGGER.info("Can't add Patient to Appointment {}, {}, {}", appointment, appointment.getTicket(), ex);
                 sqlSession.rollback();
                 throw ex;
             }

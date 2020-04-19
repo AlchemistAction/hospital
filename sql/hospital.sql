@@ -70,15 +70,16 @@ id INT(11) NOT NULL AUTO_INCREMENT,
 day_schedule_id INT(11) NOT NULL,
 timeStart VARCHAR(50) NOT NULL,
 timeEnd VARCHAR(50) NOT NULL,
-state ENUM('IS_FREE', 'IS_LOCKED_FOR_APPOINTMENT', 'IS_LOCKED_FOR_COMMISSION') NOT NULL,
+state ENUM('FREE', 'APPOINTMENT', 'COMMISSION') NOT NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (day_schedule_id) REFERENCES day_schedule (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
  
 CREATE TABLE ticket (
 id INT(11) NOT NULL AUTO_INCREMENT,
-ticket VARCHAR(50) NULL,
+name VARCHAR(50) NULL,
 patient_id INT(11) NULL,
+doctor_id INT(11) NOT NULL,
 appointment_id INT(11) NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (appointment_id) REFERENCES appointment (id) ON DELETE CASCADE,
@@ -100,6 +101,3 @@ INSERT INTO user
  insert into admin
  VALUES(LAST_INSERT_ID(),"superAdmin");
 commit;
-
-
- 

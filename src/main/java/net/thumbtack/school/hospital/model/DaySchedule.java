@@ -8,29 +8,29 @@ import java.util.Objects;
 public class DaySchedule {
 
     private int id;
-    private LocalDate dateOfAppointment;
+    private LocalDate date;
     private List<Appointment> appointmentList;
 
-    public DaySchedule(int id, LocalDate dateOfAppointment, List<Appointment> appointmentList) {
+    public DaySchedule(int id, LocalDate date, List<Appointment> appointmentList) {
         this.id = id;
-        this.dateOfAppointment = dateOfAppointment;
+        this.date = date;
         this.appointmentList = appointmentList;
     }
 
-    public DaySchedule(int id, LocalDate dateOfAppointment) {
-        this(id, dateOfAppointment, new ArrayList<>());
+    public DaySchedule(int id, LocalDate date) {
+        this(id, date, new ArrayList<>());
     }
 
-    public DaySchedule(LocalDate dateOfAppointment, List<Appointment> appointmentList) {
-        this(0, dateOfAppointment, appointmentList);
+    public DaySchedule(LocalDate date, List<Appointment> appointmentList) {
+        this(0, date, appointmentList);
     }
 
-    public DaySchedule(LocalDate dateOfAppointment) {
-        this(0, dateOfAppointment, new ArrayList<>());
+    public DaySchedule(LocalDate date) {
+        this(0, date, new ArrayList<>());
     }
 
-    public LocalDate getDateOfAppointment() {
-        return dateOfAppointment;
+    public LocalDate getDate() {
+        return date;
     }
 
     public int getId() {
@@ -41,8 +41,8 @@ public class DaySchedule {
         this.id = id;
     }
 
-    public void setDateOfAppointment(LocalDate dateOfAppointment) {
-        this.dateOfAppointment = dateOfAppointment;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public List<Appointment> getAppointmentList() {
@@ -59,12 +59,12 @@ public class DaySchedule {
         if (!(o instanceof DaySchedule)) return false;
         DaySchedule that = (DaySchedule) o;
         return getId() == that.getId() &&
-                Objects.equals(getDateOfAppointment(), that.getDateOfAppointment()) &&
+                Objects.equals(getDate(), that.getDate()) &&
                 Objects.equals(getAppointmentList(), that.getAppointmentList());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getDateOfAppointment(), getAppointmentList());
+        return Objects.hash(getId(), getDate(), getAppointmentList());
     }
 }
