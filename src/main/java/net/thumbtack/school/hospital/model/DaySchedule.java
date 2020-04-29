@@ -1,7 +1,6 @@
 package net.thumbtack.school.hospital.model;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -9,7 +8,18 @@ public class DaySchedule {
 
     private int id;
     private LocalDate date;
+    private Doctor doctor;
     private List<Appointment> appointmentList;
+
+    public DaySchedule() {
+    }
+
+    public DaySchedule(int id, LocalDate date, Doctor doctor, List<Appointment> appointmentList) {
+        this.id = id;
+        this.date = date;
+        this.doctor = doctor;
+        this.appointmentList = appointmentList;
+    }
 
     public DaySchedule(int id, LocalDate date, List<Appointment> appointmentList) {
         this.id = id;
@@ -17,16 +27,8 @@ public class DaySchedule {
         this.appointmentList = appointmentList;
     }
 
-    public DaySchedule(int id, LocalDate date) {
-        this(id, date, new ArrayList<>());
-    }
-
     public DaySchedule(LocalDate date, List<Appointment> appointmentList) {
         this(0, date, appointmentList);
-    }
-
-    public DaySchedule(LocalDate date) {
-        this(0, date, new ArrayList<>());
     }
 
     public LocalDate getDate() {
@@ -45,6 +47,14 @@ public class DaySchedule {
         this.date = date;
     }
 
+    public Doctor getDoctor() {
+        return doctor;
+    }
+
+    public void setDoctor(Doctor doctor) {
+        this.doctor = doctor;
+    }
+
     public List<Appointment> getAppointmentList() {
         return appointmentList;
     }
@@ -60,11 +70,12 @@ public class DaySchedule {
         DaySchedule that = (DaySchedule) o;
         return getId() == that.getId() &&
                 Objects.equals(getDate(), that.getDate()) &&
+                Objects.equals(getDoctor(), that.getDoctor()) &&
                 Objects.equals(getAppointmentList(), that.getAppointmentList());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getDate(), getAppointmentList());
+        return Objects.hash(getId(), getDate(), getDoctor(), getAppointmentList());
     }
 }

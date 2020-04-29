@@ -1,7 +1,7 @@
 package net.thumbtack.school.hospital.service;
 
-import net.thumbtack.school.hospital.dto.RegisterAdminDtoRequest;
-import net.thumbtack.school.hospital.dto.RegisterAdminDtoResponse;
+import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
+import net.thumbtack.school.hospital.dto.response.RegisterAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.mybatis.dao.AdminDao;

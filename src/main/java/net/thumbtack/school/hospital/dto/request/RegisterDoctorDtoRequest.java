@@ -1,4 +1,4 @@
-package net.thumbtack.school.hospital.dto;
+package net.thumbtack.school.hospital.dto.request;
 
 import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;

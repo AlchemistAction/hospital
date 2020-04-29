@@ -1,7 +1,7 @@
 package net.thumbtack.school.hospital.serviceTest;
 
-import net.thumbtack.school.hospital.dto.RegisterDoctorDtoRequest;
-import net.thumbtack.school.hospital.dto.RegisterDoctorDtoResponse;
+import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
+import net.thumbtack.school.hospital.dto.response.RegisterDoctorDtoResponse;
 import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;
 import net.thumbtack.school.hospital.model.*;
@@ -52,8 +52,7 @@ public class TestDoctorService {
         Doctor doctorWithId = new Doctor(3, UserType.DOCTOR, registerDoctorDtoRequest.getFirstName(),
                 registerDoctorDtoRequest.getLastName(), registerDoctorDtoRequest.getPatronymic(),
                 registerDoctorDtoRequest.getLogin(), registerDoctorDtoRequest.getPassword(),
-                registerDoctorDtoRequest.getSpeciality(), registerDoctorDtoRequest.getRoom(),
-                registerDoctorDtoRequest.getDateStart(), registerDoctorDtoRequest.getDateEnd(), schedule);
+                registerDoctorDtoRequest.getSpeciality(), registerDoctorDtoRequest.getRoom(), schedule);
 
         when(doctorDao.insert(any())).thenReturn(doctorWithId);
 
@@ -91,8 +90,7 @@ public class TestDoctorService {
         Doctor doctorWithId = new Doctor(3, UserType.DOCTOR, registerDoctorDtoRequest.getFirstName(),
                 registerDoctorDtoRequest.getLastName(), registerDoctorDtoRequest.getPatronymic(),
                 registerDoctorDtoRequest.getLogin(), registerDoctorDtoRequest.getPassword(),
-                registerDoctorDtoRequest.getSpeciality(), registerDoctorDtoRequest.getRoom(),
-                registerDoctorDtoRequest.getDateStart(), registerDoctorDtoRequest.getDateEnd(), schedule);
+                registerDoctorDtoRequest.getSpeciality(), registerDoctorDtoRequest.getRoom(), schedule);
 
         when(doctorDao.insert(any())).thenReturn(doctorWithId);
 

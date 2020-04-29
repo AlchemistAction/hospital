@@ -9,15 +9,13 @@ import java.util.List;
 
 public interface DoctorMapper {
 
-
-    @Insert("INSERT INTO doctor (id, speciality_id, room_id, dateStart, dateEnd)"
-            + " SELECT LAST_INSERT_ID(), speciality.id, room.id, #{doctor.dateStart},"
-            + " #{doctor.dateEnd} FROM speciality, room WHERE speciality.speciality = #{doctor.speciality}"
+    @Insert("INSERT INTO doctor (id, speciality_id, room_id) SELECT LAST_INSERT_ID(), speciality.id, room.id"
+            + " FROM speciality, room WHERE speciality.speciality = #{doctor.speciality}"
             + " and room.room = #{doctor.room}")
     Integer insert(@Param("doctor") Doctor doctor);
 
     @Select("SELECT user.id, user.userType, firstName, lastName, patronymic, login, password,"
-            + " speciality, room, dateStart, dateEnd FROM user, doctor, speciality, room"
+            + " speciality, room FROM user, doctor, speciality, room"
             + " WHERE user.id = #{id} and doctor.id = #{id} and speciality.id = speciality_id and room.id = room_id")
     @Results({
             @Result(property = "id", column = "id"),
@@ -26,6 +24,18 @@ public interface DoctorMapper {
                             fetchType = FetchType.LAZY)),
     })
     Doctor getById(int id);
+
+    @Select("SELECT user.id, user.userType, firstName, lastName, patronymic, login, password,"
+            + " speciality, room FROM user, doctor, speciality, room"
+            + " WHERE speciality.id = speciality_id and room.id = room_id and user.id in" +
+            " (select doctor_id from day_schedule where day_schedule.id = #{id})")
+//    @Results({
+//            @Result(property = "id", column = "id"),
+//            @Result(property = "schedule", column = "id", javaType = List.class,
+//                    many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper.getByDoctor",
+//                            fetchType = FetchType.LAZY)),
+//    })
+    Doctor getByDaySchedule(int id);
 
     @Delete("DELETE FROM user WHERE id = #{doctor.id}")
     void delete(@Param("doctor") Doctor doctor);

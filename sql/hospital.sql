@@ -49,8 +49,6 @@ CREATE TABLE doctor (
 id INT(11) NOT NULL,
 speciality_id INT(11) NOT NULL,
 room_id INT(11) NOT NULL,
-dateStart VARCHAR(50) NOT NULL,
-dateEnd VARCHAR(50) NOT NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (id) REFERENCES user (id) ON DELETE CASCADE,
 FOREIGN KEY (speciality_id) REFERENCES speciality (id),
@@ -60,7 +58,7 @@ FOREIGN KEY (room_id) REFERENCES room (id)
 CREATE TABLE day_schedule (
 id INT(11) NOT NULL AUTO_INCREMENT,
 doctor_id INT(11) NOT NULL,
-date_of_appointment datetime NOT NULL,
+`date` datetime NOT NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (doctor_id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -79,7 +77,6 @@ CREATE TABLE ticket (
 id INT(11) NOT NULL AUTO_INCREMENT,
 name VARCHAR(50) NULL,
 patient_id INT(11) NULL,
-doctor_id INT(11) NOT NULL,
 appointment_id INT(11) NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (appointment_id) REFERENCES appointment (id) ON DELETE CASCADE,
@@ -101,3 +98,4 @@ INSERT INTO user
  insert into admin
  VALUES(LAST_INSERT_ID(),"superAdmin");
 commit;
+

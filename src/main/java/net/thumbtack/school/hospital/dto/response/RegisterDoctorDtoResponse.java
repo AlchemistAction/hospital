@@ -1,4 +1,4 @@
-package net.thumbtack.school.hospital.dto;
+package net.thumbtack.school.hospital.dto.response;
 
 import net.thumbtack.school.hospital.model.Patient;
 

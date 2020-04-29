@@ -17,6 +17,14 @@ public interface PatientMapper {
     })
     Patient getById(int id);
 
+    @Select("SELECT user.id, user.userType, firstName, lastName, patronymic, login, password, email, address, phone"
+            + " FROM user, patient"
+            + " WHERE user.id in (select patient_id from ticket where ticket.id = #{ticketId})")
+    @Results({
+            @Result(property = "id", column = "id"),
+    })
+    Patient getByTicket(int ticketId);
+
     @Delete("delete from user WHERE userType = 'PATIENT'")
     void deleteAll();
 

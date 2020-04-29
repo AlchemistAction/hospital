@@ -1,27 +1,22 @@
-package net.thumbtack.school.hospital.dto;
+package net.thumbtack.school.hospital.dto.request;
 
-public class RegisterAdminDtoResponse {
+public class RegisterAdminDtoRequest {
 
-    private int id;
     private String firstName;
     private String lastName;
     private String patronymic;
     private String position;
+    private String login;
+    private String password;
 
-    public RegisterAdminDtoResponse(int id, String firstName, String lastName, String patronymic, String position) {
-        this.id = id;
+    public RegisterAdminDtoRequest(String firstName, String lastName, String patronymic, String position, String login,
+                                   String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.patronymic = patronymic;
         this.position = position;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+        this.login = login;
+        this.password = password;
     }
 
     public String getFirstName() {
@@ -54,5 +49,21 @@ public class RegisterAdminDtoResponse {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

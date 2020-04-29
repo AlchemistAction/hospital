@@ -1,7 +1,7 @@
 package net.thumbtack.school.hospital.service;
 
-import net.thumbtack.school.hospital.dto.RegisterDoctorDtoRequest;
-import net.thumbtack.school.hospital.dto.RegisterDoctorDtoResponse;
+import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
+import net.thumbtack.school.hospital.dto.response.RegisterDoctorDtoResponse;
 
 public interface DoctorService {
 

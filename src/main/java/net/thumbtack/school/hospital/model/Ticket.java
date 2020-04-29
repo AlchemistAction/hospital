@@ -6,18 +6,19 @@ public class Ticket {
 
     private int id;
     private String name;
-    private int patientId;
-    private int doctorId;
+    private Patient patient;
 
-    public Ticket(int id, String name, int patientId, int doctorId) {
-        this.id = id;
-        this.name = name;
-        this.doctorId = doctorId;
-        this.patientId = patientId;
+    public Ticket() {
     }
 
-    public Ticket(String name, int patientId, int doctorId) {
-        this(0, name, patientId, doctorId);
+    public Ticket(int id, String name, Patient patient) {
+        this.id = id;
+        this.name = name;
+        this.patient = patient;
+    }
+
+    public Ticket(String name, Patient patient) {
+        this(0, name, patient);
     }
 
     public int getId() {
@@ -36,20 +37,12 @@ public class Ticket {
         this.name = name;
     }
 
-    public int getDoctorId() {
-        return doctorId;
+    public Patient getPatient() {
+        return patient;
     }
 
-    public void setDoctorId(int doctorId) {
-        this.doctorId = doctorId;
-    }
-
-    public int getPatientId() {
-        return patientId;
-    }
-
-    public void setPatientId(int patientId) {
-        this.patientId = patientId;
+    public void setPatient(Patient patient) {
+        this.patient = patient;
     }
 
     @Override
@@ -58,13 +51,12 @@ public class Ticket {
         if (!(o instanceof Ticket)) return false;
         Ticket ticket = (Ticket) o;
         return getId() == ticket.getId() &&
-                getDoctorId() == ticket.getDoctorId() &&
-                getPatientId() == ticket.getPatientId() &&
-                Objects.equals(getName(), ticket.getName());
+                Objects.equals(getName(), ticket.getName()) &&
+                Objects.equals(getPatient(), ticket.getPatient());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getDoctorId(), getPatientId());
+        return Objects.hash(getId(), getName(), getPatient());
     }
 }

@@ -1,7 +1,7 @@
 package net.thumbtack.school.hospital.service;
 
-import net.thumbtack.school.hospital.dto.RegisterDoctorDtoRequest;
-import net.thumbtack.school.hospital.dto.RegisterDoctorDtoResponse;
+import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
+import net.thumbtack.school.hospital.dto.response.RegisterDoctorDtoResponse;
 import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
 import net.thumbtack.school.hospital.model.*;
 import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
@@ -30,8 +30,7 @@ public class DoctorServiceImpl implements DoctorService {
         Doctor doctor = new Doctor(UserType.DOCTOR, registerDoctorDtoRequest.getFirstName(),
                 registerDoctorDtoRequest.getLastName(), registerDoctorDtoRequest.getPatronymic(),
                 registerDoctorDtoRequest.getLogin(), registerDoctorDtoRequest.getPassword(),
-                registerDoctorDtoRequest.getSpeciality(), registerDoctorDtoRequest.getRoom(),
-                registerDoctorDtoRequest.getDateStart(), registerDoctorDtoRequest.getDateEnd(), schedule);
+                registerDoctorDtoRequest.getSpeciality(), registerDoctorDtoRequest.getRoom(), schedule);
 
         doctor = doctorDao.insert(doctor);
 

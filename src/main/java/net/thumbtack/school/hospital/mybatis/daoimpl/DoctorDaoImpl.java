@@ -1,7 +1,5 @@
 package net.thumbtack.school.hospital.mybatis.daoimpl;
 
-import net.thumbtack.school.hospital.model.Appointment;
-import net.thumbtack.school.hospital.model.DaySchedule;
 import net.thumbtack.school.hospital.model.Doctor;
 import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
 import org.apache.ibatis.session.SqlSession;
@@ -21,13 +19,11 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
                 getUserMapper(sqlSession).insert(doctor);
                 getDoctorMapper(sqlSession).insert(doctor);
 
-                for (DaySchedule daySchedule : doctor.getSchedule()) {
-                    getDayScheduleMapper(sqlSession).insert(doctor, daySchedule);
+                getDayScheduleMapper(sqlSession).insert(doctor, doctor.getSchedule());
 
-                    for (Appointment appointment : daySchedule.getAppointmentList()) {
-                        getAppointmentMapper(sqlSession).insert(daySchedule, appointment);
-                    }
-                }
+                doctor.getSchedule().forEach(daySchedule ->
+                        getAppointmentMapper(sqlSession).insert(daySchedule, daySchedule.getAppointmentList()));
+
             } catch (RuntimeException ex) {
                 LOGGER.info("Can't insert Doctor with Schedule {}, {}", doctor, ex);
                 sqlSession.rollback();

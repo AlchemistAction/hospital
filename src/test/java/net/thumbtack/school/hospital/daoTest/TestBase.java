@@ -1,6 +1,8 @@
 package net.thumbtack.school.hospital.daoTest;
 
+import static org.junit.Assert.*;
 
+import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
 import net.thumbtack.school.hospital.model.*;
 import net.thumbtack.school.hospital.mybatis.dao.*;
 import net.thumbtack.school.hospital.mybatis.daoimpl.*;
@@ -49,9 +51,9 @@ public class TestBase {
 
     protected Doctor insertDoctor(UserType userType, String firstName, String lastName, String patronymic,
                                   String login, String password, String speciality, String room,
-                                  String dateStart, String dateEnd, List<DaySchedule> schedule) {
+                                  List<DaySchedule> schedule) {
         Doctor doctor = new Doctor(userType, firstName, lastName, patronymic, login, password,
-                speciality, room, dateStart, dateEnd, schedule);
+                speciality, room, schedule);
 
         doctorDao.insert(doctor);
         assertNotEquals(0, doctor.getId());
@@ -65,6 +67,36 @@ public class TestBase {
         patientDao.insert(patient);
         assertNotEquals(0, patient.getId());
         return patient;
+    }
+
+    protected void checkDoctorFields(Doctor doctor1, Doctor doctor2) {
+        assertEquals(doctor1.getId(), doctor2.getId());
+        assertEquals(doctor1.getUserType(), doctor2.getUserType());
+        assertEquals(doctor1.getFirstName(), doctor2.getFirstName());
+        assertEquals(doctor1.getLastName(), doctor2.getLastName());
+        assertEquals(doctor1.getPatronymic(), doctor2.getPatronymic());
+        assertEquals(doctor1.getLogin(), doctor2.getLogin());
+        assertEquals(doctor1.getPassword(), doctor2.getPassword());
+        assertEquals(doctor1.getSpeciality(), doctor2.getSpeciality());
+        assertEquals(doctor1.getRoom(), doctor2.getRoom());
+        for (int i = 0; i < doctor1.getSchedule().size(); i++) {
+            checkDayScheduleFields(doctor1.getSchedule().get(i), doctor2.getSchedule().get(i));
+        }
+    }
+
+    private void checkDayScheduleFields(DaySchedule daySchedule1, DaySchedule daySchedule2) {
+        assertEquals(daySchedule1.getId(), daySchedule2.getId());
+        assertEquals(daySchedule1.getDate(), daySchedule2.getDate());
+        for (int i = 0; i < daySchedule1.getAppointmentList().size(); i++) {
+            checkAppointmentFields(daySchedule1.getAppointmentList().get(i), daySchedule2.getAppointmentList().get(i));
+        }
+    }
+
+    private void checkAppointmentFields(Appointment appointment1, Appointment appointment2) {
+        assertEquals(appointment1.getId(), appointment2.getId());
+        assertEquals(appointment1.getTimeStart(), appointment2.getTimeStart());
+        assertEquals(appointment1.getTimeEnd(), appointment2.getTimeEnd());
+        assertEquals(appointment1.getTicket(), appointment2.getTicket());
     }
 
 }
