@@ -8,6 +8,9 @@ public class Doctor extends User {
     private String room;
     private List<DaySchedule> schedule;
 
+    public Doctor() {
+    }
+
     public Doctor(int id, UserType userType, String firstName, String lastName, String patronymic, String login,
                   String password, String speciality, String room, List<DaySchedule> schedule) {
         super(id, userType, firstName, lastName, patronymic, login, password);

@@ -1,10 +1,13 @@
 package net.thumbtack.school.hospital.mybatis.daoimpl;
 
+import net.thumbtack.school.hospital.model.DaySchedule;
 import net.thumbtack.school.hospital.model.Doctor;
 import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 
 public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
@@ -13,7 +16,7 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
 
     @Override
     public Doctor insert(Doctor doctor) {
-        LOGGER.debug("Transactional Doctor Insert with Schedule{} ", doctor);
+        LOGGER.debug("DAO Doctor Insert with Schedule{} ", doctor);
         try (SqlSession sqlSession = getSession()) {
             try {
                 getUserMapper(sqlSession).insert(doctor);
@@ -32,6 +35,47 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
             sqlSession.commit();
         }
         return doctor;
+    }
+
+    @Override
+    public List<DaySchedule> insertSchedule(List<DaySchedule> newSchedule, Doctor doctor) {
+        LOGGER.debug("DAO Insert New Schedule {}, {}", newSchedule, doctor);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+                getDayScheduleMapper(sqlSession).insert(doctor, newSchedule);
+
+                newSchedule.forEach(daySchedule ->
+                        getAppointmentMapper(sqlSession).insert(daySchedule, daySchedule.getAppointmentList()));
+
+            } catch (RuntimeException ex) {
+                LOGGER.info("Can't insert New Schedule {}, {}, {}", newSchedule, doctor, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
+            sqlSession.commit();
+        }
+        return newSchedule;
+    }
+
+    @Override
+    public DaySchedule updateDaySchedule(int doctorId, DaySchedule oldDaySchedule, DaySchedule newDaySchedule) {
+        LOGGER.debug("DAO update DaySchedule {}, {}, {}", doctorId, oldDaySchedule, newDaySchedule);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+                getDayScheduleMapper(sqlSession).delete(oldDaySchedule);
+
+                getDayScheduleMapper(sqlSession).insertOne(doctorId, newDaySchedule);
+
+                getAppointmentMapper(sqlSession).insert(newDaySchedule, newDaySchedule.getAppointmentList());
+
+            } catch (RuntimeException ex) {
+                LOGGER.info("Can't update DaySchedule {}, {}, {}, {}", doctorId, newDaySchedule, newDaySchedule, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
+            sqlSession.commit();
+        }
+        return newDaySchedule;
     }
 
     @Override
@@ -74,4 +118,6 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
             sqlSession.commit();
         }
     }
+
+
 }

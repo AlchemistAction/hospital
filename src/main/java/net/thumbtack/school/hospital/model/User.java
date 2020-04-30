@@ -11,6 +11,9 @@ public abstract class User {
     private String login;
     private String password;
 
+    public User() {
+    }
+
     public User(int id, UserType userType, String firstName, String lastName, String patronymic, String login,
                 String password) {
         this.id = id;

@@ -1,4 +1,4 @@
-package net.thumbtack.school.hospital.daoTest;
+package net.thumbtack.school.hospital.dao;
 
 import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.UserType;

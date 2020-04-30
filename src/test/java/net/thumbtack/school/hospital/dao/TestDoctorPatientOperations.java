@@ -1,4 +1,4 @@
-package net.thumbtack.school.hospital.daoTest;
+package net.thumbtack.school.hospital.dao;
 
 import net.thumbtack.school.hospital.model.*;
 import org.junit.Test;
@@ -6,7 +6,6 @@ import org.junit.Test;
 import java.time.LocalDate;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class TestDoctorPatientOperations extends TestBase {
@@ -26,13 +25,10 @@ public class TestDoctorPatientOperations extends TestBase {
                     "patronymic", "doctorLogin", "doctorPass", "хирург",
                     "100", schedule);
             Doctor doctorFromDB = doctorDao.getById(doctor.getId());
-            checkDoctorFields(doctor, doctorFromDB);
 
             Patient patient = insertPatient(UserType.PATIENT, "name1", "surname1",
                     "patronymic1", "patientLogin", "patientPass", "email@mail.ru",
                     "address", "8-900-000-00-00");
-            Patient patientFromDB = patientDao.getById(patient.getId());
-            assertEquals(patient, patientFromDB);
 
             Appointment appointmentFromDb = doctorFromDB.getSchedule().get(0).getAppointmentList().get(0);
 

@@ -4,7 +4,7 @@ import net.thumbtack.school.hospital.model.Patient;
 
 import java.util.Map;
 
-public class RegisterDoctorDtoResponse {
+public class ReturnDoctorDtoResponse {
 
     private int id;
     private String firstName;
@@ -14,8 +14,11 @@ public class RegisterDoctorDtoResponse {
     private String room;
     private Map<String, Map<String, Patient>> schedule;
 
-    public RegisterDoctorDtoResponse(int id, String firstName, String lastName, String patronymic, String speciality,
-                                     String room, Map<String, Map<String, Patient>> schedule) {
+    public ReturnDoctorDtoResponse() {
+    }
+
+    public ReturnDoctorDtoResponse(int id, String firstName, String lastName, String patronymic, String speciality,
+                                   String room, Map<String, Map<String, Patient>> schedule) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;

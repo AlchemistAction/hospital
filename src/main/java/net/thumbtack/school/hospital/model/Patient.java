@@ -7,6 +7,8 @@ public class Patient extends User {
     private String address;
     private String phone;
 
+    public Patient() {
+    }
 
     public Patient(int id, UserType userType, String firstName, String lastName, String patronymic,
                    String login, String password, String email, String address, String phone) {

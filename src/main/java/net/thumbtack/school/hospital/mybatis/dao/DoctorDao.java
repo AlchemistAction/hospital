@@ -1,6 +1,9 @@
 package net.thumbtack.school.hospital.mybatis.dao;
 
+import net.thumbtack.school.hospital.model.DaySchedule;
 import net.thumbtack.school.hospital.model.Doctor;
+
+import java.util.List;
 
 
 public interface DoctorDao {
@@ -12,4 +15,8 @@ public interface DoctorDao {
     void delete(Doctor doctor);
 
     void deleteAll();
+
+    List<DaySchedule> insertSchedule(List<DaySchedule> newSchedule, Doctor doctor);
+
+    DaySchedule updateDaySchedule(int doctorId, DaySchedule oldDaySchedule, DaySchedule newDaySchedule);
 }

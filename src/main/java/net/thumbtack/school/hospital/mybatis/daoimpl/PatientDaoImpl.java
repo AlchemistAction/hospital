@@ -13,7 +13,7 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
 
     @Override
     public Patient insert(Patient patient) {
-        LOGGER.debug("Transactional Patient Insert {} ", patient);
+        LOGGER.debug("DAO Patient Insert {} ", patient);
         try (SqlSession sqlSession = getSession()) {
             try {
                 getUserMapper(sqlSession).insert(patient);

@@ -14,7 +14,7 @@ public class AdminDaoImpl extends BaseDaoImpl implements AdminDao {
 
     @Override
     public Admin insert(Admin admin) {
-        LOGGER.debug("Transactional Admin Insert {} ", admin);
+        LOGGER.debug("DAO Admin Insert {} ", admin);
         try (SqlSession sqlSession = getSession()) {
             try {
                 getUserMapper(sqlSession).insert(admin);

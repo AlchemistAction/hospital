@@ -1,8 +1,7 @@
-package net.thumbtack.school.hospital.daoTest;
+package net.thumbtack.school.hospital.dao;
 
 import static org.junit.Assert.*;
 
-import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
 import net.thumbtack.school.hospital.model.*;
 import net.thumbtack.school.hospital.mybatis.dao.*;
 import net.thumbtack.school.hospital.mybatis.daoimpl.*;
