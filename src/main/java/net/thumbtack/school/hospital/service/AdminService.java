@@ -32,6 +32,7 @@ public class AdminService {
 
         Admin admin = adminDao.getById(id);
 
+        // REVU почему только пароль ?
         admin.setPassword(updateAdminDtoRequest.getNewPassword());
 
         userDao.update(admin);

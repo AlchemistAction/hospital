@@ -131,6 +131,10 @@ public class DoctorService {
 
             for (String dateString : weekSchedule.getWeekDays()) {
                 for (LocalDate date : dateListForAllPeriod) {
+                	// REVU https://docs.oracle.com/javase/8/docs/api/java/time/DayOfWeek.html
+                	// Потом сделайте EnumSet<DayOfWeek> и в него добавьте нужные дни недели
+                	// ну и по нему contains
+
                     if (date.getDayOfWeek().name().toLowerCase().equals(dateString.toLowerCase())) {
 
                         List<Appointment> appointmentList = getAppointments(weekSchedule.getTimeStart(),
