@@ -32,6 +32,7 @@ PRIMARY KEY (id)
 
 INSERT INTO speciality
  VALUES (NULL,'хирург'),
+        (NULL,'офтальмолог'),
         (NULL,'лор');
         
 CREATE TABLE room (
@@ -42,6 +43,7 @@ PRIMARY KEY (id)
 
 INSERT INTO room
  VALUES (NULL,'100'),
+		(NULL,'200'),
         (NULL,'300');
 
 
@@ -52,6 +54,7 @@ room_id INT(11) NOT NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (id) REFERENCES user (id) ON DELETE CASCADE,
 FOREIGN KEY (speciality_id) REFERENCES speciality (id),
+UNIQUE KEY user (room_id),
 FOREIGN KEY (room_id) REFERENCES room (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
@@ -98,4 +101,3 @@ INSERT INTO user
  insert into admin
  VALUES(LAST_INSERT_ID(),"superAdmin");
 commit;
-

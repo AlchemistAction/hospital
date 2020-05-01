@@ -1,8 +1,10 @@
 package net.thumbtack.school.hospital.service;
 
 import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
+import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
+import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
 import net.thumbtack.school.hospital.mybatis.dao.UserDao;
 import net.thumbtack.school.hospital.mybatis.daoimpl.AdminDaoImpl;
@@ -43,5 +45,21 @@ public class TestAdminService {
         ReturnAdminDtoResponse returnAdminDtoResponse = adminService.registerAdmin(registerAdminDtoRequest);
 
         assertEquals(13, returnAdminDtoResponse.getId());
+    }
+
+    @Test
+    public void testUpdateAdmin() {
+        UpdateAdminDtoRequest updateAdminDtoRequest = new UpdateAdminDtoRequest("name",
+                "surname", "patronymic", "regularAdmin", "oldPassword",
+                "newPassword");
+
+        Admin admin = new Admin(UserType.ADMIN, "name", "surname",
+                "patronymic", "adminLogin", "oldPassword", "regularAdmin");
+
+        when(adminDao.getById(anyInt())).thenReturn(admin);
+
+        adminService.updateAdmin(updateAdminDtoRequest, admin.getId());
+
+        assertEquals("newPassword", admin.getPassword());
     }
 }

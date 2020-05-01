@@ -29,13 +29,30 @@ public interface DoctorMapper {
             + " speciality, room FROM user, doctor, speciality, room"
             + " WHERE speciality.id = speciality_id and room.id = room_id and user.id in" +
             " (select doctor_id from day_schedule where day_schedule.id = #{id})")
-//    @Results({
-//            @Result(property = "id", column = "id"),
-//            @Result(property = "schedule", column = "id", javaType = List.class,
-//                    many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper.getByDoctor",
-//                            fetchType = FetchType.LAZY)),
-//    })
     Doctor getByDaySchedule(int id);
+
+    @Select("SELECT user.id, user.userType, firstName, lastName, patronymic, login, password,"
+            + " speciality, room FROM user, doctor, speciality, room"
+            + " WHERE user.id = doctor.id and speciality.id = speciality_id and room.id = room_id")
+    @Results({
+            @Result(property = "id", column = "id"),
+            @Result(property = "schedule", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper.getByDoctor",
+                            fetchType = FetchType.LAZY)),
+    })
+    List<Doctor> getAllLazy();
+
+    @Select("SELECT user.id, user.userType, firstName, lastName, patronymic, login, password,"
+            + " speciality, room FROM user JOIN doctor on user.id = doctor.id and speciality_id in" +
+            " (select id from speciality where speciality = #{speciality}) JOIN speciality" +
+            " on speciality = #{speciality} JOIN room on room.id = room_id")
+    @Results({
+            @Result(property = "id", column = "id"),
+            @Result(property = "schedule", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper.getByDoctor",
+                            fetchType = FetchType.LAZY)),
+    })
+    List<Doctor> getAllBySpeciality(@Param("speciality") String speciality);
 
     @Delete("DELETE FROM user WHERE id = #{doctor.id}")
     void delete(@Param("doctor") Doctor doctor);

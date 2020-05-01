@@ -5,9 +5,7 @@ import net.thumbtack.school.hospital.model.Doctor;
 
 import java.util.List;
 
-
 public interface DoctorDao {
-
     Doctor insert(Doctor doctor);
 
     Doctor getById(int id);
@@ -19,4 +17,8 @@ public interface DoctorDao {
     List<DaySchedule> insertSchedule(List<DaySchedule> newSchedule, Doctor doctor);
 
     DaySchedule updateDaySchedule(int doctorId, DaySchedule oldDaySchedule, DaySchedule newDaySchedule);
+
+    List<Doctor> getAll();
+
+    List<Doctor> getAllBySpeciality(String speciality);
 }

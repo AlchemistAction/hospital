@@ -90,6 +90,28 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
     }
 
     @Override
+    public List<Doctor> getAll() {
+        LOGGER.debug("DAO get all Doctors lazy");
+        try (SqlSession sqlSession = getSession()) {
+            return getDoctorMapper(sqlSession).getAllLazy();
+        } catch (RuntimeException ex) {
+            LOGGER.info("Can't get All Doctors Lazy {}", ex);
+            throw ex;
+        }
+    }
+
+    @Override
+    public List<Doctor> getAllBySpeciality(String speciality) {
+        LOGGER.debug("DAO get all Doctors lazy");
+        try (SqlSession sqlSession = getSession()) {
+            return getDoctorMapper(sqlSession).getAllBySpeciality(speciality);
+        } catch (RuntimeException ex) {
+            LOGGER.info("Can't get All Doctors Lazy {}", ex);
+            throw ex;
+        }
+    }
+
+    @Override
     public void delete(Doctor doctor) {
         LOGGER.debug("DAO delete Doctor {} ", doctor);
         try (SqlSession sqlSession = getSession()) {

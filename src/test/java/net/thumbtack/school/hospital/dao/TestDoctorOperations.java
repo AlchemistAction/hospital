@@ -33,6 +33,115 @@ public class TestDoctorOperations extends TestBase {
         }
     }
 
+    @Test(expected = RuntimeException.class)
+    public void testInsertDoctorWithNullFirstName() {
+        Doctor doctor = new Doctor(UserType.DOCTOR, null, "patronymic",
+                null, "doctorLogin", "doctorPass", "хирург", "100",
+                new ArrayList<>());
+        doctorDao.insert(doctor);
+    }
+
+    @Test
+    public void testGetAllLazy() {
+        try {
+            List<DaySchedule> schedule1 = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
+                            new Appointment("10:00", "10:19", AppointmentState.FREE),
+                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
+                            new Appointment("11:00", "11:19", AppointmentState.FREE),
+                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+
+            Doctor doctor1 = insertDoctor(UserType.DOCTOR, "name1", "surname1",
+                    "patronymic1", "doctorLogin1", "doctorPass1", "хирург",
+                    "100", schedule1);
+
+            List<DaySchedule> schedule2 = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 3), Arrays.asList(
+                            new Appointment("10:00", "10:19", AppointmentState.FREE),
+                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                    new DaySchedule(LocalDate.of(2020, 2, 4), Arrays.asList(
+                            new Appointment("11:00", "11:19", AppointmentState.FREE),
+                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+
+            Doctor doctor2 = insertDoctor(UserType.DOCTOR, "name2", "surname2",
+                    "patronymic2", "doctorLogin2", "doctorPass2", "хирург",
+                    "200", schedule2);
+
+            List<DaySchedule> schedule3 = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 5), Arrays.asList(
+                            new Appointment("10:00", "10:19", AppointmentState.FREE),
+                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                    new DaySchedule(LocalDate.of(2020, 2, 6), Arrays.asList(
+                            new Appointment("11:00", "11:19", AppointmentState.FREE),
+                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+
+            Doctor doctor3 = insertDoctor(UserType.DOCTOR, "name3", "surname3",
+                    "patronymic3", "doctorLogin3", "doctorPass3", "лор",
+                    "300", schedule3);
+
+            List<Doctor> doctorList = Arrays.asList(doctor1, doctor2, doctor3);
+            List<Doctor> doctorListFromDb = doctorDao.getAll();
+
+            checkDoctorFields(doctorList.get(0), doctorListFromDb.get(0));
+            checkDoctorFields(doctorList.get(1), doctorListFromDb.get(1));
+            checkDoctorFields(doctorList.get(2), doctorListFromDb.get(2));
+
+        } catch (RuntimeException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testGetAllBySpeciality() {
+        try {
+            List<DaySchedule> schedule1 = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
+                            new Appointment("10:00", "10:19", AppointmentState.FREE),
+                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
+                            new Appointment("11:00", "11:19", AppointmentState.FREE),
+                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+
+            Doctor doctor1 = insertDoctor(UserType.DOCTOR, "name1", "surname1",
+                    "patronymic1", "doctorLogin1", "doctorPass1", "хирург",
+                    "100", schedule1);
+
+            List<DaySchedule> schedule2 = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 3), Arrays.asList(
+                            new Appointment("10:00", "10:19", AppointmentState.FREE),
+                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                    new DaySchedule(LocalDate.of(2020, 2, 4), Arrays.asList(
+                            new Appointment("11:00", "11:19", AppointmentState.FREE),
+                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+
+            Doctor doctor2 = insertDoctor(UserType.DOCTOR, "name2", "surname2",
+                    "patronymic2", "doctorLogin2", "doctorPass2", "хирург",
+                    "200", schedule2);
+
+            List<DaySchedule> schedule3 = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 5), Arrays.asList(
+                            new Appointment("10:00", "10:19", AppointmentState.FREE),
+                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                    new DaySchedule(LocalDate.of(2020, 2, 6), Arrays.asList(
+                            new Appointment("11:00", "11:19", AppointmentState.FREE),
+                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+
+            Doctor doctor3 = insertDoctor(UserType.DOCTOR, "name3", "surname3",
+                    "patronymic3", "doctorLogin3", "doctorPass3", "лор",
+                    "300", schedule3);
+
+            List<Doctor> doctorList = Arrays.asList(doctor1, doctor2);
+            List<Doctor> doctorListFromDb = doctorDao.getAllBySpeciality("хирург");
+
+            checkDoctorFields(doctorList.get(0), doctorListFromDb.get(0));
+            checkDoctorFields(doctorList.get(1), doctorListFromDb.get(1));
+
+        } catch (RuntimeException e) {
+            fail();
+        }
+    }
+
     @Test
     public void testDeleteDoctor() {
         try {
@@ -127,11 +236,5 @@ public class TestDoctorOperations extends TestBase {
         }
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testInsertDoctorWithNullFirstName() {
-        Doctor doctor = new Doctor(UserType.DOCTOR, null, "patronymic",
-                null, "doctorLogin", "doctorPass", "хирург", "100",
-                new ArrayList<>());
-        doctorDao.insert(doctor);
-    }
+
 }

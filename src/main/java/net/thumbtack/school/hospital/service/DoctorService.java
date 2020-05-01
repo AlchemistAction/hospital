@@ -2,6 +2,7 @@ package net.thumbtack.school.hospital.service;
 
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;
 import net.thumbtack.school.hospital.dto.request.ChangeScheduleDtoRequest;
+import net.thumbtack.school.hospital.dto.request.DeleteDoctorDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
 import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
@@ -17,7 +18,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DoctorService {
 
@@ -120,6 +120,11 @@ public class DoctorService {
         return result;
     }
 
+    public void deleteDoctor(DeleteDoctorDtoRequest deleteDoctorDtoRequest, int id) {
+        Doctor doctor = doctorDao.getById(id);
+        doctorDao.delete(doctor);
+    }
+
     private List<DaySchedule> createSchedule(WeekSchedule weekSchedule, DayScheduleForDto[] weekDaysSchedule,
                                              String startDate, String endDate, String durationFromDto) {
 
@@ -131,9 +136,6 @@ public class DoctorService {
 
             for (String dateString : weekSchedule.getWeekDays()) {
                 for (LocalDate date : dateListForAllPeriod) {
-                	// REVU https://docs.oracle.com/javase/8/docs/api/java/time/DayOfWeek.html
-                	// Потом сделайте EnumSet<DayOfWeek> и в него добавьте нужные дни недели
-                	// ну и по нему contains
 
                     if (date.getDayOfWeek().name().toLowerCase().equals(dateString.toLowerCase())) {
 

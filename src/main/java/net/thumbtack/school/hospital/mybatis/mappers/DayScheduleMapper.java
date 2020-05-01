@@ -27,7 +27,7 @@ public interface DayScheduleMapper {
             @Result(property = "id", column = "id"),
             @Result(property = "doctor", column = "id", javaType = Doctor.class,
                     one = @One(select = "net.thumbtack.school.hospital.mybatis.mappers.DoctorMapper.getByDaySchedule",
-                            fetchType = FetchType.EAGER)),
+                            fetchType = FetchType.LAZY)),
             @Result(property = "appointmentList", column = "id", javaType = List.class,
                     many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.AppointmentMapper.getByDaySchedule",
                             fetchType = FetchType.LAZY)),
@@ -36,6 +36,12 @@ public interface DayScheduleMapper {
 
     @Select("SELECT day_schedule.id, date FROM day_schedule WHERE day_schedule.id in" +
             " (select day_schedule_id from appointment where appointment.id = #{id})")
+    @Results({
+            @Result(property = "id", column = "id"),
+            @Result(property = "doctor", column = "id", javaType = Doctor.class,
+                    one = @One(select = "net.thumbtack.school.hospital.mybatis.mappers.DoctorMapper.getByDaySchedule",
+                            fetchType = FetchType.LAZY)),
+    })
     DaySchedule getByAppointment(int appointmentId);
 
     @Delete("DELETE FROM day_schedule WHERE id = #{daySchedule.id}")
