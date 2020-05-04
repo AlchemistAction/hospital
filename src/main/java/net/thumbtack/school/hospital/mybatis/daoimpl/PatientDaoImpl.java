@@ -2,10 +2,13 @@ package net.thumbtack.school.hospital.mybatis.daoimpl;
 
 import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Patient;
+import net.thumbtack.school.hospital.model.Ticket;
 import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
 
@@ -40,12 +43,28 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
     }
 
     @Override
-    public void addPersonToAppointment(Appointment appointment, Patient patient) {
+    public Patient update(Patient patient) {
+        LOGGER.debug("DAO change Patient {} ", patient);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+                getPatientMapper(sqlSession).updatePatient(patient);
+            } catch (RuntimeException ex) {
+                LOGGER.info("Can't change Patient {} {} ", patient, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
+            sqlSession.commit();
+        }
+        return patient;
+    }
+
+    @Override
+    public void addPatientToAppointment(Appointment appointment, Patient patient) {
         LOGGER.debug("DAO add Patient to Appointment {}, {}, {}", appointment, appointment.getTicket(), patient);
         try (SqlSession sqlSession = getSession()) {
             try {
                 getAppointmentMapper(sqlSession).changeState(appointment);
-                getTicketMapper(sqlSession).insert(appointment, appointment.getTicket(), patient);
+                getTicketMapper(sqlSession).insertForAppointment(appointment, appointment.getTicket(), patient);
             } catch (RuntimeException ex) {
                 LOGGER.info("Can't add Patient to Appointment {}, {}, {}, {}", appointment, appointment.getTicket(),
                         patient, ex);
@@ -53,6 +72,17 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
                 throw ex;
             }
             sqlSession.commit();
+        }
+    }
+
+    @Override
+    public List<Ticket> getAllTickets(Patient patient) {
+        LOGGER.debug("DAO get all Tickets by Patient {}", patient);
+        try (SqlSession sqlSession = getSession()) {
+            return getTicketMapper(sqlSession).getAllByPatient(patient);
+        } catch (RuntimeException ex) {
+            LOGGER.info("Can't get all Tickets by Patient {}, {}", patient, ex);
+            throw ex;
         }
     }
 

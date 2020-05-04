@@ -30,6 +30,8 @@
         <mapper class="net.thumbtack.school.hospital.mybatis.mappers.DoctorMapper"/>
         <mapper class="net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper"/>
         <mapper class="net.thumbtack.school.hospital.mybatis.mappers.AppointmentMapper"/>
+        <mapper class="net.thumbtack.school.hospital.mybatis.mappers.CommissionMapper"/>
+        <mapper class="net.thumbtack.school.hospital.mybatis.mappers.CommissionAppointmentMapper"/>
         <mapper class="net.thumbtack.school.hospital.mybatis.mappers.TicketMapper"/>
         <mapper class="net.thumbtack.school.hospital.mybatis.mappers.PatientMapper"/>
     </mappers>

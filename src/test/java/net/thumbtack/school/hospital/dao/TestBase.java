@@ -9,6 +9,7 @@ import net.thumbtack.school.hospital.mybatis.utils.MyBatisUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertNotEquals;
@@ -95,7 +96,31 @@ public class TestBase {
         assertEquals(appointment1.getId(), appointment2.getId());
         assertEquals(appointment1.getTimeStart(), appointment2.getTimeStart());
         assertEquals(appointment1.getTimeEnd(), appointment2.getTimeEnd());
-        assertEquals(appointment1.getTicket(), appointment2.getTicket());
+        assertEquals(appointment1.getState(), appointment2.getState());
+        assertNotNull(appointment2.getDaySchedule());
+        if (!(appointment1.getTicket() == null) && !(appointment2.getTicket() == null)) {
+            checkTicketFields(appointment1.getTicket(), appointment2.getTicket());
+            assertNotNull(appointment2.getTicket().getAppointment());
+        }
+        if (!(appointment1.getCommission() == null) && !(appointment2.getCommission() == null)) {
+            checkCommissionFields(appointment1.getCommission(), appointment2.getCommission());
+        }
+    }
+
+    private void checkCommissionFields(Commission commission1, Commission commission2) {
+        assertEquals(commission1.getId(), commission2.getId());
+        assertEquals(commission1.getAppointmentList().size(), commission2.getAppointmentList().size());
+        assertEquals(commission1.getRoom(), commission2.getRoom());
+        if (!(commission1.getTicket() == null) && !(commission2.getTicket() == null)) {
+            checkTicketFields(commission1.getTicket(), commission2.getTicket());
+            assertNotNull(commission2.getTicket().getCommission());
+        }
+    }
+
+    protected void checkTicketFields(Ticket ticket1, Ticket ticket2) {
+        assertEquals(ticket1.getId(), ticket2.getId());
+        assertEquals(ticket1.getName(), ticket2.getName());
+        assertEquals(ticket1.getPatient(), ticket2.getPatient());
     }
 
 }

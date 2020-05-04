@@ -32,9 +32,14 @@ public class TestAdminOperations extends TestBase {
         try {
             Admin admin = insertAdmin(UserType.ADMIN, "name", "surname",
                     "patronymic", "adminLogin", "adminPass", "regularAdmin");
+
+            admin.setFirstName("newName");
+            admin.setLastName("newLastName");
+            admin.setPatronymic("newPatronymic");
             admin.setPassword("newPassword");
-            userDao.update(admin);
-            Admin adminFromDB = adminDao.getById(admin.getId());
+            admin.setPosition("NormAdmin");
+
+            Admin adminFromDB = adminDao.update(admin);
             assertEquals(admin, adminFromDB);
         } catch (RuntimeException e) {
             fail();

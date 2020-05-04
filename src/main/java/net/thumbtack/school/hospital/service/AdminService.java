@@ -5,18 +5,15 @@ import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
-import net.thumbtack.school.hospital.mybatis.dao.UserDao;
 import org.modelmapper.ModelMapper;
 
 public class AdminService {
 
     private AdminDao adminDao;
-    private UserDao userDao;
     private ModelMapper modelMapper = new ModelMapper();
 
-    public AdminService(AdminDao adminDao, UserDao userDao) {
+    public AdminService(AdminDao adminDao) {
         this.adminDao = adminDao;
-        this.userDao = userDao;
     }
 
     public ReturnAdminDtoResponse registerAdmin(RegisterAdminDtoRequest registerAdminDtoRequest) {
@@ -33,8 +30,9 @@ public class AdminService {
         Admin admin = adminDao.getById(id);
 
         admin.setPassword(updateAdminDtoRequest.getNewPassword());
+        admin.setLastName(updateAdminDtoRequest.getLastName());
 
-        userDao.update(admin);
+        admin = adminDao.update(admin);
 
         return modelMapper.map(admin, ReturnAdminDtoResponse.class);
     }

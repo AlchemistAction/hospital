@@ -1,5 +1,7 @@
 package net.thumbtack.school.hospital.mybatis.daoimpl;
 
+import net.thumbtack.school.hospital.model.Appointment;
+import net.thumbtack.school.hospital.model.Commission;
 import net.thumbtack.school.hospital.model.DaySchedule;
 import net.thumbtack.school.hospital.model.Doctor;
 import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
@@ -16,16 +18,16 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
 
     @Override
     public Doctor insert(Doctor doctor) {
-        LOGGER.debug("DAO Doctor Insert with Schedule{} ", doctor);
+        LOGGER.debug("DAO Doctor Insert with Schedule {} ", doctor);
         try (SqlSession sqlSession = getSession()) {
             try {
                 getUserMapper(sqlSession).insert(doctor);
                 getDoctorMapper(sqlSession).insert(doctor);
 
-                getDayScheduleMapper(sqlSession).insert(doctor, doctor.getSchedule());
+                getDayScheduleMapper(sqlSession).batchInsert(doctor, doctor.getSchedule());
 
                 doctor.getSchedule().forEach(daySchedule ->
-                        getAppointmentMapper(sqlSession).insert(daySchedule, daySchedule.getAppointmentList()));
+                        getAppointmentMapper(sqlSession).batchInsert(daySchedule, daySchedule.getAppointmentList()));
 
             } catch (RuntimeException ex) {
                 LOGGER.info("Can't insert Doctor with Schedule {}, {}", doctor, ex);
@@ -42,10 +44,10 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
         LOGGER.debug("DAO Insert New Schedule {}, {}", newSchedule, doctor);
         try (SqlSession sqlSession = getSession()) {
             try {
-                getDayScheduleMapper(sqlSession).insert(doctor, newSchedule);
+                getDayScheduleMapper(sqlSession).batchInsert(doctor, newSchedule);
 
                 newSchedule.forEach(daySchedule ->
-                        getAppointmentMapper(sqlSession).insert(daySchedule, daySchedule.getAppointmentList()));
+                        getAppointmentMapper(sqlSession).batchInsert(daySchedule, daySchedule.getAppointmentList()));
 
             } catch (RuntimeException ex) {
                 LOGGER.info("Can't insert New Schedule {}, {}, {}", newSchedule, doctor, ex);
@@ -66,7 +68,7 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
 
                 getDayScheduleMapper(sqlSession).insertOne(doctorId, newDaySchedule);
 
-                getAppointmentMapper(sqlSession).insert(newDaySchedule, newDaySchedule.getAppointmentList());
+                getAppointmentMapper(sqlSession).batchInsert(newDaySchedule, newDaySchedule.getAppointmentList());
 
             } catch (RuntimeException ex) {
                 LOGGER.info("Can't update DaySchedule {}, {}, {}, {}", doctorId, newDaySchedule, newDaySchedule, ex);
@@ -76,6 +78,62 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
             sqlSession.commit();
         }
         return newDaySchedule;
+    }
+
+    @Override
+    public void deleteAppointment(Appointment appointment) {
+        LOGGER.debug("DAO delete Appointment {} ", appointment);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+                getAppointmentMapper(sqlSession).deleteAppointment(appointment);
+            } catch (RuntimeException ex) {
+                LOGGER.info("Can't delete Appointment {} {}", appointment, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
+            sqlSession.commit();
+        }
+    }
+
+    @Override
+    public Appointment insertAppointment(Appointment appointment) {
+        LOGGER.debug("DAO Insert Appointment {} ", appointment);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+
+                getAppointmentMapper(sqlSession).insertOne(appointment);
+
+            } catch (RuntimeException ex) {
+                LOGGER.info("Can't insert Appointment {}, {}", appointment, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
+            sqlSession.commit();
+        }
+        return appointment;
+    }
+
+    @Override
+    public Commission insertCommission(Commission commission) {
+        LOGGER.debug("DAO Insert Commission {} ", commission);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+
+                getCommissionMapper(sqlSession).insert(commission);
+
+                getCommissionAppointmentMapper(sqlSession).batchInsert(commission, commission.getAppointmentList());
+
+                getTicketMapper(sqlSession).insertForCommission(commission, commission.getTicket(),
+                        commission.getTicket().getPatient());
+
+            } catch (RuntimeException ex) {
+                LOGGER.info("Can't insert Commission {}, {}", commission, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
+            sqlSession.commit();
+        }
+        return commission;
     }
 
     @Override
@@ -132,6 +190,7 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
         try (SqlSession sqlSession = getSession()) {
             try {
                 getDoctorMapper(sqlSession).deleteAll();
+                getCommissionMapper(sqlSession).deleteAll();
             } catch (RuntimeException ex) {
                 LOGGER.info("Can't delete all Doctors {}", ex);
                 sqlSession.rollback();

@@ -18,6 +18,11 @@ public interface AdminMapper {
     })
     Admin getById(int id);
 
+    @Update("UPDATE user, admin SET firstName = #{admin.firstName}, lastName = #{admin.lastName}," +
+            " patronymic = #{admin.patronymic}, password = #{admin.password}, position = #{admin.position}" +
+            " WHERE user.id = #{admin.id} ")
+    void updateAdmin(@Param("admin") Admin admin);
+
     @Delete("DELETE FROM user where id not in (1) and userType = 'ADMIN'")
     void deleteAllExceptOne();
 

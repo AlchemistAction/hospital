@@ -1,9 +1,11 @@
 package net.thumbtack.school.hospital.service;
 
+import net.thumbtack.school.hospital.dto.internal.DoctorInfo;
 import net.thumbtack.school.hospital.dto.request.AddPatientToAppointmentDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterPatientDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdatePatientDtoRequest;
 import net.thumbtack.school.hospital.dto.response.AddPatientToAppointmentDtoResponse;
+import net.thumbtack.school.hospital.dto.response.GetAllTicketsDtoResponse;
 import net.thumbtack.school.hospital.dto.response.RegisterPatientDtoResponse;
 import net.thumbtack.school.hospital.model.*;
 import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
@@ -11,28 +13,27 @@ import net.thumbtack.school.hospital.model.exception.HospitalException;
 
 import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
 import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
-import net.thumbtack.school.hospital.mybatis.dao.UserDao;
 import org.modelmapper.ModelMapper;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PatientService {
 
     private PatientDao patientDao;
-    private UserDao userDao;
     private DoctorDao doctorDao;
     private ModelMapper modelMapper = new ModelMapper();
 
-    public PatientService(PatientDao patientDao, DoctorDao doctorDao, UserDao userDao) {
+    public PatientService(PatientDao patientDao, DoctorDao doctorDao) {
         this.patientDao = patientDao;
         this.doctorDao = doctorDao;
-        this.userDao = userDao;
     }
 
     public RegisterPatientDtoResponse registerPatient(RegisterPatientDtoRequest registerPatientDtoRequest) {
         Patient patient = modelMapper.map(registerPatientDtoRequest, Patient.class);
+        patient.setPhone(patient.getPhone().replace("-", ""));
 
         patient = patientDao.insert(patient);
 
@@ -44,8 +45,9 @@ public class PatientService {
         Patient patient = patientDao.getById(id);
 
         patient.setPassword(updatePatientDtoRequest.getNewPassword());
+        patient.setAddress(updatePatientDtoRequest.getAddress());
 
-        userDao.update(patient);
+        patient = patientDao.update(patient);
 
         return modelMapper.map(patient, RegisterPatientDtoResponse.class);
     }
@@ -70,24 +72,24 @@ public class PatientService {
 
                     for (Appointment appointment : daySchedule.getAppointmentList()) {
 
-                        if (appointment.getTimeStart().equals(addPatientToAppointmentDtoRequest.getTime()) &&
+                        if (appointment.getTimeStart().toString().equals(addPatientToAppointmentDtoRequest.getTime()) &&
                                 appointment.getState().equals(AppointmentState.FREE)) {
 
                             String ticketName = "D" + doctor.getId() +
                                     daySchedule.getDate().toString().replace("-", "") +
-                                    appointment.getTimeStart().replace(":", "");
+                                    appointment.getTimeStart().toString().replace(":", "");
 
                             Ticket ticket = new Ticket(ticketName, patient);
 
                             appointment.setTicket(ticket);
 
-                            patientDao.addPersonToAppointment(appointment, patient);
+                            patientDao.addPatientToAppointment(appointment, patient);
 
                             result = new AddPatientToAppointmentDtoResponse(appointment.getTicket().getName(),
                                     doctor.getId(), doctor.getFirstName(),
                                     doctor.getLastName(), doctor.getPatronymic(),
                                     doctor.getSpeciality(), doctor.getRoom(),
-                                    dateOfAppointment.toString(), appointment.getTimeStart());
+                                    dateOfAppointment.toString(), appointment.getTimeStart().toString());
                         }
                     }
                 }
@@ -105,24 +107,24 @@ public class PatientService {
 
                             for (Appointment appointment : daySchedule.getAppointmentList()) {
 
-                                if ((appointment.getTimeStart().equals(addPatientToAppointmentDtoRequest.getTime()) &&
+                                if ((appointment.getTimeStart().toString().equals(addPatientToAppointmentDtoRequest.getTime()) &&
                                         appointment.getState().equals(AppointmentState.FREE))) {
 
                                     String ticketName = "D" + doctor.getId() +
                                             daySchedule.getDate().toString().replace("-", "") +
-                                            appointment.getTimeStart().replace(":", "");
+                                            appointment.getTimeStart().toString().replace(":", "");
 
                                     Ticket ticket = new Ticket(ticketName, patient);
 
                                     appointment.setTicket(ticket);
 
-                                    patientDao.addPersonToAppointment(appointment, patient);
+                                    patientDao.addPatientToAppointment(appointment, patient);
 
                                     result = new AddPatientToAppointmentDtoResponse(appointment.getTicket().getName(),
                                             doctor.getId(), doctor.getFirstName(),
                                             doctor.getLastName(), doctor.getPatronymic(),
                                             doctor.getSpeciality(), doctor.getRoom(),
-                                            dateOfAppointment.toString(), appointment.getTimeStart());
+                                            dateOfAppointment.toString(), appointment.getTimeStart().toString());
                                 }
                             }
                         }
@@ -134,5 +136,56 @@ public class PatientService {
             throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_APPOINTMENT);
         }
         return result;
+    }
+
+    public List<GetAllTicketsDtoResponse> getAllTickets(int id) {
+
+        List<GetAllTicketsDtoResponse> responseList = new ArrayList<>();
+
+        Patient patient = patientDao.getById(id);
+
+        List<Ticket> ticketList = patientDao.getAllTickets(patient);
+
+        if (!(ticketList == null)) {
+
+            for (Ticket ticket : ticketList) {
+                if (!(ticket.getAppointment() == null)) {
+
+                    Doctor doctor = ticket.getAppointment().getDaySchedule().getDoctor();
+                    String date = ticket.getAppointment().getDaySchedule().getDate().toString();
+                    String time = ticket.getAppointment().getTimeStart().toString();
+
+                    GetAllTicketsDtoResponse response = new GetAllTicketsDtoResponse(ticket.getName(), doctor.getRoom(),
+                            date, time, doctor.getId(), doctor.getFirstName(), doctor.getLastName(),
+                            doctor.getPatronymic(), doctor.getSpeciality());
+
+                    responseList.add(response);
+                } else {
+                    List<Appointment> appointmentList = ticket.getCommission().getAppointmentList();
+
+                    String room = ticket.getCommission().getRoom();
+                    String date = ticket.getCommission().getAppointmentList().get(0).getDaySchedule().getDate().toString();
+                    String time = ticket.getCommission().getAppointmentList().get(0).getTimeStart().toString();
+
+                    List<DoctorInfo> list = new ArrayList<>();
+
+                    for (Appointment appointment : appointmentList) {
+                        Doctor doctor = appointment.getDaySchedule().getDoctor();
+
+                        DoctorInfo doctorInfo = new DoctorInfo(doctor.getId(), doctor.getFirstName(),
+                                doctor.getLastName(), doctor.getPatronymic(), doctor.getSpeciality());
+
+                        list.add(doctorInfo);
+                    }
+
+                    GetAllTicketsDtoResponse response = new GetAllTicketsDtoResponse(ticket.getName(), room,
+                            date, time, list);
+
+                    responseList.add(response);
+                }
+            }
+        }
+
+        return responseList;
     }
 }

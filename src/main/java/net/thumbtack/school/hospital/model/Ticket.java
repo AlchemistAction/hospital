@@ -7,6 +7,8 @@ public class Ticket {
     private int id;
     private String name;
     private Patient patient;
+    private Appointment appointment;
+    private Commission commission;
 
     public Ticket() {
     }
@@ -19,6 +21,26 @@ public class Ticket {
 
     public Ticket(String name, Patient patient) {
         this(0, name, patient);
+    }
+
+    public Ticket(int id, String name, Patient patient, Appointment appointment) {
+        this(id, name, patient);
+        this.appointment = appointment;
+    }
+
+    public Ticket(String name, Patient patient, Appointment appointment) {
+        this(0, name, patient);
+        this.appointment = appointment;
+    }
+
+    public Ticket(int id, String name, Patient patient, Commission commission) {
+        this(id, name, patient);
+        this.commission = commission;
+    }
+
+    public Ticket(String name, Patient patient, Commission commission) {
+        this(0, name, patient);
+        this.commission = commission;
     }
 
     public int getId() {
@@ -45,6 +67,22 @@ public class Ticket {
         this.patient = patient;
     }
 
+    public Appointment getAppointment() {
+        return appointment;
+    }
+
+    public void setAppointment(Appointment appointment) {
+        this.appointment = appointment;
+    }
+
+    public Commission getCommission() {
+        return commission;
+    }
+
+    public void setCommission(Commission commission) {
+        this.commission = commission;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -52,11 +90,13 @@ public class Ticket {
         Ticket ticket = (Ticket) o;
         return getId() == ticket.getId() &&
                 Objects.equals(getName(), ticket.getName()) &&
-                Objects.equals(getPatient(), ticket.getPatient());
+                Objects.equals(getPatient(), ticket.getPatient()) &&
+                Objects.equals(getAppointment(), ticket.getAppointment()) &&
+                Objects.equals(getCommission(), ticket.getCommission());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getPatient());
+        return Objects.hash(getId(), getName(), getPatient(), getAppointment(), getCommission());
     }
 }

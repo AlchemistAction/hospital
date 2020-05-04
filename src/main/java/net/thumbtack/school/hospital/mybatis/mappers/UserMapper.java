@@ -11,9 +11,6 @@ public interface UserMapper {
     @Options(useGeneratedKeys = true, keyProperty = "user.id")
     Integer insert(@Param("user") User user);
 
-    @Update("UPDATE user SET password = #{password} WHERE id = #{user.id} ")
-    void updateUser(@Param("user") User user, @Param("password") String password);
-
     @Delete("DELETE FROM user WHERE id = #{user.id}")
     void delete(@Param("user") User user);
 }

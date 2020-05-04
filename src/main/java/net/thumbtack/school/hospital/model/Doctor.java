@@ -31,7 +31,8 @@ public class Doctor extends User {
 
     public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login,
                   String password, String speciality, String room) {
-        this(0, userType, firstName, lastName, patronymic, login, password, speciality, room, new ArrayList<>());
+        this(0, userType, firstName, lastName, patronymic, login, password, speciality, room,
+                new ArrayList<>());
     }
 
     public String getSpeciality() {

@@ -5,6 +5,7 @@ import org.junit.Test;
 
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -16,11 +17,11 @@ public class TestDoctorOperations extends TestBase {
         try {
             List<DaySchedule> schedule = Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
                     new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
 
             Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
                     "patronymic", "doctorLogin", "doctorPass", "хирург",
@@ -46,11 +47,11 @@ public class TestDoctorOperations extends TestBase {
         try {
             List<DaySchedule> schedule1 = Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
                     new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
 
             Doctor doctor1 = insertDoctor(UserType.DOCTOR, "name1", "surname1",
                     "patronymic1", "doctorLogin1", "doctorPass1", "хирург",
@@ -58,11 +59,11 @@ public class TestDoctorOperations extends TestBase {
 
             List<DaySchedule> schedule2 = Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 3), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
                     new DaySchedule(LocalDate.of(2020, 2, 4), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
 
             Doctor doctor2 = insertDoctor(UserType.DOCTOR, "name2", "surname2",
                     "patronymic2", "doctorLogin2", "doctorPass2", "хирург",
@@ -70,11 +71,11 @@ public class TestDoctorOperations extends TestBase {
 
             List<DaySchedule> schedule3 = Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 5), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
                     new DaySchedule(LocalDate.of(2020, 2, 6), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
 
             Doctor doctor3 = insertDoctor(UserType.DOCTOR, "name3", "surname3",
                     "patronymic3", "doctorLogin3", "doctorPass3", "лор",
@@ -97,11 +98,11 @@ public class TestDoctorOperations extends TestBase {
         try {
             List<DaySchedule> schedule1 = Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
                     new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
 
             Doctor doctor1 = insertDoctor(UserType.DOCTOR, "name1", "surname1",
                     "patronymic1", "doctorLogin1", "doctorPass1", "хирург",
@@ -109,11 +110,11 @@ public class TestDoctorOperations extends TestBase {
 
             List<DaySchedule> schedule2 = Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 3), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
                     new DaySchedule(LocalDate.of(2020, 2, 4), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
 
             Doctor doctor2 = insertDoctor(UserType.DOCTOR, "name2", "surname2",
                     "patronymic2", "doctorLogin2", "doctorPass2", "хирург",
@@ -121,11 +122,11 @@ public class TestDoctorOperations extends TestBase {
 
             List<DaySchedule> schedule3 = Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 5), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
                     new DaySchedule(LocalDate.of(2020, 2, 6), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
 
             Doctor doctor3 = insertDoctor(UserType.DOCTOR, "name3", "surname3",
                     "patronymic3", "doctorLogin3", "doctorPass3", "лор",
@@ -147,11 +148,11 @@ public class TestDoctorOperations extends TestBase {
         try {
             List<DaySchedule> schedule = Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
                     new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.FREE))));
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
 
             Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
                     "patronymic", "doctorLogin", "doctorPass", "хирург",
@@ -169,20 +170,20 @@ public class TestDoctorOperations extends TestBase {
     public void testInsertNewSchedule() {
         try {
             List<DaySchedule> oldSchedule = new LinkedList<>(Arrays.asList(
-                    new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
-                    new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.FREE)))));
+                    new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE)))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))))));
 
             List<DaySchedule> newSchedule = new LinkedList<>(Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 3), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
                     new DaySchedule(LocalDate.of(2020, 2, 4), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.FREE)))));
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE)))));
 
             Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
                     "patronymic", "doctorLogin", "doctorPass", "хирург",
@@ -205,12 +206,12 @@ public class TestDoctorOperations extends TestBase {
     public void testUpdateDaySchedule() {
         try {
             List<DaySchedule> schedule = new LinkedList<>(Arrays.asList(
-                    new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
-                            new Appointment("10:00", "10:19", AppointmentState.FREE),
-                            new Appointment("10:20", "10:39", AppointmentState.FREE))),
-                    new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
-                            new Appointment("11:00", "11:19", AppointmentState.FREE),
-                            new Appointment("11:20", "11:39", AppointmentState.FREE)))));
+                    new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE)))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))))));
 
             Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
                     "patronymic", "doctorLogin", "doctorPass", "хирург",
@@ -218,8 +219,8 @@ public class TestDoctorOperations extends TestBase {
 
             DaySchedule updatedDaySchedule = new DaySchedule(LocalDate.of(2020, 1, 1),
                     Arrays.asList(
-                            new Appointment("15:00", "15:19", AppointmentState.FREE),
-                            new Appointment("15:20", "15:39", AppointmentState.FREE)));
+                            new Appointment(LocalTime.parse("15:00"), LocalTime.parse("15:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("15:20"), LocalTime.parse("15:39"), AppointmentState.FREE)));
 
             doctorDao.updateDaySchedule(doctor.getId(), doctor.getSchedule().get(0), updatedDaySchedule);
 
@@ -230,6 +231,61 @@ public class TestDoctorOperations extends TestBase {
             Doctor doctorFromDB = doctorDao.getById(doctor.getId());
             doctorFromDB.getSchedule().sort(Comparator.comparing(DaySchedule::getDate));
 
+            checkDoctorFields(doctor, doctorFromDB);
+        } catch (RuntimeException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testDeleteAppointment() {
+        try {
+            List<DaySchedule> schedule = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE)))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE)))));
+
+            Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
+                    "patronymic", "doctorLogin", "doctorPass", "хирург",
+                    "100", schedule);
+
+            doctorDao.deleteAppointment(doctor.getSchedule().get(1).getAppointmentList().get(0));
+
+            doctor.getSchedule().get(1).getAppointmentList().remove(0);
+
+            Doctor doctorFromDB = doctorDao.getById(doctor.getId());
+            checkDoctorFields(doctor, doctorFromDB);
+        } catch (RuntimeException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testInsertAppointment() {
+        try {
+            List<DaySchedule> schedule = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE)))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE)))));
+
+            Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
+                    "patronymic", "doctorLogin", "doctorPass", "хирург",
+                    "100", schedule);
+
+            Appointment neeApp = new Appointment(LocalTime.parse("11:40"), LocalTime.parse("12:00"),
+                    AppointmentState.FREE, doctor.getSchedule().get(1));
+
+            Appointment neeAppFromDb = doctorDao.insertAppointment(neeApp);
+
+            doctor.getSchedule().get(1).getAppointmentList().add(neeAppFromDb);
+
+            Doctor doctorFromDB = doctorDao.getById(doctor.getId());
             checkDoctorFields(doctor, doctorFromDB);
         } catch (RuntimeException e) {
             fail();

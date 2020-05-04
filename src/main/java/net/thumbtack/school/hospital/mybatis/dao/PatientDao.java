@@ -2,6 +2,9 @@ package net.thumbtack.school.hospital.mybatis.dao;
 
 import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Patient;
+import net.thumbtack.school.hospital.model.Ticket;
+
+import java.util.List;
 
 public interface PatientDao {
 
@@ -9,7 +12,11 @@ public interface PatientDao {
 
     Patient getById(int id);
 
+    Patient update(Patient patient);
+
     void deleteAll();
 
-    void addPersonToAppointment(Appointment appointment, Patient patient);
+    void addPatientToAppointment(Appointment appointment, Patient patient);
+
+    List<Ticket> getAllTickets(Patient patient);
 }

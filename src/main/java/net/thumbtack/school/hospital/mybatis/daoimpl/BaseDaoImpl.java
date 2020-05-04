@@ -27,6 +27,14 @@ public class BaseDaoImpl {
         return sqlSession.getMapper(DayScheduleMapper.class);
     }
 
+    protected CommissionMapper getCommissionMapper(SqlSession sqlSession) {
+        return sqlSession.getMapper(CommissionMapper.class);
+    }
+
+    protected CommissionAppointmentMapper getCommissionAppointmentMapper(SqlSession sqlSession) {
+        return sqlSession.getMapper(CommissionAppointmentMapper.class);
+    }
+
     protected AppointmentMapper getAppointmentMapper(SqlSession sqlSession) {
         return sqlSession.getMapper(AppointmentMapper.class);
     }

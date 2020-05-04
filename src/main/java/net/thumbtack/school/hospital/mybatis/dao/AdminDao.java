@@ -8,5 +8,7 @@ public interface AdminDao {
 
     Admin getById(int id);
 
+    Admin update(Admin admin);
+
     void deleteAllExceptOne();
 }

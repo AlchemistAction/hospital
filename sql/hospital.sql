@@ -33,7 +33,10 @@ PRIMARY KEY (id)
 INSERT INTO speciality
  VALUES (NULL,'хирург'),
         (NULL,'офтальмолог'),
-        (NULL,'лор');
+        (NULL,'лор'),
+        (NULL,'терапевт'),
+        (NULL,'уролог'),
+        (NULL,'дерматолог');
         
 CREATE TABLE room (
 id INT(11) NOT NULL AUTO_INCREMENT,
@@ -44,7 +47,10 @@ PRIMARY KEY (id)
 INSERT INTO room
  VALUES (NULL,'100'),
 		(NULL,'200'),
-        (NULL,'300');
+        (NULL,'300'),
+        (NULL,'400'),
+        (NULL,'500'),
+        (NULL,'600');
 
 
 CREATE TABLE doctor (
@@ -69,21 +75,38 @@ FOREIGN KEY (doctor_id) REFERENCES user (id) ON DELETE CASCADE
 CREATE TABLE appointment (
 id INT(11) NOT NULL AUTO_INCREMENT,
 day_schedule_id INT(11) NOT NULL,
-timeStart VARCHAR(50) NOT NULL,
-timeEnd VARCHAR(50) NOT NULL,
+timeStart time NOT NULL,
+timeEnd time NOT NULL,
 state ENUM('FREE', 'APPOINTMENT', 'COMMISSION') NOT NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (day_schedule_id) REFERENCES day_schedule (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
  
+ CREATE TABLE commission (
+id INT(11) NOT NULL AUTO_INCREMENT,
+room_id INT(11) NULL,
+PRIMARY KEY (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
 CREATE TABLE ticket (
 id INT(11) NOT NULL AUTO_INCREMENT,
 name VARCHAR(50) NULL,
 patient_id INT(11) NULL,
 appointment_id INT(11) NULL,
+commission_id INT(11) NULL,
 PRIMARY KEY (id),
-FOREIGN KEY (appointment_id) REFERENCES appointment (id) ON DELETE CASCADE,
-constraint ticket_AltPK unique (patient_id, appointment_id)
+FOREIGN KEY (commission_id) REFERENCES commission (id) ON DELETE CASCADE,
+FOREIGN KEY (appointment_id) REFERENCES appointment (id) ON DELETE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+CREATE TABLE commission_appointment (
+id INT(11) NOT NULL AUTO_INCREMENT,
+commission_id INT(11) NULL,
+appointment_id INT(11) NULL,
+PRIMARY KEY (id),
+UNIQUE KEY commission_appointment (commission_id, appointment_id),
+FOREIGN KEY (commission_id) REFERENCES commission (id) ON DELETE CASCADE,
+FOREIGN KEY (appointment_id) REFERENCES appointment (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE patient (

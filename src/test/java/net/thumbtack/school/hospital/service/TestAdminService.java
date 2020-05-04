@@ -6,9 +6,7 @@ import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
-import net.thumbtack.school.hospital.mybatis.dao.UserDao;
 import net.thumbtack.school.hospital.mybatis.daoimpl.AdminDaoImpl;
-import net.thumbtack.school.hospital.mybatis.daoimpl.UserDaoImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
@@ -20,15 +18,13 @@ import static org.mockito.Mockito.*;
 public class TestAdminService {
 
     private AdminDao adminDao;
-    private UserDao userDao;
     private AdminService adminService;
     private ModelMapper modelMapper = new ModelMapper();
 
     @Before
     public void setUp() {
         adminDao = mock(AdminDaoImpl.class);
-        userDao = mock(UserDaoImpl.class);
-        adminService = new AdminService(adminDao, userDao);
+        adminService = new AdminService(adminDao);
     }
 
     @Test
@@ -50,16 +46,21 @@ public class TestAdminService {
     @Test
     public void testUpdateAdmin() {
         UpdateAdminDtoRequest updateAdminDtoRequest = new UpdateAdminDtoRequest("name",
-                "surname", "patronymic", "regularAdmin", "oldPassword",
+                "newLastName", "patronymic", "regularAdmin", "oldPassword",
                 "newPassword");
 
-        Admin admin = new Admin(UserType.ADMIN, "name", "surname",
+        Admin oldAdmin = new Admin(UserType.ADMIN, "name", "oldLastNAme",
                 "patronymic", "adminLogin", "oldPassword", "regularAdmin");
 
-        when(adminDao.getById(anyInt())).thenReturn(admin);
+        Admin newAdmin = new Admin(UserType.ADMIN, "name", "newLastName",
+                "patronymic", "adminLogin", "newPassword", "regularAdmin");
 
-        adminService.updateAdmin(updateAdminDtoRequest, admin.getId());
+        when(adminDao.getById(anyInt())).thenReturn(oldAdmin);
+        when(adminDao.update(any())).thenReturn(newAdmin);
 
-        assertEquals("newPassword", admin.getPassword());
+        adminService.updateAdmin(updateAdminDtoRequest, oldAdmin.getId());
+
+        assertEquals("newPassword", newAdmin.getPassword());
+        assertEquals("newLastName", newAdmin.getLastName());
     }
 }

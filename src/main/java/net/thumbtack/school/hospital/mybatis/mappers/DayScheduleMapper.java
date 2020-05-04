@@ -1,5 +1,6 @@
 package net.thumbtack.school.hospital.mybatis.mappers;
 
+import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.DaySchedule;
 import net.thumbtack.school.hospital.model.Doctor;
 import org.apache.ibatis.annotations.*;
@@ -20,7 +21,7 @@ public interface DayScheduleMapper {
             "</foreach>",
             "</script>"})
     @Options(useGeneratedKeys = true, keyProperty = "list.id", keyColumn = "daySchedule.id")
-    void insert(@Param("doctor") Doctor doctor, @Param("list") List<DaySchedule> schedule);
+    void batchInsert(@Param("doctor") Doctor doctor, @Param("list") List<DaySchedule> schedule);
 
     @Select("SELECT day_schedule.id, `date` FROM day_schedule WHERE doctor_id = #{doctor.id}")
     @Results({
@@ -32,17 +33,17 @@ public interface DayScheduleMapper {
                     many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.AppointmentMapper.getByDaySchedule",
                             fetchType = FetchType.LAZY)),
     })
-    List<DaySchedule> getByDoctor(Doctor doctor);
+    List<DaySchedule> getByDoctor(@Param("doctor") Doctor doctor);
 
     @Select("SELECT day_schedule.id, date FROM day_schedule WHERE day_schedule.id in" +
-            " (select day_schedule_id from appointment where appointment.id = #{id})")
+            " (select day_schedule_id from appointment where appointment.id = #{appointment.id})")
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "doctor", column = "id", javaType = Doctor.class,
                     one = @One(select = "net.thumbtack.school.hospital.mybatis.mappers.DoctorMapper.getByDaySchedule",
                             fetchType = FetchType.LAZY)),
     })
-    DaySchedule getByAppointment(int appointmentId);
+    DaySchedule getByAppointment(@Param("appointment") Appointment appointment);
 
     @Delete("DELETE FROM day_schedule WHERE id = #{daySchedule.id}")
     void delete(@Param("daySchedule") DaySchedule daySchedule);

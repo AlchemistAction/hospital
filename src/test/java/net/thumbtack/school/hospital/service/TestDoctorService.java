@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.modelmapper.ModelMapper;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -50,8 +51,8 @@ public class TestDoctorService {
         List<DaySchedule> schedule = Collections.singletonList(
                 new DaySchedule(LocalDate.of(2020, 4, 13),
                         Arrays.asList(
-                                new Appointment("10:00", "10:30", AppointmentState.FREE),
-                                new Appointment("10:30", "11:00", AppointmentState.FREE))));
+                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.FREE),
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))));
 
         Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
         doctor.setSchedule(schedule);
@@ -85,10 +86,10 @@ public class TestDoctorService {
         List<DaySchedule> schedule = Arrays.asList(
                 new DaySchedule(LocalDate.of(2020, 4, 13),
                         Collections.singletonList(
-                                new Appointment("10:00", "10:30", AppointmentState.FREE))),
+                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.FREE))),
                 new DaySchedule(LocalDate.of(2020, 4, 14),
                         Collections.singletonList(
-                                new Appointment("11:00", "11:30", AppointmentState.FREE))));
+                                new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:30"), AppointmentState.FREE))));
 
 
         Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
@@ -126,18 +127,18 @@ public class TestDoctorService {
         List<DaySchedule> schedule = new LinkedList<>(Arrays.asList(
                 new DaySchedule(LocalDate.of(2020, 4, 13),
                         Collections.singletonList(
-                                new Appointment("10:00", "10:30", AppointmentState.FREE))),
+                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.FREE))),
                 new DaySchedule(LocalDate.of(2020, 4, 14),
                         Collections.singletonList(
-                                new Appointment("11:00", "11:30", AppointmentState.FREE)))));
+                                new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:30"), AppointmentState.FREE)))));
 
         List<DaySchedule> newSchedule = new LinkedList<>(Arrays.asList(
                 new DaySchedule(LocalDate.of(2020, 4, 16),
                         Collections.singletonList(
-                                new Appointment("10:00", "10:30", AppointmentState.FREE))),
+                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.FREE))),
                 new DaySchedule(LocalDate.of(2020, 4, 17),
                         Collections.singletonList(
-                                new Appointment("11:00", "11:30", AppointmentState.FREE)))));
+                                new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:30"), AppointmentState.FREE)))));
 
         Doctor doctor = new Doctor(UserType.DOCTOR, "name", "surname",
                 "patronymic", "doctorLogin", "doctorPass", "хирург",
@@ -184,14 +185,14 @@ public class TestDoctorService {
         List<DaySchedule> schedule = new LinkedList<>(Arrays.asList(
                 new DaySchedule(LocalDate.of(2020, 4, 13),
                         Collections.singletonList(
-                                new Appointment("10:00", "10:30", AppointmentState.FREE))),
+                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.FREE))),
                 new DaySchedule(LocalDate.of(2020, 4, 15),
                         Collections.singletonList(
-                                new Appointment("11:00", "11:30", AppointmentState.FREE)))));
+                                new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:30"), AppointmentState.FREE)))));
 
         DaySchedule newDaySchedule = new DaySchedule(LocalDate.of(2020, 4, 15),
                 Collections.singletonList(
-                        new Appointment("22:00", "22:30", AppointmentState.FREE)));
+                        new Appointment(LocalTime.parse("22:00"), LocalTime.parse("22:30"), AppointmentState.FREE)));
 
         Doctor doctor = new Doctor(UserType.DOCTOR, "name", "surname",
                 "patronymic", "doctorLogin", "doctorPass", "хирург",
@@ -230,10 +231,10 @@ public class TestDoctorService {
         List<DaySchedule> schedule = new LinkedList<>(Arrays.asList(
                 new DaySchedule(LocalDate.of(2020, 4, 13),
                         Collections.singletonList(
-                                new Appointment("10:00", "10:30", AppointmentState.APPOINTMENT))),
+                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.APPOINTMENT))),
                 new DaySchedule(LocalDate.of(2020, 4, 15),
                         Collections.singletonList(
-                                new Appointment("11:00", "11:30", AppointmentState.APPOINTMENT)))));
+                                new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:30"), AppointmentState.APPOINTMENT)))));
 
         Doctor doctor = new Doctor(UserType.DOCTOR, "name", "surname",
                 "patronymic", "doctorLogin", "doctorPass", "хирург",
