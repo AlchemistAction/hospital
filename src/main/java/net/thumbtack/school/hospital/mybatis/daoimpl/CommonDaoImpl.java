@@ -5,7 +5,9 @@ import net.thumbtack.school.hospital.mybatis.dao.CommonDao;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class CommonDaoImpl extends BaseDaoImpl implements CommonDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonDaoImpl.class);

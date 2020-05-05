@@ -4,7 +4,9 @@ package net.thumbtack.school.hospital.mybatis.daoimpl;
 import net.thumbtack.school.hospital.mybatis.mappers.*;
 import net.thumbtack.school.hospital.mybatis.utils.MyBatisUtils;
 import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Component;
 
+@Component
 public class BaseDaoImpl {
 
     protected SqlSession getSession() {

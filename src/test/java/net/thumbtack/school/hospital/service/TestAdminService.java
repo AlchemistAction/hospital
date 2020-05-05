@@ -19,7 +19,7 @@ public class TestAdminService {
 
     private AdminDao adminDao;
     private AdminService adminService;
-    private ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Before
     public void setUp() {

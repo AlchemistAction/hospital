@@ -6,8 +6,9 @@ import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
-
+@Repository
 public class AdminDaoImpl extends BaseDaoImpl implements AdminDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminDaoImpl.class);

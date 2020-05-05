@@ -1,12 +1,22 @@
 package net.thumbtack.school.hospital.dto.request;
 
+import net.thumbtack.school.hospital.validator.Name;
+
+import javax.validation.constraints.NotNull;
+
 public class RegisterAdminDtoRequest {
 
+    @Name
     private String firstName;
+    @Name
     private String lastName;
+
     private String patronymic;
+    @NotNull
     private String position;
+    @NotNull
     private String login;
+    @NotNull
     private String password;
 
     public RegisterAdminDtoRequest(String firstName, String lastName, String patronymic, String position, String login,
@@ -17,6 +27,8 @@ public class RegisterAdminDtoRequest {
         this.position = position;
         this.login = login;
         this.password = password;
+    }
+    public RegisterAdminDtoRequest() {
     }
 
     public String getFirstName() {

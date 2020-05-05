@@ -3,6 +3,7 @@ package net.thumbtack.school.hospital.mybatis.mappers;
 import net.thumbtack.school.hospital.model.User;
 import org.apache.ibatis.annotations.*;
 
+@Mapper
 public interface UserMapper {
 
     @Insert("INSERT INTO user (userType, firstName, lastName, patronymic, login, password) VALUES"

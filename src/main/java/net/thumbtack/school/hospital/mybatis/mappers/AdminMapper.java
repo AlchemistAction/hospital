@@ -4,7 +4,7 @@ package net.thumbtack.school.hospital.mybatis.mappers;
 import net.thumbtack.school.hospital.model.Admin;
 import org.apache.ibatis.annotations.*;
 
-
+@Mapper
 public interface AdminMapper {
 
     @Insert("INSERT INTO admin (id, position) VALUES (LAST_INSERT_ID(), #{admin.position})")

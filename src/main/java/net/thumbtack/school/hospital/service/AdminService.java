@@ -4,14 +4,19 @@ import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
+import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class AdminService {
 
     private AdminDao adminDao;
-    private ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper modelMapper = new ModelMapper();
 
+    @Autowired
     public AdminService(AdminDao adminDao) {
         this.adminDao = adminDao;
     }
@@ -19,6 +24,8 @@ public class AdminService {
     public ReturnAdminDtoResponse registerAdmin(RegisterAdminDtoRequest registerAdminDtoRequest) {
 
         Admin admin = modelMapper.map(registerAdminDtoRequest, Admin.class);
+
+        admin.setUserType(UserType.ADMIN);
 
         admin = adminDao.insert(admin);
 

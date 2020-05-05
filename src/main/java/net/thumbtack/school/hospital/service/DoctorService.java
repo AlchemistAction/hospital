@@ -14,8 +14,9 @@ import net.thumbtack.school.hospital.model.exception.HospitalException;
 import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
 import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import javax.print.Doc;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,12 +24,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Service
 public class DoctorService {
 
     private DoctorDao doctorDao;
     private PatientDao patientDao;
     private ModelMapper modelMapper = new ModelMapper();
 
+    @Autowired
     public DoctorService(DoctorDao doctorDao, PatientDao patientDao) {
         this.doctorDao = doctorDao;
         this.patientDao = patientDao;
@@ -42,6 +45,7 @@ public class DoctorService {
 
         Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
         doctor.setSchedule(schedule);
+        doctor.setUserType(UserType.DOCTOR);
 
         doctor = doctorDao.insert(doctor);
 

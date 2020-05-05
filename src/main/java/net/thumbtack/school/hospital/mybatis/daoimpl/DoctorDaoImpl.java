@@ -8,10 +8,11 @@ import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-
+@Repository
 public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DoctorDaoImpl.class);
