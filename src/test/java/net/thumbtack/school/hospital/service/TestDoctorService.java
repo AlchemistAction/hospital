@@ -1,5 +1,7 @@
 package net.thumbtack.school.hospital.service;
 
+import net.thumbtack.school.hospital.dao.TestBase;
+import net.thumbtack.school.hospital.dto.request.AddPatientToCommissionDtoRequest;
 import net.thumbtack.school.hospital.dto.request.ChangeScheduleDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
@@ -19,6 +21,7 @@ import org.modelmapper.ModelMapper;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -248,6 +251,191 @@ public class TestDoctorService {
         } catch (HospitalException ex) {
             assertEquals(HospitalErrorCode.CAN_NOT_UPDATE_SCHEDULE, ex.getErrorCode());
         }
+    }
+
+    @Test
+    public void testAddPatientToCommission() throws HospitalException {
+
+        Patient patient = new Patient(2, UserType.PATIENT, "name", "surname",
+                "patronymic", "Login", "oldPassword", "email@mail.ru",
+                "address", "8-900-000-00-00");
+
+        List<DaySchedule> schedule1 = new LinkedList<>(Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                        new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:07"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("10:07"), LocalTime.parse("10:30"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:30"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("11:30"), LocalTime.parse("12:00"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("12:30"), LocalTime.parse("13:00"), AppointmentState.FREE))))));
+
+        Doctor doctor1 = new Doctor(13, UserType.DOCTOR, "name1", "surname1",
+                "patronymic1", "doctorLogin1", "doctorPass1", "хирург",
+                "100", schedule1);
+
+        List<DaySchedule> schedule2 = new LinkedList<>(Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                        new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:20"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:40"), AppointmentState.FREE))))));
+
+        Doctor doctor2 = new Doctor(14, UserType.DOCTOR, "name2", "surname2",
+                "patronymic2", "doctorLogin2", "doctorPass2", "хирург",
+                "200", schedule2);
+
+
+        Ticket ticket1 = new Ticket("ticket for app1", patient);
+        ticket1.setAppointment(new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:10"), AppointmentState.COMMISSION,
+                new DaySchedule(LocalDate.of(2020, 1, 1), new ArrayList<>())));
+        Ticket ticket2 = new Ticket("ticket for app2", patient);
+        ticket2.setAppointment(new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:20"), AppointmentState.COMMISSION,
+                new DaySchedule(LocalDate.of(2020, 1, 1), new ArrayList<>())));
+        Ticket ticket3 = new Ticket("ticket for app3", patient);
+        ticket3.setAppointment(new Appointment(LocalTime.parse("10:45"), LocalTime.parse("11:00"), AppointmentState.COMMISSION,
+                new DaySchedule(LocalDate.of(2020, 1, 1), new ArrayList<>())));
+
+        List<Ticket> ticketList = Arrays.asList(ticket1, ticket2, ticket3);
+
+        when(patientDao.getAllTickets(any())).thenReturn(ticketList);
+
+        when(doctorDao.getById(anyInt())).thenReturn(doctor1).thenReturn(doctor2);
+        when(patientDao.getById(anyInt())).thenReturn(patient);
+
+
+        List<DaySchedule> scheduleForResult1 = new LinkedList<>(Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                        new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:07"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("10:07"), LocalTime.parse("10:15"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("10:15"), LocalTime.parse("10:35"), AppointmentState.COMMISSION),
+                        new Appointment(LocalTime.parse("10:35"), LocalTime.parse("11:00"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:30"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("11:30"), LocalTime.parse("12:00"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("12:30"), LocalTime.parse("13:00"), AppointmentState.FREE))))));
+
+        List<DaySchedule> scheduleForResult2 = new LinkedList<>(Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                        new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:15"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("10:15"), LocalTime.parse("10:35"), AppointmentState.COMMISSION),
+                        new Appointment(LocalTime.parse("10:35"), LocalTime.parse("10:40"), AppointmentState.FREE))))));
+
+        Doctor doctorForResult1 = new Doctor(13, UserType.DOCTOR, "name1", "surname1",
+                "patronymic1", "doctorLogin1", "doctorPass1", "хирург",
+                "100", scheduleForResult1);
+
+        Doctor doctorForResult2 = new Doctor(14, UserType.DOCTOR, "name2", "surname2",
+                "patronymic2", "doctorLogin2", "doctorPass2", "хирург",
+                "200", scheduleForResult2);
+
+        List<Doctor> expectedList = Arrays.asList(doctorForResult1, doctorForResult2);
+
+
+        AddPatientToCommissionDtoRequest dtoRequest = new AddPatientToCommissionDtoRequest(patient.getId(),
+                new Integer[]{13, 14}, "100", "01-01-2020", "10:15", "00:20");
+
+        List<Doctor> doctorListFromService = doctorService.addPatientToCommission(dtoRequest, doctor1.getId());
+
+        doctorListFromService.forEach(doctor -> doctor.getSchedule().
+                forEach(daySchedule -> daySchedule.getAppointmentList().
+                        sort(Comparator.comparing(Appointment::getTimeStart))));
+
+
+        checkDoctorFields(expectedList.get(0), doctorListFromService.get(0));
+        checkDoctorFields(expectedList.get(1), doctorListFromService.get(1));
+    }
+
+    @Test
+    public void testAddPatientToCommissionFail1() {
+
+        Patient patient = new Patient(2, UserType.PATIENT, "name", "surname",
+                "patronymic", "Login", "oldPassword", "email@mail.ru",
+                "address", "8-900-000-00-00");
+
+        Ticket ticket1 = new Ticket("ticket for app1", patient);
+        ticket1.setAppointment(new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:14"), AppointmentState.COMMISSION,
+                new DaySchedule(LocalDate.of(2020, 1, 1), new ArrayList<>())));
+        Ticket ticket2 = new Ticket("ticket for app2", patient);
+        ticket2.setAppointment(new Appointment(LocalTime.parse("10:36"), LocalTime.parse("11:00"), AppointmentState.COMMISSION,
+                new DaySchedule(LocalDate.of(2020, 1, 1), new ArrayList<>())));
+        Ticket ticket3 = new Ticket("ticket for app3", patient);
+        ticket3.setAppointment(new Appointment(LocalTime.parse("10:40"), LocalTime.parse("11:00"), AppointmentState.APPOINTMENT,
+                new DaySchedule(LocalDate.of(2020, 1, 1), new ArrayList<>())));
+        Ticket ticket4 = new Ticket("ticket for app3", patient);
+        ticket4.setAppointment(new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:30"), AppointmentState.APPOINTMENT,
+                new DaySchedule(LocalDate.of(2020, 1, 1), new ArrayList<>())));
+
+        List<Ticket> ticketList = Arrays.asList(ticket1, ticket2, ticket3, ticket4);
+
+        when(patientDao.getAllTickets(any())).thenReturn(ticketList);
+
+        AddPatientToCommissionDtoRequest dtoRequest = new AddPatientToCommissionDtoRequest(patient.getId(),
+                new Integer[]{13, 14}, "100", "01-01-2020", "10:15", "00:20");
+
+        try {
+            doctorService.addPatientToCommission(dtoRequest, patient.getId());
+            fail();
+        } catch (HospitalException ex) {
+            assertEquals(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION, ex.getErrorCode());
+        }
+    }
+
+    @Test
+    public void testAddPatientToCommissionFail2() {
+
+        Patient patient = new Patient(2, UserType.PATIENT, "name", "surname",
+                "patronymic", "Login", "oldPassword", "email@mail.ru",
+                "address", "8-900-000-00-00");
+
+        List<DaySchedule> schedule1 = new LinkedList<>(Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                        new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:07"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("10:07"), LocalTime.parse("10:30"), AppointmentState.APPOINTMENT))))));
+
+        Doctor doctor1 = new Doctor(13, UserType.DOCTOR, "name1", "surname1",
+                "patronymic1", "doctorLogin1", "doctorPass1", "хирург",
+                "100", schedule1);
+
+        when(doctorDao.getById(anyInt())).thenReturn(doctor1);
+
+        AddPatientToCommissionDtoRequest dtoRequest = new AddPatientToCommissionDtoRequest(patient.getId(),
+                new Integer[]{13, 14}, "100", "01-01-2020", "10:15", "00:20");
+
+        try {
+            doctorService.addPatientToCommission(dtoRequest, patient.getId());
+            fail();
+        } catch (HospitalException ex) {
+            assertEquals(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION, ex.getErrorCode());
+        }
+
+    }
+
+
+    private void checkDoctorFields(Doctor doctor1, Doctor doctor2) {
+        assertEquals(doctor1.getId(), doctor2.getId());
+        assertEquals(doctor1.getUserType(), doctor2.getUserType());
+        assertEquals(doctor1.getFirstName(), doctor2.getFirstName());
+        assertEquals(doctor1.getLastName(), doctor2.getLastName());
+        assertEquals(doctor1.getPatronymic(), doctor2.getPatronymic());
+        assertEquals(doctor1.getLogin(), doctor2.getLogin());
+        assertEquals(doctor1.getPassword(), doctor2.getPassword());
+        assertEquals(doctor1.getSpeciality(), doctor2.getSpeciality());
+        assertEquals(doctor1.getRoom(), doctor2.getRoom());
+        for (int i = 0; i < doctor1.getSchedule().size(); i++) {
+            checkDayScheduleFields(doctor1.getSchedule().get(i), doctor2.getSchedule().get(i));
+        }
+    }
+
+    private void checkDayScheduleFields(DaySchedule daySchedule1, DaySchedule daySchedule2) {
+        assertEquals(daySchedule1.getId(), daySchedule2.getId());
+        assertEquals(daySchedule1.getDate(), daySchedule2.getDate());
+        for (int i = 0; i < daySchedule1.getAppointmentList().size(); i++) {
+            checkAppointmentFields(daySchedule1.getAppointmentList().get(i), daySchedule2.getAppointmentList().get(i));
+        }
+    }
+
+    private void checkAppointmentFields(Appointment appointment1, Appointment appointment2) {
+        assertEquals(appointment1.getId(), appointment2.getId());
+        assertEquals(appointment1.getTimeStart(), appointment2.getTimeStart());
+        assertEquals(appointment1.getTimeEnd(), appointment2.getTimeEnd());
+        assertEquals(appointment1.getState(), appointment2.getState());
     }
 
 }

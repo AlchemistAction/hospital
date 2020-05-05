@@ -129,7 +129,7 @@ public class DoctorService {
         doctorDao.delete(doctor);
     }
 
-    public AddPatientToCommissionDtoResponse addPatientToCommission(
+    public List<Doctor> addPatientToCommission(
             AddPatientToCommissionDtoRequest dtoRequest, int id) throws HospitalException {
 
         Set<Integer> doctorIds = new HashSet<>(Arrays.asList(dtoRequest.getDoctorIds()));
@@ -151,14 +151,19 @@ public class DoctorService {
             for (Ticket ticket : ticketList) {
                 if (!(ticket.getAppointment() == null)) {
 
-                    if (ticket.getAppointment().getTimeStart().isAfter(startOfCommission) &&
-                            ticket.getAppointment().getTimeEnd().isBefore(endOfCommission)) {
-                        throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
+
+                    if (ticket.getAppointment().getDaySchedule().getDate().equals(dateOfCommission)) {
+                        if (ticket.getAppointment().getTimeEnd().isAfter(startOfCommission) &&
+                                ticket.getAppointment().getTimeStart().isBefore(endOfCommission)) {
+                            throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
+                        }
                     }
                 } else {
-                    if (ticket.getCommission().getAppointmentList().get(0).getTimeStart().isAfter(startOfCommission) &&
-                            ticket.getCommission().getAppointmentList().get(0).getTimeEnd().isBefore(endOfCommission)) {
-                        throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
+                    if (ticket.getCommission().getAppointmentList().get(0).getDaySchedule().getDate().equals(dateOfCommission)) {
+                        if (ticket.getCommission().getAppointmentList().get(0).getTimeEnd().isAfter(startOfCommission) &&
+                                ticket.getCommission().getAppointmentList().get(0).getTimeStart().isBefore(endOfCommission)) {
+                            throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
+                        }
                     }
                 }
             }
@@ -184,7 +189,7 @@ public class DoctorService {
             for (DaySchedule daySchedule : doctor.getSchedule()) {
                 if (daySchedule.getDate().equals(dateOfCommission)) {
                     for (Appointment appointment : daySchedule.getAppointmentList()) {
-                        if (appointment.getTimeEnd().isAfter(startOfCommission) ||
+                        if (appointment.getTimeEnd().isAfter(startOfCommission) &&
                                 appointment.getTimeStart().isBefore(endOfCommission)) {
                             if (!appointment.getState().equals(AppointmentState.FREE)) {
                                 throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
@@ -206,8 +211,8 @@ public class DoctorService {
                 appForCommission.setDaySchedule(daySchedule.get());
 
                 List<Appointment> appointmentList = daySchedule.get().getAppointmentList().stream().
-                        filter(a -> a.getTimeEnd().isAfter(startOfCommission) ||
-                                a.getTimeStart().isBefore(endOfCommission)).collect(Collectors.toList());
+                        filter(a -> (a.getTimeEnd().isAfter(startOfCommission) &&
+                                a.getTimeStart().isBefore(endOfCommission))).collect(Collectors.toList());
 
                 for (Appointment appointment : appointmentList) {
 
@@ -219,17 +224,7 @@ public class DoctorService {
 
                         break;
 
-                    } else if (appointment.getTimeStart().isBefore(endOfCommission)) {
-
-                        startOfNewAppointment = appointment.getTimeEnd();
-                        endOfOfNewAppointment = endOfCommission;
-
-                        newAppointment = new Appointment(startOfNewAppointment, endOfOfNewAppointment,
-                                AppointmentState.FREE, daySchedule.get());
-
-                        Appointment newAppFromDb = doctorDao.insertAppointment(newAppointment);
-                        daySchedule.get().getAppointmentList().add(newAppFromDb);
-                    } else {
+                    } else if (appointment.getTimeStart().isBefore(startOfCommission)) {
 
                         startOfNewAppointment = appointment.getTimeStart();
                         endOfOfNewAppointment = startOfCommission;
@@ -237,15 +232,26 @@ public class DoctorService {
                         newAppointment = new Appointment(startOfNewAppointment, endOfOfNewAppointment,
                                 AppointmentState.FREE, daySchedule.get());
 
-                        Appointment newAppFromDb = doctorDao.insertAppointment(newAppointment);
-                        daySchedule.get().getAppointmentList().add(newAppFromDb);
+                        doctorDao.insertAppointment(newAppointment);
+                        daySchedule.get().getAppointmentList().add(newAppointment);
+                    } else {
+
+                        startOfNewAppointment = endOfCommission;
+                        endOfOfNewAppointment = appointment.getTimeEnd();
+
+                        newAppointment = new Appointment(startOfNewAppointment, endOfOfNewAppointment,
+                                AppointmentState.FREE, daySchedule.get());
+
+                        doctorDao.insertAppointment(newAppointment);
+
+                        daySchedule.get().getAppointmentList().add(newAppointment);
                     }
                 }
-                Appointment newAppForCommissionFromDb = doctorDao.insertAppointment(appForCommission);
+                doctorDao.insertAppointment(appForCommission);
 
-                daySchedule.get().getAppointmentList().add(newAppForCommissionFromDb);
+                daySchedule.get().getAppointmentList().add(appForCommission);
 
-                appointmentListFromDb.add(newAppForCommissionFromDb);
+                appointmentListFromDb.add(appForCommission);
             } else {
                 throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
             }
@@ -261,17 +267,16 @@ public class DoctorService {
                 dateOfCommission.toString().replace("-", "") +
                 startOfCommission.toString().replace(":", "");
 
-        String roomForCommission = doctorList.get(0).getRoom();
 
-        Commission commission = new Commission(appointmentListFromDb, roomForCommission, new Ticket(ticketName, patient));
+        Commission commission = new Commission(appointmentListFromDb, dtoRequest.getRoom(), new Ticket(ticketName, patient));
 
         doctorDao.insertCommission(commission);
 
         AddPatientToCommissionDtoResponse dtoResponse = new AddPatientToCommissionDtoResponse(ticketName,
-                patient.getId(), dtoRequest.getDoctorIds(), roomForCommission, dtoRequest.getDate(),
+                patient.getId(), dtoRequest.getDoctorIds(), dtoRequest.getRoom(), dtoRequest.getDate(),
                 dtoRequest.getDate(), dtoRequest.getDuration());
 
-        return dtoResponse;
+        return doctorList;
     }
 
     private List<DaySchedule> createSchedule(WeekSchedule weekSchedule, DayScheduleForDto[] weekDaysSchedule,
