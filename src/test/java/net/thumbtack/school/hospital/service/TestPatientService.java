@@ -6,7 +6,7 @@ import net.thumbtack.school.hospital.dto.request.RegisterPatientDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdatePatientDtoRequest;
 import net.thumbtack.school.hospital.dto.response.AddPatientToAppointmentDtoResponse;
 import net.thumbtack.school.hospital.dto.response.GetAllTicketsDtoResponse;
-import net.thumbtack.school.hospital.dto.response.RegisterPatientDtoResponse;
+import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
 import net.thumbtack.school.hospital.model.*;
 import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
@@ -50,13 +50,13 @@ public class TestPatientService {
 
         when(patientDao.insert(any())).thenReturn(patient);
 
-        RegisterPatientDtoResponse registerPatientDtoResponse = patientService.registerPatient(registerPatientDtoRequest);
+        ReturnPatientDtoResponse returnPatientDtoResponse = patientService.registerPatient(registerPatientDtoRequest);
 
-        assertEquals(2, registerPatientDtoResponse.getId());
+        assertEquals(2, returnPatientDtoResponse.getId());
     }
 
     @Test
-    public void testUpdatePatient() {
+    public void testUpdatePatient() throws HospitalException {
         UpdatePatientDtoRequest updatePatientDtoRequest = new UpdatePatientDtoRequest("name",
                 "surname", "patronymic", "email@mail.ru",
                 "newAddress", "8-900-000-00-00", "oldPassword",

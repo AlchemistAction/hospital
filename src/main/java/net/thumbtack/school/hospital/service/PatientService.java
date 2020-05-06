@@ -4,9 +4,7 @@ import net.thumbtack.school.hospital.dto.internal.DoctorInfo;
 import net.thumbtack.school.hospital.dto.request.AddPatientToAppointmentDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterPatientDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdatePatientDtoRequest;
-import net.thumbtack.school.hospital.dto.response.AddPatientToAppointmentDtoResponse;
-import net.thumbtack.school.hospital.dto.response.GetAllTicketsDtoResponse;
-import net.thumbtack.school.hospital.dto.response.RegisterPatientDtoResponse;
+import net.thumbtack.school.hospital.dto.response.*;
 import net.thumbtack.school.hospital.model.*;
 import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
@@ -35,25 +33,40 @@ public class PatientService {
         this.doctorDao = doctorDao;
     }
 
-    public RegisterPatientDtoResponse registerPatient(RegisterPatientDtoRequest registerPatientDtoRequest) {
+    public ReturnPatientDtoResponse registerPatient(RegisterPatientDtoRequest registerPatientDtoRequest) {
         Patient patient = modelMapper.map(registerPatientDtoRequest, Patient.class);
         patient.setPhone(patient.getPhone().replace("-", ""));
         patient.setUserType(UserType.PATIENT);
         patient = patientDao.insert(patient);
 
-        return modelMapper.map(patient, RegisterPatientDtoResponse.class);
+        return modelMapper.map(patient, ReturnPatientDtoResponse.class);
     }
 
-    public RegisterPatientDtoResponse updatePatient(UpdatePatientDtoRequest updatePatientDtoRequest, int id) {
+    public ReturnPatientDtoResponse getPatient(int patientId) {
+        Patient patient = patientDao.getById(patientId);
+
+        return modelMapper.map(patient, ReturnPatientDtoResponse.class);
+    }
+
+    public ReturnPatientDtoResponse updatePatient(UpdatePatientDtoRequest updatePatientDtoRequest, int id) throws HospitalException {
 
         Patient patient = patientDao.getById(id);
 
-        patient.setPassword(updatePatientDtoRequest.getNewPassword());
+        if (!patient.getPassword().equals(updatePatientDtoRequest.getOldPassword())) {
+            throw new HospitalException(HospitalErrorCode.WRONG_PASSWORD);
+        }
+
+        patient.setFirstName(updatePatientDtoRequest.getFirstName());
+        patient.setLastName(updatePatientDtoRequest.getLastName());
+        patient.setPassword(updatePatientDtoRequest.getPatronymic());
+        patient.setEmail(updatePatientDtoRequest.getEmail());
         patient.setAddress(updatePatientDtoRequest.getAddress());
+        patient.setPhone(updatePatientDtoRequest.getPhone());
+        patient.setPassword(updatePatientDtoRequest.getNewPassword());
 
         patient = patientDao.update(patient);
 
-        return modelMapper.map(patient, RegisterPatientDtoResponse.class);
+        return modelMapper.map(patient, ReturnPatientDtoResponse.class);
     }
 
     public AddPatientToAppointmentDtoResponse addPatientToAppointment(
@@ -192,4 +205,6 @@ public class PatientService {
 
         return responseList;
     }
+
+
 }

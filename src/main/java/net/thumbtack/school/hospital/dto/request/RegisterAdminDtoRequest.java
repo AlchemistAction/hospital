@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 
 public class RegisterAdminDtoRequest {
 
+
     @Name
     private String firstName;
     @Name
@@ -28,6 +29,7 @@ public class RegisterAdminDtoRequest {
         this.login = login;
         this.password = password;
     }
+
     public RegisterAdminDtoRequest() {
     }
 

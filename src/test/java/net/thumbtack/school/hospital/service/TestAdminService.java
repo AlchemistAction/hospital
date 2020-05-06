@@ -5,6 +5,7 @@ import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.UserType;
+import net.thumbtack.school.hospital.model.exception.HospitalException;
 import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
 import net.thumbtack.school.hospital.mybatis.daoimpl.AdminDaoImpl;
 import org.junit.Before;
@@ -44,7 +45,7 @@ public class TestAdminService {
     }
 
     @Test
-    public void testUpdateAdmin() {
+    public void testUpdateAdmin() throws HospitalException {
         UpdateAdminDtoRequest updateAdminDtoRequest = new UpdateAdminDtoRequest("name",
                 "newLastName", "patronymic", "regularAdmin", "oldPassword",
                 "newPassword");

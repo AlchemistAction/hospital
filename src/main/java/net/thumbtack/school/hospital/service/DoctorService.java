@@ -2,7 +2,7 @@ package net.thumbtack.school.hospital.service;
 
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;
 import net.thumbtack.school.hospital.dto.request.AddPatientToCommissionDtoRequest;
-import net.thumbtack.school.hospital.dto.request.ChangeScheduleDtoRequest;
+import net.thumbtack.school.hospital.dto.request.UpdateScheduleDtoRequest;
 import net.thumbtack.school.hospital.dto.request.DeleteDoctorDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
 import net.thumbtack.school.hospital.dto.response.AddPatientToCommissionDtoResponse;
@@ -57,17 +57,17 @@ public class DoctorService {
         return result;
     }
 
-    public ReturnDoctorDtoResponse updateSchedule(ChangeScheduleDtoRequest changeScheduleDtoRequest, int id)
+    public ReturnDoctorDtoResponse updateSchedule(UpdateScheduleDtoRequest updateScheduleDtoRequest, int id)
             throws HospitalException {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-        LocalDate startDate = LocalDate.parse(changeScheduleDtoRequest.getDateStart(), formatter);
-        LocalDate endDate = LocalDate.parse(changeScheduleDtoRequest.getDateEnd(), formatter);
+        LocalDate startDate = LocalDate.parse(updateScheduleDtoRequest.getDateStart(), formatter);
+        LocalDate endDate = LocalDate.parse(updateScheduleDtoRequest.getDateEnd(), formatter);
 
-        List<DaySchedule> newSchedule = createSchedule(changeScheduleDtoRequest.getWeekSchedule(),
-                changeScheduleDtoRequest.getWeekDaysSchedule(), changeScheduleDtoRequest.getDateStart(),
-                changeScheduleDtoRequest.getDateEnd(), changeScheduleDtoRequest.getDuration());
+        List<DaySchedule> newSchedule = createSchedule(updateScheduleDtoRequest.getWeekSchedule(),
+                updateScheduleDtoRequest.getWeekDaysSchedule(), updateScheduleDtoRequest.getDateStart(),
+                updateScheduleDtoRequest.getDateEnd(), updateScheduleDtoRequest.getDuration());
 
         Doctor doctor = doctorDao.getById(id);
 
@@ -126,6 +126,30 @@ public class DoctorService {
         result.setSchedule(scheduleForResponse);
 
         return result;
+    }
+
+    public ReturnDoctorDtoResponse getDoctor(int doctorId) {
+
+        Doctor doctor = doctorDao.getById(doctorId);
+
+        ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+        result.setSchedule(new HashMap<>());
+        return result;
+    }
+
+    public List<ReturnDoctorDtoResponse> getAllDoctors(String speciality) {
+
+        List<Doctor> doctorList = doctorDao.getAll();
+
+        List<ReturnDoctorDtoResponse> resultList = new ArrayList<>();
+
+        for (Doctor doctor : doctorList) {
+            ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+            result.setSchedule(new HashMap<>());
+            resultList.add(result);
+        }
+
+        return resultList;
     }
 
     public void deleteDoctor(DeleteDoctorDtoRequest deleteDoctorDtoRequest, int id) {
@@ -399,4 +423,6 @@ public class DoctorService {
         }
         return fullMap;
     }
+
+
 }

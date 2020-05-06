@@ -12,6 +12,9 @@ public class DayScheduleForDto {
         this.timeEnd = timeEnd;
     }
 
+    public DayScheduleForDto() {
+    }
+
     public String getWeekDay() {
         return weekDay;
     }

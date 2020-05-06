@@ -1,5 +1,6 @@
 package net.thumbtack.school.hospital.mybatis.mappers;
 
+import net.thumbtack.school.hospital.model.LoginVerificator;
 import net.thumbtack.school.hospital.model.User;
 import org.apache.ibatis.annotations.*;
 
@@ -14,4 +15,8 @@ public interface UserMapper {
 
     @Delete("DELETE FROM user WHERE id = #{user.id}")
     void delete(@Param("user") User user);
+
+    @Select("SELECT user.id, user.userType, user.password FROM user WHERE user.login = #{login}")
+    LoginVerificator getByLogin(String login);
+
 }

@@ -12,6 +12,9 @@ public class WeekSchedule {
         this.weekDays = weekDays;
     }
 
+    public WeekSchedule() {
+    }
+
     public String getTimeStart() {
         return timeStart;
     }

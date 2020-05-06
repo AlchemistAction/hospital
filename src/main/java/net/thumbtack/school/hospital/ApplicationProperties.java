@@ -1,5 +1,6 @@
 package net.thumbtack.school.hospital;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -7,16 +8,18 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "application")
 public class ApplicationProperties {
 
-    private int max_name_length;
-    private int min_password_length;
+    @Value("${max_name_length}")
+    private int maxNameLength;
 
-    public int getMax_name_length() {
-        return max_name_length;
+    @Value("${min_password_length}")
+    private int minPasswordLength;
+
+
+    public int getMaxNameLength() {
+        return maxNameLength;
     }
 
-    public int getMin_password_length() {
-        return min_password_length;
+    public int getMinPasswordLength() {
+        return minPasswordLength;
     }
-
-
 }

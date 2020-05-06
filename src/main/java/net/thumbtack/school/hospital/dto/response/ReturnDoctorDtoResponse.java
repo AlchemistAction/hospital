@@ -3,13 +3,11 @@ package net.thumbtack.school.hospital.dto.response;
 import net.thumbtack.school.hospital.model.Patient;
 
 import java.util.Map;
+import java.util.Objects;
 
-public class ReturnDoctorDtoResponse {
+public class ReturnDoctorDtoResponse extends ReturnUserDtoResponse {
 
-    private int id;
-    private String firstName;
-    private String lastName;
-    private String patronymic;
+
     private String speciality;
     private String room;
     private Map<String, Map<String, Patient>> schedule;
@@ -19,45 +17,18 @@ public class ReturnDoctorDtoResponse {
 
     public ReturnDoctorDtoResponse(int id, String firstName, String lastName, String patronymic, String speciality,
                                    String room, Map<String, Map<String, Patient>> schedule) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.patronymic = patronymic;
+        super(id, firstName, lastName, patronymic);
         this.speciality = speciality;
         this.room = room;
         this.schedule = schedule;
     }
 
-    public int getId() {
-        return id;
-    }
+    public ReturnDoctorDtoResponse(int id, String firstName, String lastName, String patronymic, String speciality,
+                                   String room) {
+        super(id, firstName, lastName, patronymic);
+        this.speciality = speciality;
+        this.room = room;
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getPatronymic() {
-        return patronymic;
-    }
-
-    public void setPatronymic(String patronymic) {
-        this.patronymic = patronymic;
     }
 
     public String getSpeciality() {
@@ -82,5 +53,21 @@ public class ReturnDoctorDtoResponse {
 
     public void setSchedule(Map<String, Map<String, Patient>> schedule) {
         this.schedule = schedule;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReturnDoctorDtoResponse)) return false;
+        if (!super.equals(o)) return false;
+        ReturnDoctorDtoResponse that = (ReturnDoctorDtoResponse) o;
+        return Objects.equals(getSpeciality(), that.getSpeciality()) &&
+                Objects.equals(getRoom(), that.getRoom()) &&
+                Objects.equals(getSchedule(), that.getSchedule());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getSpeciality(), getRoom(), getSchedule());
     }
 }

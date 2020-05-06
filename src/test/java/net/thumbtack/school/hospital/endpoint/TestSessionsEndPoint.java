@@ -1,35 +1,36 @@
-package net.thumbtack.school.hospital.endoint;
+package net.thumbtack.school.hospital.endpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import net.thumbtack.school.hospital.dao.TestBase;
 import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
-import net.thumbtack.school.hospital.endpoint.AdminsEndPoint;
 import net.thumbtack.school.hospital.model.Admin;
+import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
+import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
+import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
 import net.thumbtack.school.hospital.mybatis.daoimpl.AdminDaoImpl;
 import net.thumbtack.school.hospital.service.AdminService;
+import net.thumbtack.school.hospital.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(controllers = AdminsEndPoint.class)
-public class TestAdminsEndPoint extends TestBase {
+@WebMvcTest(controllers = SessionsEndPoint.class)
+@ComponentScan("net.thumbtack.school.hospital")
+public class TestSessionsEndPoint {
 
     private final ModelMapper modelMapper = new ModelMapper();
 
@@ -38,25 +39,31 @@ public class TestAdminsEndPoint extends TestBase {
     @Autowired
     private ObjectMapper mapper;
     @MockBean
-    private AdminDaoImpl adminDao;
+    private UserService userService;
     @MockBean
-    private AdminService adminService;
+    private PatientDao patientDao;
+    @MockBean
+    private DoctorDao doctorDao;
+    @MockBean
+    private AdminDao adminDao;
 
     @Test
-    public void testRegisterAdmin() throws Exception {
-        RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest("name",
-                "surname", "patronymic", "regularAdmin", "adminLogin",
+    public void testLogin() throws Exception {
+        RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest("рома",
+                "ромагов", "patronymic", "regularAdmin", "adminLogin",
                 "adminPassword");
+
         Admin admin = modelMapper.map(registerAdminDtoRequest, Admin.class);
         admin.setId(13);
-        when(adminDao.insert(any())).thenReturn(admin);
-        when(adminService.registerAdmin(any())).thenReturn(modelMapper.map(admin, ReturnAdminDtoResponse.class));
-        MvcResult result = mvc.perform(post("/api/admins")
+
+        when(userService.login(any())).thenReturn(modelMapper.map(admin, ReturnAdminDtoResponse.class));
+
+        MvcResult result = mvc.perform(post("/api/sessions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(registerAdminDtoRequest)))
                 .andReturn();
+
         assertEquals(result.getResponse().getStatus(), 200);
-        verify(adminDao).insert(admin);
     }
 
 }

@@ -15,8 +15,6 @@ public class NameValidator implements ConstraintValidator<Name, String> {
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-        return (s != null && !s.matches("[0-9]+") && !Pattern.matches("[a-zA-Z]+", s)
-                && (s.length() > ap.getMax_name_length()));
+        return ((s != null) && Pattern.matches("[а-яА-Я]+", s) && (s.length() < ap.getMaxNameLength()));
     }
 }
-

@@ -1,8 +1,12 @@
 package net.thumbtack.school.hospital.dto.request;
 
+import net.thumbtack.school.hospital.validator.Name;
+
 public class RegisterPatientDtoRequest {
 
+    @Name
     private String firstName;
+    @Name
     private String lastName;
     private String patronymic;
     private String login;
@@ -21,6 +25,9 @@ public class RegisterPatientDtoRequest {
         this.email = email;
         this.address = address;
         this.phone = phone;
+    }
+
+    public RegisterPatientDtoRequest() {
     }
 
     public String getFirstName() {

@@ -3,7 +3,7 @@ package net.thumbtack.school.hospital.dto.request;
 import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;
 
-public class ChangeScheduleDtoRequest {
+public class UpdateScheduleDtoRequest {
 
     private String dateStart;
     private String dateEnd;
@@ -11,14 +11,14 @@ public class ChangeScheduleDtoRequest {
     private DayScheduleForDto[] weekDaysSchedule;
     private String duration;
 
-    public ChangeScheduleDtoRequest(String dateStart, String dateEnd, WeekSchedule weekSchedule, String duration) {
+    public UpdateScheduleDtoRequest(String dateStart, String dateEnd, WeekSchedule weekSchedule, String duration) {
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
         this.weekSchedule = weekSchedule;
         this.duration = duration;
     }
 
-    public ChangeScheduleDtoRequest(String dateStart, String dateEnd, DayScheduleForDto[] weekDaysSchedule,
+    public UpdateScheduleDtoRequest(String dateStart, String dateEnd, DayScheduleForDto[] weekDaysSchedule,
                                     String duration) {
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;

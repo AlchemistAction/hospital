@@ -1,8 +1,7 @@
 package net.thumbtack.school.hospital.service;
 
-import net.thumbtack.school.hospital.dao.TestBase;
 import net.thumbtack.school.hospital.dto.request.AddPatientToCommissionDtoRequest;
-import net.thumbtack.school.hospital.dto.request.ChangeScheduleDtoRequest;
+import net.thumbtack.school.hospital.dto.request.UpdateScheduleDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
 import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
@@ -21,7 +20,6 @@ import org.modelmapper.ModelMapper;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -119,7 +117,7 @@ public class TestDoctorService {
     @Test
     public void testInsertNewSchedule1() throws HospitalException {
 
-        ChangeScheduleDtoRequest changeScheduleDtoRequest = new ChangeScheduleDtoRequest(
+        UpdateScheduleDtoRequest updateScheduleDtoRequest = new UpdateScheduleDtoRequest(
                 "15-04-2020",
                 "18-04-2020",
                 new DayScheduleForDto[]{
@@ -151,7 +149,7 @@ public class TestDoctorService {
         when(doctorDao.insertSchedule(any(), any())).thenReturn(newSchedule);
 
         ReturnDoctorDtoResponse returnDoctorDtoResponse = doctorService.
-                updateSchedule(changeScheduleDtoRequest, doctor.getId());
+                updateSchedule(updateScheduleDtoRequest, doctor.getId());
 
         Map<String, Map<String, Patient>> resultMap = new TreeMap<>();
 
@@ -177,7 +175,7 @@ public class TestDoctorService {
     @Test
     public void testInsertNewSchedule2() throws HospitalException {
 
-        ChangeScheduleDtoRequest changeScheduleDtoRequest = new ChangeScheduleDtoRequest(
+        UpdateScheduleDtoRequest updateScheduleDtoRequest = new UpdateScheduleDtoRequest(
                 "14-04-2020",
                 "16-04-2020",
                 new DayScheduleForDto[]{
@@ -205,7 +203,7 @@ public class TestDoctorService {
         when(doctorDao.updateDaySchedule(anyInt(), any(), any())).thenReturn(newDaySchedule);
 
         ReturnDoctorDtoResponse returnDoctorDtoResponse = doctorService.
-                updateSchedule(changeScheduleDtoRequest, doctor.getId());
+                updateSchedule(updateScheduleDtoRequest, doctor.getId());
 
         Map<String, Map<String, Patient>> resultMap = new TreeMap<>();
 
@@ -223,7 +221,7 @@ public class TestDoctorService {
     @Test
     public void testInsertNewScheduleFail() {
 
-        ChangeScheduleDtoRequest changeScheduleDtoRequest = new ChangeScheduleDtoRequest(
+        UpdateScheduleDtoRequest updateScheduleDtoRequest = new UpdateScheduleDtoRequest(
                 "14-04-2020",
                 "16-04-2020",
                 new DayScheduleForDto[]{
@@ -246,7 +244,7 @@ public class TestDoctorService {
         when(doctorDao.getById(anyInt())).thenReturn(doctor);
 
         try {
-            doctorService.updateSchedule(changeScheduleDtoRequest, doctor.getId());
+            doctorService.updateSchedule(updateScheduleDtoRequest, doctor.getId());
             fail();
         } catch (HospitalException ex) {
             assertEquals(HospitalErrorCode.CAN_NOT_UPDATE_SCHEDULE, ex.getErrorCode());

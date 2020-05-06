@@ -2,10 +2,13 @@ package net.thumbtack.school.hospital.dto.request;
 
 import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;
+import net.thumbtack.school.hospital.validator.Name;
 
 public class RegisterDoctorDtoRequest {
 
+    @Name
     private String firstName;
+    @Name
     private String lastName;
     private String patronymic;
     private String speciality;
@@ -48,6 +51,9 @@ public class RegisterDoctorDtoRequest {
         this.dateEnd = dateEnd;
         this.weekDaysSchedule = weekDaysSchedule;
         this.duration = duration;
+    }
+
+    public RegisterDoctorDtoRequest() {
     }
 
     public String getFirstName() {

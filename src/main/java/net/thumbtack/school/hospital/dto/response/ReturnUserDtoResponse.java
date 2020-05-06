@@ -1,27 +1,21 @@
 package net.thumbtack.school.hospital.dto.response;
 
-public class RegisterPatientDtoResponse {
+import java.util.Objects;
 
+public abstract class ReturnUserDtoResponse {
     private int id;
     private String firstName;
     private String lastName;
     private String patronymic;
-    private String email;
-    private String address;
-    private String phone;
 
-    public RegisterPatientDtoResponse() {
-    }
-
-    public RegisterPatientDtoResponse(int id, String firstName, String lastName, String patronymic, String email,
-                                      String address, String phone) {
+    public ReturnUserDtoResponse(int id, String firstName, String lastName, String patronymic) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.patronymic = patronymic;
-        this.email = email;
-        this.address = address;
-        this.phone = phone;
+    }
+
+    public ReturnUserDtoResponse() {
     }
 
     public int getId() {
@@ -56,27 +50,19 @@ public class RegisterPatientDtoResponse {
         this.patronymic = patronymic;
     }
 
-    public String getEmail() {
-        return email;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReturnUserDtoResponse)) return false;
+        ReturnUserDtoResponse that = (ReturnUserDtoResponse) o;
+        return getId() == that.getId() &&
+                Objects.equals(getFirstName(), that.getFirstName()) &&
+                Objects.equals(getLastName(), that.getLastName()) &&
+                Objects.equals(getPatronymic(), that.getPatronymic());
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getFirstName(), getLastName(), getPatronymic());
     }
 }

@@ -5,6 +5,8 @@ import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.UserType;
+import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
+import net.thumbtack.school.hospital.model.exception.HospitalException;
 import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +34,19 @@ public class AdminService {
         return modelMapper.map(admin, ReturnAdminDtoResponse.class);
     }
 
-    public ReturnAdminDtoResponse updateAdmin(UpdateAdminDtoRequest updateAdminDtoRequest, int id) {
+    public ReturnAdminDtoResponse updateAdmin(UpdateAdminDtoRequest updateAdminDtoRequest, int id) throws HospitalException {
 
         Admin admin = adminDao.getById(id);
 
-        admin.setPassword(updateAdminDtoRequest.getNewPassword());
+        if (!admin.getPassword().equals(updateAdminDtoRequest.getOldPassword())) {
+            throw new HospitalException(HospitalErrorCode.WRONG_PASSWORD);
+        }
+
+        admin.setFirstName(updateAdminDtoRequest.getFirstName());
         admin.setLastName(updateAdminDtoRequest.getLastName());
+        admin.setPatronymic(updateAdminDtoRequest.getPatronymic());
+        admin.setPosition(updateAdminDtoRequest.getPosition());
+        admin.setPassword(updateAdminDtoRequest.getNewPassword());
 
         admin = adminDao.update(admin);
 

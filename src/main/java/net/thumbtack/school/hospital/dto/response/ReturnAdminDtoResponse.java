@@ -1,54 +1,17 @@
 package net.thumbtack.school.hospital.dto.response;
 
-public class ReturnAdminDtoResponse {
+import java.util.Objects;
 
-    private int id;
-    private String firstName;
-    private String lastName;
-    private String patronymic;
+public class ReturnAdminDtoResponse extends ReturnUserDtoResponse {
+
     private String position;
 
     public ReturnAdminDtoResponse() {
     }
 
     public ReturnAdminDtoResponse(int id, String firstName, String lastName, String patronymic, String position) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.patronymic = patronymic;
+        super(id, firstName, lastName, patronymic);
         this.position = position;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getPatronymic() {
-        return patronymic;
-    }
-
-    public void setPatronymic(String patronymic) {
-        this.patronymic = patronymic;
     }
 
     public String getPosition() {
@@ -57,5 +20,19 @@ public class ReturnAdminDtoResponse {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReturnAdminDtoResponse)) return false;
+        if (!super.equals(o)) return false;
+        ReturnAdminDtoResponse that = (ReturnAdminDtoResponse) o;
+        return Objects.equals(getPosition(), that.getPosition());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getPosition());
     }
 }
