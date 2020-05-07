@@ -239,16 +239,9 @@ public class TestPatientService {
 
         Ticket ticketForCommission = new Ticket("ticket for commission", patient);
 
-        Appointment appointment2 = doctor1.getSchedule().get(0).getAppointmentList().get(1);
-        appointment2.setDaySchedule(doctor1.getSchedule().get(0));
-        appointment2.getDaySchedule().setDoctor(doctor1);
-        Appointment appointment3 = doctor2.getSchedule().get(0).getAppointmentList().get(1);
-        appointment3.setDaySchedule(doctor2.getSchedule().get(0));
-        appointment3.getDaySchedule().setDoctor(doctor2);
-
-        List<Appointment> appointmentList = Arrays.asList(appointment2, appointment3);
-
-        Commission commission = new Commission(appointmentList, doctor1.getRoom(), ticketForCommission);
+        Commission commission = new Commission(LocalDate.of(2020, 1, 1),
+                LocalTime.parse("10:15"), LocalTime.parse("10:35"),
+                doctor1.getRoom(), Arrays.asList(doctor1, doctor2), ticketForCommission);
 
         ticketForCommission.setCommission(commission);
 
@@ -265,8 +258,7 @@ public class TestPatientService {
                 doctor2.getFirstName(), doctor2.getLastName(), doctor2.getPatronymic(), doctor2.getSpeciality());
 
         GetAllTicketsDtoResponse response2 = new GetAllTicketsDtoResponse(ticketForCommission.getName(),
-                doctor1.getRoom(), doctor1.getSchedule().get(0).getDate().toString(),
-                doctor1.getSchedule().get(0).getAppointmentList().get(1).getTimeStart().toString(),
+                doctor1.getRoom(), commission.getDate().toString(), commission.getTimeStart().toString(),
                 Arrays.asList(
                         new DoctorInfo(doctor1.getId(), doctor1.getFirstName(), doctor1.getLastName(),
                                 doctor1.getPatronymic(), doctor1.getSpeciality()),

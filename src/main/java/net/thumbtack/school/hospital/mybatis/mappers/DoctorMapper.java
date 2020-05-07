@@ -1,6 +1,8 @@
 package net.thumbtack.school.hospital.mybatis.mappers;
 
 
+import net.thumbtack.school.hospital.model.Appointment;
+import net.thumbtack.school.hospital.model.Commission;
 import net.thumbtack.school.hospital.model.DaySchedule;
 import net.thumbtack.school.hospital.model.Doctor;
 import org.apache.ibatis.annotations.*;
@@ -23,6 +25,9 @@ public interface DoctorMapper {
             @Result(property = "schedule", column = "id", javaType = List.class,
                     many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper.getByDoctor",
                             fetchType = FetchType.LAZY)),
+            @Result(property = "commissionList", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.CommissionMapper.getByDoctor",
+                            fetchType = FetchType.LAZY)),
     })
     Doctor getById(int id);
 
@@ -34,12 +39,22 @@ public interface DoctorMapper {
     Doctor getByDaySchedule(@Param("daySchedule") DaySchedule daySchedule);
 
     @Select("SELECT user.id, user.userType, firstName, lastName, patronymic, login, password,"
+            + " speciality, room FROM user JOIN doctor on user.id = doctor.id"
+            + " JOIN speciality on speciality.id = speciality_id" +
+            " JOIN room on room.id = room_id WHERE user.id in" +
+            " (select doctor_id from commission_doctor where commission_id = #{commission.id})")
+    List<Doctor> getByCommission(@Param("commission") Commission commission);
+
+    @Select("SELECT user.id, user.userType, firstName, lastName, patronymic, login, password,"
             + " speciality, room FROM user, doctor, speciality, room"
             + " WHERE user.id = doctor.id and speciality.id = speciality_id and room.id = room_id")
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "schedule", column = "id", javaType = List.class,
                     many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper.getByDoctor",
+                            fetchType = FetchType.LAZY)),
+            @Result(property = "commissionList", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.CommissionMapper.getByDoctor",
                             fetchType = FetchType.LAZY)),
     })
     List<Doctor> getAllLazy();
@@ -52,6 +67,9 @@ public interface DoctorMapper {
             @Result(property = "id", column = "id"),
             @Result(property = "schedule", column = "id", javaType = List.class,
                     many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper.getByDoctor",
+                            fetchType = FetchType.LAZY)),
+            @Result(property = "commissionList", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.CommissionMapper.getByDoctor",
                             fetchType = FetchType.LAZY)),
     })
     List<Doctor> getAllBySpeciality(@Param("speciality") String speciality);

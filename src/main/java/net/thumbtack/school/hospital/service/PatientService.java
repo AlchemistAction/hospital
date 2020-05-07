@@ -178,16 +178,15 @@ public class PatientService {
 
                     responseList.add(response);
                 } else {
-                    List<Appointment> appointmentList = ticket.getCommission().getAppointmentList();
+                    List<Doctor> doctorList = ticket.getCommission().getDoctorList();
 
                     String room = ticket.getCommission().getRoom();
-                    String date = ticket.getCommission().getAppointmentList().get(0).getDaySchedule().getDate().toString();
-                    String time = ticket.getCommission().getAppointmentList().get(0).getTimeStart().toString();
+                    String date = ticket.getCommission().getDate().toString();
+                    String time = ticket.getCommission().getTimeStart().toString();
 
                     List<DoctorInfo> list = new ArrayList<>();
 
-                    for (Appointment appointment : appointmentList) {
-                        Doctor doctor = appointment.getDaySchedule().getDoctor();
+                    for (Doctor doctor : doctorList) {
 
                         DoctorInfo doctorInfo = new DoctorInfo(doctor.getId(), doctor.getFirstName(),
                                 doctor.getLastName(), doctor.getPatronymic(), doctor.getSpeciality());

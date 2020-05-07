@@ -7,6 +7,7 @@ public class Doctor extends User {
     private String speciality;
     private String room;
     private List<DaySchedule> schedule;
+    private List<Commission> commissionList;
 
     public Doctor() {
     }
@@ -20,8 +21,19 @@ public class Doctor extends User {
     }
 
     public Doctor(int id, UserType userType, String firstName, String lastName, String patronymic, String login,
+                  String password, String speciality, String room,
+                  List<DaySchedule> schedule, List<Commission> commissionList) {
+        super(id, userType, firstName, lastName, patronymic, login, password);
+        this.speciality = speciality;
+        this.room = room;
+        this.schedule = schedule;
+        this.commissionList = commissionList;
+    }
+
+    public Doctor(int id, UserType userType, String firstName, String lastName, String patronymic, String login,
                   String password, String speciality, String room) {
-        this(id, userType, firstName, lastName, patronymic, login, password, speciality, room, new ArrayList<>());
+        this(id, userType, firstName, lastName, patronymic, login, password,
+                speciality, room, new ArrayList<>(), new ArrayList<>());
     }
 
     public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login,
@@ -30,9 +42,16 @@ public class Doctor extends User {
     }
 
     public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login,
+                  String password, String speciality, String room,
+                  List<DaySchedule> schedule, List<Commission> commissionList) {
+        this(0, userType, firstName, lastName, patronymic, login, password,
+                speciality, room, schedule, commissionList);
+    }
+
+    public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login,
                   String password, String speciality, String room) {
         this(0, userType, firstName, lastName, patronymic, login, password, speciality, room,
-                new ArrayList<>());
+                new ArrayList<>(), new ArrayList<>());
     }
 
     public String getSpeciality() {
@@ -59,6 +78,14 @@ public class Doctor extends User {
         this.schedule = schedule;
     }
 
+    public List<Commission> getCommissionList() {
+        return commissionList;
+    }
+
+    public void setCommissionList(List<Commission> commissionList) {
+        this.commissionList = commissionList;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -67,11 +94,12 @@ public class Doctor extends User {
         Doctor doctor = (Doctor) o;
         return Objects.equals(getSpeciality(), doctor.getSpeciality()) &&
                 Objects.equals(getRoom(), doctor.getRoom()) &&
-                Objects.equals(getSchedule(), doctor.getSchedule());
+                Objects.equals(getSchedule(), doctor.getSchedule()) &&
+                Objects.equals(getCommissionList(), doctor.getCommissionList());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getSpeciality(), getRoom(), getSchedule());
+        return Objects.hash(super.hashCode(), getSpeciality(), getRoom(), getSchedule(), getCommissionList());
     }
 }

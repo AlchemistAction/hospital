@@ -238,55 +238,82 @@ public class TestDoctorOperations extends TestBase {
     }
 
     @Test
-    public void testDeleteAppointment() {
+    public void testDeleteAllSchedulesSinceDate() {
         try {
-            List<DaySchedule> schedule = Arrays.asList(
+            Patient patient = insertPatient(UserType.PATIENT, "name1", "surname1",
+                    "patronymic1", "patientLogin", "patientPass", "email@mail.ru",
+                    "address", "8-900-000-00-00");
+
+            List<DaySchedule> schedule1 = new LinkedList<>(Arrays.asList(
                     new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
                             new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
                             new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE)))),
-                    new DaySchedule(LocalDate.of(2020, 2, 2), new LinkedList<>(Arrays.asList(
-                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
-                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE)))));
-
-            Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
-                    "patronymic", "doctorLogin", "doctorPass", "хирург",
-                    "100", schedule);
-
-            doctorDao.deleteAppointment(doctor.getSchedule().get(1).getAppointmentList().get(0));
-
-            doctor.getSchedule().get(1).getAppointmentList().remove(0);
-
-            Doctor doctorFromDB = doctorDao.getById(doctor.getId());
-            checkDoctorFields(doctor, doctorFromDB);
-        } catch (RuntimeException e) {
-            fail();
-        }
-    }
-
-    @Test
-    public void testInsertAppointment() {
-        try {
-            List<DaySchedule> schedule = Arrays.asList(
-                    new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 2), new LinkedList<>(Arrays.asList(
                             new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
                             new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE)))),
-                    new DaySchedule(LocalDate.of(2020, 2, 2), new LinkedList<>(Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 3), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE)))),
+                    new DaySchedule(LocalDate.of(2020, 1, 4), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE)))),
+                    new DaySchedule(LocalDate.of(2020, 2, 5), new LinkedList<>(Arrays.asList(
                             new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
-                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE)))));
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))))));
 
-            Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
-                    "patronymic", "doctorLogin", "doctorPass", "хирург",
-                    "100", schedule);
+            Doctor doctor1 = insertDoctor(UserType.DOCTOR, "name1", "surname1",
+                    "patronymic1", "doctorLogin1", "doctorPass1", "хирург",
+                    "100", schedule1);
 
-            Appointment neeApp = new Appointment(LocalTime.parse("11:40"), LocalTime.parse("12:00"),
-                    AppointmentState.FREE, doctor.getSchedule().get(1));
+            List<DaySchedule> schedule2 = new LinkedList<>(Collections.singletonList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1),
+                            new LinkedList<>(Collections.singletonList(
+                                    new Appointment(
+                                            LocalTime.parse("10:00"), LocalTime.parse("10:19"),
+                                            AppointmentState.FREE))))));
 
-            Appointment neeAppFromDb = doctorDao.insertAppointment(neeApp);
+            Doctor doctor2 = insertDoctor(UserType.DOCTOR, "name", "surname",
+                    "patronymic", "doctorLogin2", "doctorPass", "хирург",
+                    "200", schedule2);
 
-            doctor.getSchedule().get(1).getAppointmentList().add(neeAppFromDb);
+            Commission commission1 = new Commission(LocalDate.of(2020, 1, 5),
+                    LocalTime.parse("10:10"), LocalTime.parse("10:20"), doctor1.getRoom(),
+                    Arrays.asList(doctor1, doctor2), new Ticket("ticketName1", patient));
 
-            Doctor doctorFromDB = doctorDao.getById(doctor.getId());
-            checkDoctorFields(doctor, doctorFromDB);
+            doctorDao.insertCommission(commission1);
+
+            Commission commission2 = new Commission(LocalDate.of(2020, 1, 3),
+                    LocalTime.parse("10:10"), LocalTime.parse("10:20"), doctor1.getRoom(),
+                    Arrays.asList(doctor1, doctor2), new Ticket("ticketName2", patient));
+
+            doctorDao.insertCommission(commission2);
+
+            List<DaySchedule> schedule3 = new LinkedList<>(Collections.singletonList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1),
+                            new LinkedList<>(Collections.singletonList(
+                                    new Appointment(
+                                            LocalTime.parse("10:00"), LocalTime.parse("10:19"),
+                                            AppointmentState.FREE))))));
+
+            Doctor doctor3 = insertDoctor(UserType.DOCTOR, "name", "surname",
+                    "patronymic", "doctorLogin3", "doctorPass", "хирург",
+                    "300", schedule3);
+
+            Commission commission3 = new Commission(LocalDate.of(2020, 1, 5),
+                    LocalTime.parse("10:10"), LocalTime.parse("10:20"), doctor1.getRoom(),
+                    Arrays.asList(doctor2, doctor3), new Ticket("ticketName3", patient));
+
+            doctorDao.insertCommission(commission3);
+
+            doctorDao.deleteScheduleSinceDate(doctor1.getId(), LocalDate.of(2020, 1, 4));
+            schedule1.remove(3);
+            schedule1.remove(3);
+            doctor1.setSchedule(schedule1);
+            doctor1.setCommissionList(new ArrayList<>());
+            doctor1.getCommissionList().add(commission2);
+
+            Doctor doctorFromDB = doctorDao.getById(doctor1.getId());
+            checkDoctorFields(doctor1, doctorFromDB);
         } catch (RuntimeException e) {
             fail();
         }

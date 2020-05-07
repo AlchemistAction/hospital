@@ -6,6 +6,7 @@ import net.thumbtack.school.hospital.model.Doctor;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.mapping.FetchType;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface DayScheduleMapper {
@@ -48,4 +49,6 @@ public interface DayScheduleMapper {
     @Delete("DELETE FROM day_schedule WHERE id = #{daySchedule.id}")
     void delete(@Param("daySchedule") DaySchedule daySchedule);
 
+    @Delete("DELETE FROM day_schedule WHERE date >= #{lastDateOfWork}")
+    void deleteAllSinceDate(LocalDate lastDateOfWork);
 }

@@ -84,6 +84,9 @@ FOREIGN KEY (day_schedule_id) REFERENCES day_schedule (id) ON DELETE CASCADE
  
  CREATE TABLE commission (
 id INT(11) NOT NULL AUTO_INCREMENT,
+`date` datetime NOT NULL,
+timeStart time NOT NULL,
+timeEnd time NOT NULL,
 room_id INT(11) NULL,
 PRIMARY KEY (id)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -99,14 +102,14 @@ FOREIGN KEY (commission_id) REFERENCES commission (id) ON DELETE CASCADE,
 FOREIGN KEY (appointment_id) REFERENCES appointment (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
-CREATE TABLE commission_appointment (
+CREATE TABLE commission_doctor (
 id INT(11) NOT NULL AUTO_INCREMENT,
 commission_id INT(11) NULL,
-appointment_id INT(11) NULL,
+doctor_id INT(11) NULL,
 PRIMARY KEY (id),
-UNIQUE KEY commission_appointment (commission_id, appointment_id),
+UNIQUE KEY commission_doctor (commission_id, doctor_id),
 FOREIGN KEY (commission_id) REFERENCES commission (id) ON DELETE CASCADE,
-FOREIGN KEY (appointment_id) REFERENCES appointment (id) ON DELETE CASCADE
+FOREIGN KEY (doctor_id) REFERENCES doctor (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE patient (
@@ -124,3 +127,5 @@ INSERT INTO user
  insert into admin
  VALUES(LAST_INSERT_ID(),"superAdmin");
 commit;
+
+select*from day_schedule;

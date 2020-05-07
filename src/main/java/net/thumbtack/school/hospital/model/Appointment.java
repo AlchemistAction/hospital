@@ -11,7 +11,6 @@ public class Appointment {
     private AppointmentState state;
     private DaySchedule daySchedule;
     private Ticket ticket;
-    private Commission commission;
 
     public Appointment() {
     }
@@ -54,17 +53,6 @@ public class Appointment {
         this(0, startOfCommission, endOfCommission, state, null, ticket);
     }
 
-    public Appointment(int id, LocalTime startOfCommission, LocalTime endOfCommission, AppointmentState state,
-                       DaySchedule daySchedule, Ticket ticket, Commission commission) {
-        this(id, startOfCommission, endOfCommission, state, daySchedule, ticket);
-        this.commission = commission;
-    }
-
-    public Appointment(LocalTime startOfCommission, LocalTime endOfCommission, AppointmentState state,
-                       DaySchedule daySchedule, Ticket ticket, Commission commission) {
-        this(0, startOfCommission, endOfCommission, state, daySchedule, ticket);
-        this.commission = commission;
-    }
 
     public int getId() {
         return id;
@@ -114,14 +102,6 @@ public class Appointment {
         this.ticket = ticket;
     }
 
-    public Commission getCommission() {
-        return commission;
-    }
-
-    public void setCommission(Commission commission) {
-        this.commission = commission;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -132,12 +112,11 @@ public class Appointment {
                 Objects.equals(getTimeEnd(), that.getTimeEnd()) &&
                 getState() == that.getState() &&
                 Objects.equals(getDaySchedule(), that.getDaySchedule()) &&
-                Objects.equals(getTicket(), that.getTicket()) &&
-                Objects.equals(getCommission(), that.getCommission());
+                Objects.equals(getTicket(), that.getTicket());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getTimeStart(), getTimeEnd(), getState(), getDaySchedule(), getTicket(), getCommission());
+        return Objects.hash(getId(), getTimeStart(), getTimeEnd(), getState(), getDaySchedule(), getTicket());
     }
 }

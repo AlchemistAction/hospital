@@ -71,6 +71,7 @@ public class TestDoctorPatientOperations extends TestBase {
             Doctor doctor1 = insertDoctor(UserType.DOCTOR, "name", "surname",
                     "patronymic", "doctorLogin", "doctorPass", "хирург",
                     "100", schedule1);
+            doctor1.setCommissionList(new ArrayList<>());
 
             List<DaySchedule> schedule2 = new LinkedList<>(Collections.singletonList(
                     new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
@@ -80,17 +81,16 @@ public class TestDoctorPatientOperations extends TestBase {
             Doctor doctor2 = insertDoctor(UserType.DOCTOR, "name2", "surname2",
                     "patronymic2", "doctorLogin2", "doctorPass2", "хирург",
                     "200", schedule2);
-
-            List<Appointment> appointmentList = Arrays.asList(doctor1.getSchedule().get(0).getAppointmentList().get(0),
-                    doctor2.getSchedule().get(0).getAppointmentList().get(0));
-
-            Commission commission = new Commission(appointmentList, doctor1.getRoom(), ticket);
-
-            Commission commissionFromDb = doctorDao.insertCommission(commission);
+            doctor2.setCommissionList(new ArrayList<>());
 
             List<Doctor> doctorList = Arrays.asList(doctor1, doctor2);
 
-            doctorList.forEach(doctor -> doctor.getSchedule().get(0).getAppointmentList().get(0).setCommission(commissionFromDb));
+            Commission commission = new Commission(LocalDate.of(2020, 1, 1),
+                    LocalTime.parse("10:10"), LocalTime.parse("10:20"), doctor1.getRoom(), doctorList, ticket);
+
+            Commission commissionFromDb = doctorDao.insertCommission(commission);
+
+            doctorList.forEach(doctor -> doctor.getCommissionList().add(commissionFromDb));
 
             List<Doctor> doctorListFromDb = doctorDao.getAll();
 
@@ -134,10 +134,9 @@ public class TestDoctorPatientOperations extends TestBase {
                     "patronymic2", "doctorLogin2", "doctorPass2", "лор",
                     "200", schedule2);
 
-            List<Appointment> appointmentList = Arrays.asList(doctor1.getSchedule().get(0).getAppointmentList().get(0),
-                    doctor2.getSchedule().get(0).getAppointmentList().get(0));
-
-            Commission commission = new Commission(appointmentList, doctor1.getRoom(), ticket1);
+            Commission commission = new Commission(LocalDate.of(2020, 1, 1),
+                    LocalTime.parse("10:10"), LocalTime.parse("10:20"), doctor1.getRoom(),
+                    Arrays.asList(doctor1, doctor2), ticket1);
 
             Commission commissionFromDb = doctorDao.insertCommission(commission);
 

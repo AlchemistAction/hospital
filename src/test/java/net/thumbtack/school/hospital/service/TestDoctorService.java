@@ -269,7 +269,7 @@ public class TestDoctorService {
 
         Doctor doctor1 = new Doctor(13, UserType.DOCTOR, "name1", "surname1",
                 "patronymic1", "doctorLogin1", "doctorPass1", "хирург",
-                "100", schedule1);
+                "100", schedule1, new ArrayList<>());
 
         List<DaySchedule> schedule2 = new LinkedList<>(Collections.singletonList(
                 new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
@@ -278,7 +278,7 @@ public class TestDoctorService {
 
         Doctor doctor2 = new Doctor(14, UserType.DOCTOR, "name2", "surname2",
                 "patronymic2", "doctorLogin2", "doctorPass2", "хирург",
-                "200", schedule2);
+                "200", schedule2, new ArrayList<>());
 
 
         Ticket ticket1 = new Ticket("ticket for app1", patient);
@@ -302,39 +302,37 @@ public class TestDoctorService {
         List<DaySchedule> scheduleForResult1 = new LinkedList<>(Collections.singletonList(
                 new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
                         new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:07"), AppointmentState.FREE),
-                        new Appointment(LocalTime.parse("10:07"), LocalTime.parse("10:15"), AppointmentState.FREE),
-                        new Appointment(LocalTime.parse("10:15"), LocalTime.parse("10:35"), AppointmentState.COMMISSION),
-                        new Appointment(LocalTime.parse("10:35"), LocalTime.parse("11:00"), AppointmentState.FREE),
+                        new Appointment(LocalTime.parse("10:07"), LocalTime.parse("10:30"), AppointmentState.COMMISSION),
+                        new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.COMMISSION),
                         new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:30"), AppointmentState.FREE),
                         new Appointment(LocalTime.parse("11:30"), LocalTime.parse("12:00"), AppointmentState.FREE),
                         new Appointment(LocalTime.parse("12:30"), LocalTime.parse("13:00"), AppointmentState.FREE))))));
 
         List<DaySchedule> scheduleForResult2 = new LinkedList<>(Collections.singletonList(
                 new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
-                        new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:15"), AppointmentState.FREE),
-                        new Appointment(LocalTime.parse("10:15"), LocalTime.parse("10:35"), AppointmentState.COMMISSION),
-                        new Appointment(LocalTime.parse("10:35"), LocalTime.parse("10:40"), AppointmentState.FREE))))));
+                        new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:20"), AppointmentState.COMMISSION),
+                        new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:40"), AppointmentState.COMMISSION))))));
 
         Doctor doctorForResult1 = new Doctor(13, UserType.DOCTOR, "name1", "surname1",
                 "patronymic1", "doctorLogin1", "doctorPass1", "хирург",
-                "100", scheduleForResult1);
+                "100", scheduleForResult1, new ArrayList<>());
 
         Doctor doctorForResult2 = new Doctor(14, UserType.DOCTOR, "name2", "surname2",
                 "patronymic2", "doctorLogin2", "doctorPass2", "хирург",
-                "200", scheduleForResult2);
+                "200", scheduleForResult2, new ArrayList<>());
 
         List<Doctor> expectedList = Arrays.asList(doctorForResult1, doctorForResult2);
 
+        Commission commission = new Commission(LocalDate.of(2020, 1, 1),
+                LocalTime.parse("10:15"), LocalTime.parse("10:35"),
+                doctor1.getRoom(), expectedList, new Ticket("CD1314202001011015", patient));
+
+        expectedList.forEach(doctor -> doctor.getCommissionList().add(commission));
 
         AddPatientToCommissionDtoRequest dtoRequest = new AddPatientToCommissionDtoRequest(patient.getId(),
                 new Integer[]{13, 14}, "100", "01-01-2020", "10:15", "00:20");
 
         List<Doctor> doctorListFromService = doctorService.addPatientToCommission(dtoRequest, doctor1.getId());
-
-        doctorListFromService.forEach(doctor -> doctor.getSchedule().
-                forEach(daySchedule -> daySchedule.getAppointmentList().
-                        sort(Comparator.comparing(Appointment::getTimeStart))));
-
 
         checkDoctorFields(expectedList.get(0), doctorListFromService.get(0));
         checkDoctorFields(expectedList.get(1), doctorListFromService.get(1));
@@ -419,6 +417,9 @@ public class TestDoctorService {
         for (int i = 0; i < doctor1.getSchedule().size(); i++) {
             checkDayScheduleFields(doctor1.getSchedule().get(i), doctor2.getSchedule().get(i));
         }
+        for (int i = 0; i < doctor1.getCommissionList().size(); i++) {
+            checkCommissionFields(doctor1.getCommissionList().get(i), doctor2.getCommissionList().get(i));
+        }
     }
 
     private void checkDayScheduleFields(DaySchedule daySchedule1, DaySchedule daySchedule2) {
@@ -435,5 +436,16 @@ public class TestDoctorService {
         assertEquals(appointment1.getTimeEnd(), appointment2.getTimeEnd());
         assertEquals(appointment1.getState(), appointment2.getState());
     }
+
+    private void checkCommissionFields(Commission commission1, Commission commission2) {
+        assertEquals(commission1.getId(), commission2.getId());
+        assertEquals(commission1.getDate(), commission2.getDate());
+        assertEquals(commission1.getTimeStart(), commission2.getTimeStart());
+        assertEquals(commission1.getTimeEnd(), commission2.getTimeEnd());
+        assertEquals(commission1.getRoom(), commission2.getRoom());
+        assertEquals(commission1.getDoctorList().size(), commission2.getDoctorList().size());
+        assertEquals(commission1.getTicket(), commission2.getTicket());
+    }
+
 
 }

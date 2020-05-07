@@ -1,7 +1,6 @@
 package net.thumbtack.school.hospital.endpoint;
 
 import net.thumbtack.school.hospital.dto.request.LoginDtoRequest;
-import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
@@ -67,8 +66,9 @@ public class SessionsEndPoint {
     }
 
     @DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public void logout(@CookieValue(value = "userId", defaultValue = "-1") int id,
-                       @CookieValue(value = "userType", defaultValue = "user") String userType, HttpServletResponse response) {
+    public void logout(
+            @CookieValue(value = "userId", defaultValue = "-1") int id,
+            @CookieValue(value = "userType", defaultValue = "user") String userType, HttpServletResponse response) {
 
         Cookie cookie1 = new Cookie("userId", String.valueOf(id));
         cookie1.setMaxAge(0);

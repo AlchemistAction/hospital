@@ -1,14 +1,11 @@
 package net.thumbtack.school.hospital.endpoint;
 
-import net.thumbtack.school.hospital.ApplicationProperties;
 import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
-import net.thumbtack.school.hospital.dto.request.UpdatePatientDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
 import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
-import net.thumbtack.school.hospital.mybatis.daoimpl.AdminDaoImpl;
 import net.thumbtack.school.hospital.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,9 +31,10 @@ public class AdminsEndPoint {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ReturnAdminDtoResponse registerAdmin(@CookieValue(value = "userId", defaultValue = "-1") int id,
-                                                @CookieValue(value = "userType", defaultValue = "user") String userType,
-                                                @Valid @RequestBody RegisterAdminDtoRequest registerAdminDtoRequest) {
+    public ReturnAdminDtoResponse registerAdmin(
+            @CookieValue(value = "userId", defaultValue = "-1") int id,
+            @CookieValue(value = "userType", defaultValue = "user") String userType,
+            @Valid @RequestBody RegisterAdminDtoRequest registerAdminDtoRequest) {
 
         if (userType.equals(String.valueOf(UserType.ADMIN))) {
             return adminService.registerAdmin(registerAdminDtoRequest);

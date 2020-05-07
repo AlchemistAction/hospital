@@ -7,8 +7,6 @@ import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
 import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
 import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
-import net.thumbtack.school.hospital.mybatis.daoimpl.AdminDaoImpl;
-import net.thumbtack.school.hospital.service.AdminService;
 import net.thumbtack.school.hospital.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

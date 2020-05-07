@@ -9,7 +9,6 @@ import net.thumbtack.school.hospital.mybatis.utils.MyBatisUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertNotEquals;
@@ -82,6 +81,11 @@ public class TestBase {
         for (int i = 0; i < doctor1.getSchedule().size(); i++) {
             checkDayScheduleFields(doctor1.getSchedule().get(i), doctor2.getSchedule().get(i));
         }
+        if (!( doctor1.getCommissionList() == null) && !( doctor1.getCommissionList() == null)) {
+            for (int i = 0; i < doctor1.getCommissionList().size(); i++) {
+                checkCommissionFields(doctor1.getCommissionList().get(i), doctor2.getCommissionList().get(i));
+            }
+        }
     }
 
     private void checkDayScheduleFields(DaySchedule daySchedule1, DaySchedule daySchedule2) {
@@ -102,15 +106,15 @@ public class TestBase {
             checkTicketFields(appointment1.getTicket(), appointment2.getTicket());
             assertNotNull(appointment2.getTicket().getAppointment());
         }
-        if (!(appointment1.getCommission() == null) && !(appointment2.getCommission() == null)) {
-            checkCommissionFields(appointment1.getCommission(), appointment2.getCommission());
-        }
     }
 
     private void checkCommissionFields(Commission commission1, Commission commission2) {
         assertEquals(commission1.getId(), commission2.getId());
-        assertEquals(commission1.getAppointmentList().size(), commission2.getAppointmentList().size());
+        assertEquals(commission1.getDate(), commission2.getDate());
+        assertEquals(commission1.getTimeStart(), commission2.getTimeStart());
+        assertEquals(commission1.getTimeEnd(), commission2.getTimeEnd());
         assertEquals(commission1.getRoom(), commission2.getRoom());
+        assertEquals(commission1.getDoctorList().size(), commission2.getDoctorList().size());
         if (!(commission1.getTicket() == null) && !(commission2.getTicket() == null)) {
             checkTicketFields(commission1.getTicket(), commission2.getTicket());
             assertNotNull(commission2.getTicket().getCommission());

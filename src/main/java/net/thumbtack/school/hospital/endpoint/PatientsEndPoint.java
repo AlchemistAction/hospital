@@ -1,12 +1,8 @@
 package net.thumbtack.school.hospital.endpoint;
 
 import net.thumbtack.school.hospital.dto.request.RegisterPatientDtoRequest;
-import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdatePatientDtoRequest;
-import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
-import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
-import net.thumbtack.school.hospital.dto.response.ReturnUserDtoResponse;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
 import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
@@ -36,8 +32,9 @@ public class PatientsEndPoint {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ReturnPatientDtoResponse registerPatient(HttpServletResponse response,
-                                                    @Valid @RequestBody RegisterPatientDtoRequest registerPatientDtoRequest) {
+    public ReturnPatientDtoResponse registerPatient(
+            HttpServletResponse response,
+            @Valid @RequestBody RegisterPatientDtoRequest registerPatientDtoRequest) {
 
         ReturnPatientDtoResponse dtoResponse = patientService.registerPatient(registerPatientDtoRequest);
 

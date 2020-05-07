@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -82,39 +83,6 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
     }
 
     @Override
-    public void deleteAppointment(Appointment appointment) {
-        LOGGER.debug("DAO delete Appointment {} ", appointment);
-        try (SqlSession sqlSession = getSession()) {
-            try {
-                getAppointmentMapper(sqlSession).deleteAppointment(appointment);
-            } catch (RuntimeException ex) {
-                LOGGER.info("Can't delete Appointment {} {}", appointment, ex);
-                sqlSession.rollback();
-                throw ex;
-            }
-            sqlSession.commit();
-        }
-    }
-
-    @Override
-    public Appointment insertAppointment(Appointment appointment) {
-        LOGGER.debug("DAO Insert Appointment {} ", appointment);
-        try (SqlSession sqlSession = getSession()) {
-            try {
-
-                getAppointmentMapper(sqlSession).insertOne(appointment);
-
-            } catch (RuntimeException ex) {
-                LOGGER.info("Can't insert Appointment {}, {}", appointment, ex);
-                sqlSession.rollback();
-                throw ex;
-            }
-            sqlSession.commit();
-        }
-        return appointment;
-    }
-
-    @Override
     public Commission insertCommission(Commission commission) {
         LOGGER.debug("DAO Insert Commission {} ", commission);
         try (SqlSession sqlSession = getSession()) {
@@ -122,7 +90,7 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
 
                 getCommissionMapper(sqlSession).insert(commission);
 
-                getCommissionAppointmentMapper(sqlSession).batchInsert(commission, commission.getAppointmentList());
+                getCommissionDoctoMapper(sqlSession).batchInsert(commission, commission.getDoctorList());
 
                 getTicketMapper(sqlSession).insertForCommission(commission, commission.getTicket(),
                         commission.getTicket().getPatient());
@@ -167,6 +135,37 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
         } catch (RuntimeException ex) {
             LOGGER.info("Can't get All Doctors Lazy {}", ex);
             throw ex;
+        }
+    }
+
+    @Override
+    public void deleteScheduleSinceDate(int id, LocalDate lastDateOfWork) {
+        LOGGER.debug("DAO delete all DaySchedules since {}", lastDateOfWork);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+                getDayScheduleMapper(sqlSession).deleteAllSinceDate(lastDateOfWork);
+                getCommissionMapper(sqlSession).deleteAllByDoctorSinceDate(id, lastDateOfWork);
+            } catch (RuntimeException ex) {
+                LOGGER.info("Can't delete all DaySchedules since {}, {}", lastDateOfWork, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
+            sqlSession.commit();
+        }
+    }
+
+    @Override
+    public void changeAppointmentState(Appointment appointment) {
+        LOGGER.debug("DAO change Appointment state {}", appointment);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+                getAppointmentMapper(sqlSession).changeState(appointment);
+            } catch (RuntimeException ex) {
+                LOGGER.info("Can't change Appointment state {}, {}", appointment, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
+            sqlSession.commit();
         }
     }
 

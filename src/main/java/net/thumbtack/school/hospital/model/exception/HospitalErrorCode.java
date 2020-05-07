@@ -4,6 +4,7 @@ public enum HospitalErrorCode {
 
     DUPLICATE_USER("User has already registered"),
     WRONG_LOGIN("Wrong login"),
+    WRONG_ID("Wrong ID"),
     WRONG_PASSWORD("Wrong password"),
     CAN_NOT_ADD_PATIENT_TO_APPOINTMENT("Can't add patient to appointment"),
     CAN_NOT_ADD_PATIENT_TO_COMMISSION("Can't add patient to commission"),

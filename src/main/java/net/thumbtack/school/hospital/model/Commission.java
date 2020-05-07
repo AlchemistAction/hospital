@@ -1,27 +1,37 @@
 package net.thumbtack.school.hospital.model;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
 public class Commission {
 
     private int id;
-    private List<Appointment> appointmentList;
+    private LocalDate date;
+    private LocalTime timeStart;
+    private LocalTime timeEnd;
     private String room;
+    private List<Doctor> doctorList;
     private Ticket ticket;
 
     public Commission() {
     }
 
-    public Commission(int id, List<Appointment> appointmentList, String room, Ticket ticket) {
+    public Commission(int id, LocalDate date, LocalTime timeStart, LocalTime timeEnd, String room,
+                      List<Doctor> doctorList, Ticket ticket) {
         this.id = id;
-        this.appointmentList = appointmentList;
+        this.date = date;
+        this.timeStart = timeStart;
+        this.timeEnd = timeEnd;
         this.room = room;
+        this.doctorList = doctorList;
         this.ticket = ticket;
     }
 
-    public Commission(List<Appointment> appointmentList, String room, Ticket ticket) {
-        this(0, appointmentList, room, ticket);
+    public Commission(LocalDate date, LocalTime timeStart, LocalTime timeEnd, String room, List<Doctor> doctorList,
+                      Ticket ticket) {
+        this(0, date, timeStart, timeEnd, room, doctorList, ticket);
     }
 
     public int getId() {
@@ -32,12 +42,12 @@ public class Commission {
         this.id = id;
     }
 
-    public List<Appointment> getAppointmentList() {
-        return appointmentList;
+    public List<Doctor> getDoctorList() {
+        return doctorList;
     }
 
-    public void setAppointmentList(List<Appointment> appointmentList) {
-        this.appointmentList = appointmentList;
+    public void setDoctorList(List<Doctor> doctorList) {
+        this.doctorList = doctorList;
     }
 
     public String getRoom() {
@@ -56,19 +66,46 @@ public class Commission {
         this.ticket = ticket;
     }
 
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public LocalTime getTimeStart() {
+        return timeStart;
+    }
+
+    public void setTimeStart(LocalTime timeStart) {
+        this.timeStart = timeStart;
+    }
+
+    public LocalTime getTimeEnd() {
+        return timeEnd;
+    }
+
+    public void setTimeEnd(LocalTime timeEnd) {
+        this.timeEnd = timeEnd;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Commission)) return false;
         Commission that = (Commission) o;
         return getId() == that.getId() &&
-                Objects.equals(getAppointmentList(), that.getAppointmentList()) &&
+                Objects.equals(getDate(), that.getDate()) &&
+                Objects.equals(getTimeStart(), that.getTimeStart()) &&
+                Objects.equals(getTimeEnd(), that.getTimeEnd()) &&
                 Objects.equals(getRoom(), that.getRoom()) &&
+                Objects.equals(getDoctorList(), that.getDoctorList()) &&
                 Objects.equals(getTicket(), that.getTicket());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getAppointmentList(), getRoom(), getTicket());
+        return Objects.hash(getId(), getDate(), getTimeStart(), getTimeEnd(), getRoom(), getDoctorList(), getTicket());
     }
 }

@@ -1,10 +1,10 @@
 package net.thumbtack.school.hospital.dto.request;
 
-public class DeleteDoctorDtoRequest {
+public class DeleteDoctorScheduleDtoRequest {
 
     private String date;
 
-    public DeleteDoctorDtoRequest(String date) {
+    public DeleteDoctorScheduleDtoRequest(String date) {
         this.date = date;
     }
 
