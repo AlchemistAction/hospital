@@ -35,6 +35,7 @@ public class PatientsEndPoint {
 
         ReturnPatientDtoResponse dtoResponse = patientService.registerPatient(registerPatientDtoRequest);
 
+        // REVU зачем это ? В ТЗ сказано, какую cookie возвращать
         Cookie cookie1 = new Cookie("userId", String.valueOf(dtoResponse.getId()));
         Cookie cookie2 = new Cookie("userType", String.valueOf(UserType.PATIENT));
         response.addCookie(cookie1);

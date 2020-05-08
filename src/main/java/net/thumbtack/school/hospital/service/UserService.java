@@ -80,6 +80,7 @@ public class UserService {
             throw new HospitalException(HospitalErrorCode.CAN_NOT_FIND_USER);
         }
 
+        // REVU уберите, мертвый код
         return null;
     }
 }

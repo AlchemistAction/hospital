@@ -169,6 +169,7 @@ public class DoctorService {
 
     public List<Doctor> addPatientToCommission(
             AddPatientToCommissionDtoRequest dtoRequest, int id) throws HospitalException {
+    	// REVU слишком длинный метод. Выделите части как private  методы
 
         Set<Integer> doctorIds = new HashSet<>(Arrays.asList(dtoRequest.getDoctorIds()));
         doctorIds.add(id);
@@ -210,7 +211,16 @@ public class DoctorService {
             doctorList.add(doctor);
         }
 
-        for (Doctor doctor : doctorList) {
+        // REVU проверка не есть корректный метод
+        // REVU проверили,и что ? А если между проверкой и doctorDao.insertCommission(commission);
+        // другой пациент займет это время ?
+        // нельзя так
+        // надо найти все Appointmente всех докторов комиссии, которые нужно захватить для комиссии
+        // и поставить им всем ScheduleType.COMISSION, если они ScheduleType.FREE
+        // и определить, сколько поставилось (mapper.update вернет это значение)
+        // если поставилось столько, сколько ставили - значит, все были FREE и можно продолжать
+        // а иначе rollback
+       for (Doctor doctor : doctorList) {
             for (DaySchedule daySchedule : doctor.getSchedule()) {
                 if (daySchedule.getDate().equals(dateOfCommission)) {
                     for (Appointment appointment : daySchedule.getAppointmentList()) {
@@ -283,7 +293,7 @@ public class DoctorService {
                     collect(Collectors.toCollection(() -> EnumSet.noneOf(DayOfWeek.class)));
 
             for (LocalDate date : dateListForAllPeriod) {
-
+            	// REVU уберите пустые строки. На экране меньше видно строк с кодом
                 if (weekDays.contains(date.getDayOfWeek())) {
 
                     List<Appointment> appointmentList = getAppointments(weekSchedule.getTimeStart(),
@@ -364,6 +374,7 @@ public class DoctorService {
 
         Map<String, Map<String, Patient>> fullMap = new TreeMap<>();
 
+        // REVU а нельзя ли было получить данные упорядоченно по дате и времени, и не упорядочивать с помощью TreeMap ?
         for (DaySchedule daySchedule : schedule) {
 
             Map<String, Patient> timeMap = new TreeMap<>();

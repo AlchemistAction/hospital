@@ -1,5 +1,6 @@
 package net.thumbtack.school.hospital.model;
 
+// REVU не нужен такой класс, не усложняйте
 public class LoginVerificator {
 
     private int id;

@@ -1,3 +1,4 @@
+// package net.thumbtack.school.hospital.daoimpl.mybatis;
 package net.thumbtack.school.hospital.mybatis.daoimpl;
 
 
