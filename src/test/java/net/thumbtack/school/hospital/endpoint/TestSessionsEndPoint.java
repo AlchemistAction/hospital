@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
-import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
-import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
-import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
 import net.thumbtack.school.hospital.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,12 +35,6 @@ public class TestSessionsEndPoint {
     private ObjectMapper mapper;
     @MockBean
     private UserService userService;
-    @MockBean
-    private PatientDao patientDao;
-    @MockBean
-    private DoctorDao doctorDao;
-    @MockBean
-    private AdminDao adminDao;
 
     @Test
     public void testLogin() throws Exception {

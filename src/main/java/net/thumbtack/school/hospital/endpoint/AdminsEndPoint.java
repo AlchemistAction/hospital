@@ -5,7 +5,6 @@ import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
-import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
 import net.thumbtack.school.hospital.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,12 +20,9 @@ public class AdminsEndPoint {
 
     private AdminService adminService;
 
-    private AdminDao adminDao;
-
     @Autowired
-    public AdminsEndPoint(AdminService adminService, AdminDao adminDao) {
+    public AdminsEndPoint(AdminService adminService) {
         this.adminService = adminService;
-        this.adminDao = adminDao;
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE,

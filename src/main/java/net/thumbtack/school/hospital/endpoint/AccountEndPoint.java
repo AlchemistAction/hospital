@@ -2,9 +2,6 @@ package net.thumbtack.school.hospital.endpoint;
 
 import net.thumbtack.school.hospital.dto.response.ReturnUserDtoResponse;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
-import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
-import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
-import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
 import net.thumbtack.school.hospital.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -16,20 +13,14 @@ import org.springframework.web.bind.annotation.*;
 public class AccountEndPoint {
 
     private UserService userService;
-    private PatientDao patientDao;
-    private DoctorDao doctorDao;
-    private AdminDao adminDao;
 
     @Autowired
-    public AccountEndPoint(UserService userService, PatientDao patientDao, DoctorDao doctorDao, AdminDao adminDao) {
+    public AccountEndPoint(UserService userService) {
         this.userService = userService;
-        this.patientDao = patientDao;
-        this.doctorDao = doctorDao;
-        this.adminDao = adminDao;
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ReturnUserDtoResponse login(
+    public ReturnUserDtoResponse getInfo(
             @CookieValue(value = "userId", defaultValue = "-1") int id,
             @CookieValue(value = "userType", defaultValue = "user") String userType) throws HospitalException {
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
-import net.thumbtack.school.hospital.mybatis.daoimpl.AdminDaoImpl;
 import net.thumbtack.school.hospital.service.AdminService;
 import net.thumbtack.school.hospital.validator.GlobalErrorHandler;
 import org.junit.jupiter.api.Test;
@@ -37,8 +36,6 @@ public class TestAdminsEndPoint {
     private MockMvc mvc;
     @Autowired
     private ObjectMapper mapper;
-    @MockBean
-    private AdminDaoImpl adminDao;
     @MockBean
     private AdminService adminService;
 

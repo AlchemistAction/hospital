@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thumbtack.school.hospital.dto.request.RegisterPatientDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
 import net.thumbtack.school.hospital.model.*;
-import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
 import net.thumbtack.school.hospital.service.PatientService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,8 +33,6 @@ public class TestPatientsEndPoint {
     private MockMvc mvc;
     @Autowired
     private ObjectMapper mapper;
-    @MockBean
-    private PatientDao patientDao;
     @MockBean
     private PatientService patientService;
 

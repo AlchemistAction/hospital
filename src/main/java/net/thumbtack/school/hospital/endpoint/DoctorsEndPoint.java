@@ -6,7 +6,6 @@ import net.thumbtack.school.hospital.dto.request.UpdateScheduleDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
-import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
 import net.thumbtack.school.hospital.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,12 +21,10 @@ import java.util.List;
 public class DoctorsEndPoint {
 
     private DoctorService doctorService;
-    private DoctorDao doctorDao;
 
     @Autowired
-    public DoctorsEndPoint(DoctorService doctorService, DoctorDao doctorDao) {
+    public DoctorsEndPoint(DoctorService doctorService) {
         this.doctorService = doctorService;
-        this.doctorDao = doctorDao;
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE,

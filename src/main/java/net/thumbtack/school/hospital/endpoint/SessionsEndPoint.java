@@ -7,9 +7,6 @@ import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnUserDtoResponse;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
-import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
-import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
-import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
 import net.thumbtack.school.hospital.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -24,16 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 public class SessionsEndPoint {
 
     private UserService userService;
-    private PatientDao patientDao;
-    private DoctorDao doctorDao;
-    private AdminDao adminDao;
 
     @Autowired
-    public SessionsEndPoint(UserService userService, PatientDao patientDao, DoctorDao doctorDao, AdminDao adminDao) {
+    public SessionsEndPoint(UserService userService) {
         this.userService = userService;
-        this.patientDao = patientDao;
-        this.doctorDao = doctorDao;
-        this.adminDao = adminDao;
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE,

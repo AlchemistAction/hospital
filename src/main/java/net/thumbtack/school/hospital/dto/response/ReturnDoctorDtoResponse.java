@@ -7,7 +7,6 @@ import java.util.Objects;
 
 public class ReturnDoctorDtoResponse extends ReturnUserDtoResponse {
 
-
     private String speciality;
     private String room;
     private Map<String, Map<String, Patient>> schedule;
