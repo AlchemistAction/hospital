@@ -1,4 +1,4 @@
-package net.thumbtack.school.hospital.mybatis.utils;
+package net.thumbtack.school.hospital.dao.mybatis.utils;
 
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;

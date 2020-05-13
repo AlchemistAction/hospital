@@ -44,16 +44,6 @@ public class Appointment {
         this(0, timeStart, timeEnd, state);
     }
 
-    public Appointment(LocalTime timeStart, LocalTime timeEnd, AppointmentState state, DaySchedule daySchedule, Ticket ticket) {
-        this(0, timeStart, timeEnd, state, daySchedule, ticket);
-
-    }
-
-    public Appointment(LocalTime startOfCommission, LocalTime endOfCommission, AppointmentState state, Ticket ticket) {
-        this(0, startOfCommission, endOfCommission, state, null, ticket);
-    }
-
-
     public int getId() {
         return id;
     }

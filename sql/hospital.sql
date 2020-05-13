@@ -93,7 +93,7 @@ PRIMARY KEY (id)
 
 CREATE TABLE ticket (
 id INT(11) NOT NULL AUTO_INCREMENT,
-name VARCHAR(50) NULL,
+number VARCHAR(50) NULL,
 patient_id INT(11) NULL,
 appointment_id INT(11) NULL,
 commission_id INT(11) NULL,
@@ -121,6 +121,15 @@ PRIMARY KEY (id),
 FOREIGN KEY (id) REFERENCES user (id) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+CREATE TABLE session (
+id INT(11) NOT NULL AUTO_INCREMENT,
+user_id INT(11) NOT NULL,
+uuid VARCHAR(50) NOT NULL,
+PRIMARY KEY (id),
+UNIQUE KEY user_session (user_id, uuid),
+FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
 begin;
 INSERT INTO user
  VALUES(NULL,'ADMIN',"Admin","admin",null,"SuperAdmin", "SuperAdminPassword");
@@ -128,4 +137,4 @@ INSERT INTO user
  VALUES(LAST_INSERT_ID(),"superAdmin");
 commit;
 
-select*from day_schedule;
+select*from session;

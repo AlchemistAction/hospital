@@ -25,11 +25,6 @@ public abstract class User {
         this.password = password;
     }
 
-    public User(UserType userType, String firstName, String lastName, String patronymic,
-                String login, String password) {
-        this(0, userType, firstName, lastName, patronymic, login, password);
-    }
-
     public int getId() {
         return id;
     }

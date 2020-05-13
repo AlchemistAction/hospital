@@ -18,10 +18,6 @@ public class ReturnAdminDtoResponse extends ReturnUserDtoResponse {
         return position;
     }
 
-    public void setPosition(String position) {
-        this.position = position;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

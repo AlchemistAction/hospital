@@ -1,7 +1,7 @@
-package net.thumbtack.school.hospital.mybatis.mappers;
+package net.thumbtack.school.hospital.dao.mybatis.mappers;
 
-import net.thumbtack.school.hospital.model.LoginVerificator;
 import net.thumbtack.school.hospital.model.User;
+import net.thumbtack.school.hospital.model.UserType;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
@@ -16,7 +16,10 @@ public interface UserMapper {
     @Delete("DELETE FROM user WHERE id = #{user.id}")
     void delete(@Param("user") User user);
 
-    @Select("SELECT user.id, user.userType, user.password FROM user WHERE user.login = #{login}")
-    LoginVerificator getByLogin(String login);
+    @Select("SELECT user.userType FROM user WHERE user.login = #{login}")
+    UserType getByLogin(String login);
+
+    @Select("SELECT user.userType FROM user WHERE user.id in (select user_id from session where uuid = #{uuid})")
+    UserType getUserTypeBySession(String uuid);
 
 }

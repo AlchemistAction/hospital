@@ -1,9 +1,11 @@
-package net.thumbtack.school.hospital.mybatis.daoimpl;
+package net.thumbtack.school.hospital.dao.mybatis.daoimpl;
 
+import net.thumbtack.school.hospital.dao.dao.PatientDao;
 import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Patient;
 import net.thumbtack.school.hospital.model.Ticket;
-import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
+import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
+import net.thumbtack.school.hospital.model.exception.HospitalException;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +47,17 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
     }
 
     @Override
+    public Patient getByLogin(String login) {
+        LOGGER.debug("DAO get Patient by login {}", login);
+        try (SqlSession sqlSession = getSession()) {
+            return getPatientMapper(sqlSession).getByLogin(login);
+        } catch (RuntimeException ex) {
+            LOGGER.info("Can't get Patient {}, {}", login, ex);
+            throw ex;
+        }
+    }
+
+    @Override
     public Patient update(Patient patient) {
         LOGGER.debug("DAO change Patient {} ", patient);
         try (SqlSession sqlSession = getSession()) {
@@ -61,11 +74,15 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
     }
 
     @Override
-    public void addPatientToAppointment(Appointment appointment, Patient patient) {
+    public void addPatientToAppointment(Appointment appointment, Patient patient) throws HospitalException {
         LOGGER.debug("DAO add Patient to Appointment {}, {}, {}", appointment, appointment.getTicket(), patient);
         try (SqlSession sqlSession = getSession()) {
             try {
-                getAppointmentMapper(sqlSession).changeState(appointment);
+                int result = getAppointmentMapper(sqlSession).changeState(appointment);
+                if (result != 1) {
+                    sqlSession.rollback();
+                    throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_APPOINTMENT);
+                }
                 getTicketMapper(sqlSession).insertForAppointment(appointment, appointment.getTicket(), patient);
             } catch (RuntimeException ex) {
                 LOGGER.info("Can't add Patient to Appointment {}, {}, {}, {}", appointment, appointment.getTicket(),

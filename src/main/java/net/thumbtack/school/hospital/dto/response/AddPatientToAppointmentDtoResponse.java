@@ -33,14 +33,6 @@ public class AddPatientToAppointmentDtoResponse {
         this.ticket = ticket;
     }
 
-    public int getDoctorId() {
-        return doctorId;
-    }
-
-    public void setDoctorId(int doctorId) {
-        this.doctorId = doctorId;
-    }
-
     public String getFirstName() {
         return firstName;
     }

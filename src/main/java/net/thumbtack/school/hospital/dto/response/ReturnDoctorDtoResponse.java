@@ -1,7 +1,8 @@
 package net.thumbtack.school.hospital.dto.response;
 
-import net.thumbtack.school.hospital.model.Patient;
+import net.thumbtack.school.hospital.dto.internal.AppointmentForDto;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -9,13 +10,13 @@ public class ReturnDoctorDtoResponse extends ReturnUserDtoResponse {
 
     private String speciality;
     private String room;
-    private Map<String, Map<String, Patient>> schedule;
+    private Map<String, List<AppointmentForDto>> schedule;
 
     public ReturnDoctorDtoResponse() {
     }
 
     public ReturnDoctorDtoResponse(int id, String firstName, String lastName, String patronymic, String speciality,
-                                   String room, Map<String, Map<String, Patient>> schedule) {
+                                   String room, Map<String, List<AppointmentForDto>> schedule) {
         super(id, firstName, lastName, patronymic);
         this.speciality = speciality;
         this.room = room;
@@ -46,11 +47,11 @@ public class ReturnDoctorDtoResponse extends ReturnUserDtoResponse {
         this.room = room;
     }
 
-    public Map<String, Map<String, Patient>> getSchedule() {
+    public Map<String, List<AppointmentForDto>> getSchedule() {
         return schedule;
     }
 
-    public void setSchedule(Map<String, Map<String, Patient>> schedule) {
+    public void setSchedule(Map<String, List<AppointmentForDto>> schedule) {
         this.schedule = schedule;
     }
 

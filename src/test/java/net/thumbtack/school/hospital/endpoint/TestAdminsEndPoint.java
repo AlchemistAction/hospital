@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
+import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.service.AdminService;
+import net.thumbtack.school.hospital.service.UserService;
+import net.thumbtack.school.hospital.validator.ErrorModel;
 import net.thumbtack.school.hospital.validator.GlobalErrorHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +25,7 @@ import javax.servlet.http.Cookie;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -38,6 +42,8 @@ public class TestAdminsEndPoint {
     private ObjectMapper mapper;
     @MockBean
     private AdminService adminService;
+    @MockBean
+    private UserService userService;
 
     @Test
     public void testRegisterAdmin() throws Exception {
@@ -48,9 +54,11 @@ public class TestAdminsEndPoint {
         Admin admin = modelMapper.map(registerAdminDtoRequest, Admin.class);
         admin.setId(13);
 
+        when(userService.getUserTypeBySession(anyString())).thenReturn(UserType.ADMIN);
         when(adminService.registerAdmin(any())).thenReturn(modelMapper.map(admin, ReturnAdminDtoResponse.class));
+
         MvcResult result = mvc.perform(post("/api/admins")
-                .contentType(MediaType.APPLICATION_JSON).cookie(new Cookie("userType", "ADMIN"))
+                .contentType(MediaType.APPLICATION_JSON).cookie(new Cookie("JAVASESSIONID", "123"))
                 .content(mapper.writeValueAsString(registerAdminDtoRequest)))
                 .andReturn();
 
@@ -60,17 +68,21 @@ public class TestAdminsEndPoint {
     @Test
     public void testRegisterAdminFail() throws Exception {
         RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest(null,
-                "romanov", "patronymic", "regularAdmin", "adminLogin",
+                "романов", "patronymic", "regularAdmin", "adminLogin",
                 "adminPassword");
 
+        when(userService.getUserTypeBySession(anyString())).thenReturn(UserType.ADMIN);
+
         MvcResult result = mvc.perform(post("/api/admins")
-                .contentType(MediaType.APPLICATION_JSON).cookie(new Cookie("userType", "ADMIN"))
+                .contentType(MediaType.APPLICATION_JSON).cookie(new Cookie("JAVASESSIONID", "123"))
                 .content(mapper.writeValueAsString(registerAdminDtoRequest)))
                 .andReturn();
         assertEquals(result.getResponse().getStatus(), 400);
         GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(),
                 GlobalErrorHandler.MyError.class);
-        assertEquals(2, error.getAllErrors().size());
+
+        ErrorModel errorModel = new ErrorModel("VALIDATION_ERROR","firstName", "First name: ''");
+        assertEquals(errorModel, error.getAllErrors().get(0));
     }
 
 

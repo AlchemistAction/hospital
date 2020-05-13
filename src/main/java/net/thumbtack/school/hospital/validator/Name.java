@@ -10,7 +10,9 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Name {
-    String message() default "Invalid name";
+    String message() default "{field}: '${validatedValue}'";
+
+    String field() default " ";
 
     Class<?>[] groups() default {};
 

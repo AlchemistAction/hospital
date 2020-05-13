@@ -1,17 +1,18 @@
 package net.thumbtack.school.hospital.service;
 
+import net.thumbtack.school.hospital.dao.dao.AdminDao;
+import net.thumbtack.school.hospital.dao.dao.DoctorDao;
+import net.thumbtack.school.hospital.dao.dao.PatientDao;
+import net.thumbtack.school.hospital.dao.dao.UserDao;
 import net.thumbtack.school.hospital.dto.request.LoginDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnUserDtoResponse;
-import net.thumbtack.school.hospital.model.*;
+import net.thumbtack.school.hospital.model.User;
+import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
-import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
-import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
-import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
-import net.thumbtack.school.hospital.mybatis.dao.UserDao;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,53 +35,71 @@ public class UserService {
         this.adminDao = adminDao;
     }
 
-    public ReturnUserDtoResponse login(LoginDtoRequest loginDtoRequest) throws HospitalException {
+    public ReturnUserDtoResponse login(LoginDtoRequest loginDtoRequest, String uuid) throws HospitalException {
 
-        LoginVerificator loginVerificator = userDao.getByLogin(loginDtoRequest.getLogin());
-        if (loginVerificator == null) {
+        UserType userType = userDao.getUserTypeByLogin(loginDtoRequest.getLogin());
+        if (userType == null) {
             throw new HospitalException(HospitalErrorCode.WRONG_LOGIN);
         }
-        if (!loginVerificator.getPassword().equals(loginDtoRequest.getPassword())) {
-            throw new HospitalException(HospitalErrorCode.WRONG_PASSWORD);
-        }
-        User user;
-
-        switch (loginVerificator.getUserType()) {
+        switch (userType) {
             case ADMIN:
-                user = adminDao.getById(loginVerificator.getId());
-                return modelMapper.map(user, ReturnAdminDtoResponse.class);
-            case DOCTOR:
-                user = doctorDao.getById(loginVerificator.getId());
-                return modelMapper.map(user, ReturnDoctorDtoResponse.class);
-            case PATIENT:
-                user = patientDao.getById(loginVerificator.getId());
-                return modelMapper.map(user, ReturnPatientDtoResponse.class);
-        }
+                User admin = adminDao.getByLogin(loginDtoRequest.getLogin());
+                checkPassword(loginDtoRequest.getPassword(), admin.getPassword());
+                setSession(admin.getId(), uuid);
 
-        return null;
+                return modelMapper.map(admin, ReturnAdminDtoResponse.class);
+            case DOCTOR:
+                User doctor = doctorDao.getByLogin(loginDtoRequest.getLogin());
+                checkPassword(loginDtoRequest.getPassword(), doctor.getPassword());
+                setSession(doctor.getId(), uuid);
+
+                return modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+            case PATIENT:
+                User patient = patientDao.getByLogin(loginDtoRequest.getLogin());
+                checkPassword(loginDtoRequest.getPassword(), patient.getPassword());
+                setSession(patient.getId(), uuid);
+
+                return modelMapper.map(patient, ReturnPatientDtoResponse.class);
+            default:
+                throw new HospitalException(HospitalErrorCode.CAN_NOT_FIND_USER);
+        }
     }
 
-    public ReturnUserDtoResponse getInfo(int id, String userType) throws HospitalException {
+    private void checkPassword(String password, String passwordFromDb) throws HospitalException {
+        if (!password.equals(passwordFromDb)) {
+            throw new HospitalException(HospitalErrorCode.WRONG_PASSWORD);
+        }
+    }
 
-        User user = null;
+    public void setSession(int id, String uuid) {
+        userDao.setSession(id, uuid);
+    }
 
-        switch (UserType.valueOf(userType)) {
+    public ReturnUserDtoResponse getInfo(int id, UserType userType) throws HospitalException {
+        switch (userType) {
             case ADMIN:
-                user = adminDao.getById(id);
-                return modelMapper.map(user, ReturnAdminDtoResponse.class);
+                User admin = adminDao.getById(id);
+                return modelMapper.map(admin, ReturnAdminDtoResponse.class);
             case DOCTOR:
-                user = doctorDao.getById(id);
-                return modelMapper.map(user, ReturnDoctorDtoResponse.class);
+                User doctor = doctorDao.getById(id);
+                return modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
             case PATIENT:
-                user = patientDao.getById(id);
-                return modelMapper.map(user, ReturnPatientDtoResponse.class);
+                User patient = patientDao.getById(id);
+                return modelMapper.map(patient, ReturnPatientDtoResponse.class);
+            default:
+                throw new HospitalException(HospitalErrorCode.CAN_NOT_FIND_USER);
         }
+    }
 
-        if (user == null) {
-            throw new HospitalException(HospitalErrorCode.CAN_NOT_FIND_USER);
-        }
+    public void logout(String uuid) {
+        userDao.endSession(uuid);
+    }
 
-        // REVU уберите, мертвый код
-        return null;
+    public UserType getUserTypeBySession(String uuid) {
+       return userDao.getUserTypeBySession(uuid);
+    }
+
+    public Integer getIdBySession(String uuid) {
+        return userDao.getIdBySession(uuid);
     }
 }

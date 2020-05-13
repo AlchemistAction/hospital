@@ -23,10 +23,6 @@ public class AddPatientToAppointmentDtoRequest {
         return doctorId;
     }
 
-    public void setDoctorId(int doctorId) {
-        this.doctorId = doctorId;
-    }
-
     public String getSpeciality() {
         return speciality;
     }

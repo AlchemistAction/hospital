@@ -1,10 +1,12 @@
-package net.thumbtack.school.hospital.mybatis.daoimpl;
+package net.thumbtack.school.hospital.dao.mybatis.daoimpl;
 
+import net.thumbtack.school.hospital.dao.dao.DoctorDao;
 import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Commission;
 import net.thumbtack.school.hospital.model.DaySchedule;
 import net.thumbtack.school.hospital.model.Doctor;
-import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
+import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
+import net.thumbtack.school.hospital.model.exception.HospitalException;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,6 +119,17 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
     }
 
     @Override
+    public Doctor getByLogin(String login) {
+        LOGGER.debug("DAO get Doctor by login {}", login);
+        try (SqlSession sqlSession = getSession()) {
+            return getDoctorMapper(sqlSession).getByLogin(login);
+        } catch (RuntimeException ex) {
+            LOGGER.info("Can't get Doctor {}, {}", login, ex);
+            throw ex;
+        }
+    }
+
+    @Override
     public List<Doctor> getAll() {
         LOGGER.debug("DAO get all Doctors lazy");
         try (SqlSession sqlSession = getSession()) {
@@ -165,6 +178,26 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
                 sqlSession.rollback();
                 throw ex;
             }
+            sqlSession.commit();
+        }
+    }
+
+    @Override
+    public void changeAllAppointmentsState(List<Appointment> appointments) throws HospitalException {
+        LOGGER.debug("DAO change all Appointments state {}", appointments);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+                int numberOfChanges = getAppointmentMapper(sqlSession).changeAllState(appointments);
+                if (appointments.size() != numberOfChanges) {
+                    sqlSession.rollback();
+                    throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
+                }
+            } catch (RuntimeException ex) {
+                LOGGER.info("Can't change all Appointments state {}, {}", appointments, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
+
             sqlSession.commit();
         }
     }

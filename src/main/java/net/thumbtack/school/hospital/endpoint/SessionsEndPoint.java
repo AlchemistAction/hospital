@@ -5,7 +5,6 @@ import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnUserDtoResponse;
-import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
 import net.thumbtack.school.hospital.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.util.UUID;
 
 
 @RestController
@@ -32,42 +32,37 @@ public class SessionsEndPoint {
     public ReturnUserDtoResponse login(@RequestBody LoginDtoRequest loginDtoRequest,
                                        HttpServletResponse response) throws HospitalException {
 
-        ReturnUserDtoResponse dtoResponse = userService.login(loginDtoRequest);
+        String uuid = UUID.randomUUID().toString();
+
+        ReturnUserDtoResponse dtoResponse = userService.login(loginDtoRequest, uuid);
 
         if (dtoResponse instanceof ReturnPatientDtoResponse) {
-            Cookie cookie1 = new Cookie("userId", String.valueOf(dtoResponse.getId()));
-            Cookie cookie2 = new Cookie("userType", String.valueOf(UserType.PATIENT));
-            response.addCookie(cookie1);
-            response.addCookie(cookie2);
+            createCookie(response, uuid);
         }
         if (dtoResponse instanceof ReturnAdminDtoResponse) {
-            Cookie cookie1 = new Cookie("userId", String.valueOf(dtoResponse.getId()));
-            Cookie cookie2 = new Cookie("userType", String.valueOf(UserType.ADMIN));
-            response.addCookie(cookie1);
-            response.addCookie(cookie2);
+            createCookie(response, uuid);
         }
         if (dtoResponse instanceof ReturnDoctorDtoResponse) {
-            Cookie cookie1 = new Cookie("userId", String.valueOf(dtoResponse.getId()));
-            Cookie cookie2 = new Cookie("userType", String.valueOf(UserType.DOCTOR));
-            response.addCookie(cookie1);
-            response.addCookie(cookie2);
+            createCookie(response, uuid);
         }
 
         return dtoResponse;
     }
 
+    private void createCookie(HttpServletResponse response, String uuid) {
+        Cookie cookie = new Cookie("JAVASESSIONID", uuid);
+        response.addCookie(cookie);
+    }
+
     @DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public void logout(
-            @CookieValue(value = "userId", defaultValue = "-1") int id,
-            @CookieValue(value = "userType", defaultValue = "user") String userType, HttpServletResponse response) {
+    public void logout(@CookieValue(value = "JAVASESSIONID", defaultValue = "-1") String JAVASESSIONID,
+                       HttpServletResponse response) {
 
-        Cookie cookie1 = new Cookie("userId", String.valueOf(id));
-        cookie1.setMaxAge(0);
-        Cookie cookie2 = new Cookie("userType", userType);
-        cookie2.setMaxAge(0);
+        Cookie cookie = new Cookie("JAVASESSIONID", null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
 
-        response.addCookie(cookie1);
-        response.addCookie(cookie2);
+        userService.logout(JAVASESSIONID);
     }
 
 }

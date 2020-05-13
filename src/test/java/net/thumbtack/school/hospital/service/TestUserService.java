@@ -1,5 +1,13 @@
 package net.thumbtack.school.hospital.service;
 
+import net.thumbtack.school.hospital.dao.dao.AdminDao;
+import net.thumbtack.school.hospital.dao.dao.DoctorDao;
+import net.thumbtack.school.hospital.dao.dao.PatientDao;
+import net.thumbtack.school.hospital.dao.dao.UserDao;
+import net.thumbtack.school.hospital.dao.mybatis.daoimpl.AdminDaoImpl;
+import net.thumbtack.school.hospital.dao.mybatis.daoimpl.DoctorDaoImpl;
+import net.thumbtack.school.hospital.dao.mybatis.daoimpl.PatientDaoImpl;
+import net.thumbtack.school.hospital.dao.mybatis.daoimpl.UserDaoImpl;
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;
 import net.thumbtack.school.hospital.dto.request.LoginDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
@@ -9,17 +17,12 @@ import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnUserDtoResponse;
-import net.thumbtack.school.hospital.model.*;
+import net.thumbtack.school.hospital.model.Admin;
+import net.thumbtack.school.hospital.model.Doctor;
+import net.thumbtack.school.hospital.model.Patient;
+import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
-import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
-import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
-import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
-import net.thumbtack.school.hospital.mybatis.dao.UserDao;
-import net.thumbtack.school.hospital.mybatis.daoimpl.AdminDaoImpl;
-import net.thumbtack.school.hospital.mybatis.daoimpl.DoctorDaoImpl;
-import net.thumbtack.school.hospital.mybatis.daoimpl.PatientDaoImpl;
-import net.thumbtack.school.hospital.mybatis.daoimpl.UserDaoImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
@@ -27,7 +30,7 @@ import org.modelmapper.ModelMapper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,12 +65,12 @@ public class TestUserService {
 
         ReturnUserDtoResponse expected = modelMapper.map(patient, ReturnPatientDtoResponse.class);
 
-        when(patientDao.getById(anyInt())).thenReturn(patient);
-        when(userDao.getByLogin(any())).thenReturn(new LoginVerificator(2, UserType.PATIENT, "password"));
+        when(patientDao.getByLogin(anyString())).thenReturn(patient);
+        when(userDao.getUserTypeByLogin(any())).thenReturn(UserType.PATIENT);
 
         LoginDtoRequest loginDtoRequest = new LoginDtoRequest("patientLogin", "password");
 
-        ReturnUserDtoResponse dtoResponse = userService.login(loginDtoRequest);
+        ReturnUserDtoResponse dtoResponse = userService.login(loginDtoRequest, "uuid");
 
         assertEquals(expected, dtoResponse);
     }
@@ -86,12 +89,12 @@ public class TestUserService {
 
         ReturnUserDtoResponse expected = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
 
-        when(doctorDao.getById(anyInt())).thenReturn(doctor);
-        when(userDao.getByLogin(any())).thenReturn(new LoginVerificator(3, UserType.DOCTOR, "doctorPassword"));
+        when(doctorDao.getByLogin(anyString())).thenReturn(doctor);
+        when(userDao.getUserTypeByLogin(any())).thenReturn(UserType.DOCTOR);
 
         LoginDtoRequest loginDtoRequest = new LoginDtoRequest("doctorLogin", "doctorPassword");
 
-        ReturnUserDtoResponse dtoResponse = userService.login(loginDtoRequest);
+        ReturnUserDtoResponse dtoResponse = userService.login(loginDtoRequest, "uuid");
 
         assertEquals(expected, dtoResponse);
     }
@@ -109,12 +112,12 @@ public class TestUserService {
 
         ReturnUserDtoResponse expected = modelMapper.map(admin, ReturnAdminDtoResponse.class);
 
-        when(adminDao.getById(anyInt())).thenReturn(admin);
-        when(userDao.getByLogin(any())).thenReturn(new LoginVerificator(13, UserType.ADMIN,"adminPassword"));
+        when(adminDao.getByLogin(anyString())).thenReturn(admin);
+        when(userDao.getUserTypeByLogin(any())).thenReturn(UserType.ADMIN);
 
         LoginDtoRequest loginDtoRequest = new LoginDtoRequest("adminLogin", "adminPassword");
 
-        ReturnUserDtoResponse dtoResponse = userService.login(loginDtoRequest);
+        ReturnUserDtoResponse dtoResponse = userService.login(loginDtoRequest, "uuid");
 
         assertEquals(expected, dtoResponse);
     }
@@ -122,11 +125,11 @@ public class TestUserService {
     @Test
     public void testLoginFail1() {
 
-        when(userDao.getByLogin(any())).thenReturn(null);
+        when(userDao.getUserTypeByLogin(any())).thenReturn(null);
 
         LoginDtoRequest loginDtoRequest = new LoginDtoRequest("adminLogin", "adminPassword");
         try {
-            userService.login(loginDtoRequest);
+            userService.login(loginDtoRequest, "uuid");
             fail();
         } catch (HospitalException ex) {
             assertEquals(HospitalErrorCode.WRONG_LOGIN, ex.getErrorCode());
@@ -136,11 +139,21 @@ public class TestUserService {
     @Test
     public void testLoginFail2() {
 
-        when(userDao.getByLogin(any())).thenReturn(new LoginVerificator(13, UserType.ADMIN, "WrongPassword"));
+        RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest("name",
+                "surname", "patronymic", "regularAdmin", "adminLogin",
+                "adminPassword");
 
-        LoginDtoRequest loginDtoRequest = new LoginDtoRequest("adminLogin", "adminPassword");
+        Admin admin = modelMapper.map(registerAdminDtoRequest, Admin.class);
+        admin.setId(13);
+        admin.setUserType(UserType.ADMIN);
+
+        when(adminDao.getByLogin(anyString())).thenReturn(admin);
+
+        when(userDao.getUserTypeByLogin(any())).thenReturn(UserType.ADMIN);
+
+        LoginDtoRequest loginDtoRequest = new LoginDtoRequest("adminLogin", "adminPasswordWrong");
         try {
-            userService.login(loginDtoRequest);
+            userService.login(loginDtoRequest, "uuid");
             fail();
         } catch (HospitalException ex) {
             assertEquals(HospitalErrorCode.WRONG_PASSWORD, ex.getErrorCode());

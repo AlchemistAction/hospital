@@ -1,9 +1,10 @@
-package net.thumbtack.school.hospital.mybatis.dao;
+package net.thumbtack.school.hospital.dao.dao;
 
 import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Commission;
 import net.thumbtack.school.hospital.model.DaySchedule;
 import net.thumbtack.school.hospital.model.Doctor;
+import net.thumbtack.school.hospital.model.exception.HospitalException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -14,6 +15,8 @@ public interface DoctorDao {
     Doctor insert(Doctor doctor);
 
     Doctor getById(int id);
+
+    Doctor getByLogin(String login);
 
     void delete(Doctor doctor);
 
@@ -32,4 +35,6 @@ public interface DoctorDao {
     void deleteScheduleSinceDate(int id, LocalDate lastDateOfWork);
 
     void changeAppointmentState(Appointment appointment);
+
+    void changeAllAppointmentsState(List<Appointment> appointments) throws HospitalException;
 }

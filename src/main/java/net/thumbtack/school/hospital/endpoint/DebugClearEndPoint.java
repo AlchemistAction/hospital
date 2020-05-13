@@ -1,11 +1,13 @@
 package net.thumbtack.school.hospital.endpoint;
 
-import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
-import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
-import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
+import net.thumbtack.school.hospital.dao.dao.AdminDao;
+import net.thumbtack.school.hospital.dao.dao.DoctorDao;
+import net.thumbtack.school.hospital.dao.dao.PatientDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController

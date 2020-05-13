@@ -5,7 +5,7 @@ import java.util.Objects;
 public class Ticket {
 
     private int id;
-    private String name;
+    private String number;
     private Patient patient;
     private Appointment appointment;
     private Commission commission;
@@ -13,34 +13,14 @@ public class Ticket {
     public Ticket() {
     }
 
-    public Ticket(int id, String name, Patient patient) {
+    public Ticket(int id, String number, Patient patient) {
         this.id = id;
-        this.name = name;
+        this.number = number;
         this.patient = patient;
     }
 
-    public Ticket(String name, Patient patient) {
-        this(0, name, patient);
-    }
-
-    public Ticket(int id, String name, Patient patient, Appointment appointment) {
-        this(id, name, patient);
-        this.appointment = appointment;
-    }
-
-    public Ticket(String name, Patient patient, Appointment appointment) {
-        this(0, name, patient);
-        this.appointment = appointment;
-    }
-
-    public Ticket(int id, String name, Patient patient, Commission commission) {
-        this(id, name, patient);
-        this.commission = commission;
-    }
-
-    public Ticket(String name, Patient patient, Commission commission) {
-        this(0, name, patient);
-        this.commission = commission;
+    public Ticket(String number, Patient patient) {
+        this(0, number, patient);
     }
 
     public int getId() {
@@ -51,12 +31,12 @@ public class Ticket {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getNumber() {
+        return number;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setNumber(String number) {
+        this.number = number;
     }
 
     public Patient getPatient() {
@@ -89,7 +69,7 @@ public class Ticket {
         if (!(o instanceof Ticket)) return false;
         Ticket ticket = (Ticket) o;
         return getId() == ticket.getId() &&
-                Objects.equals(getName(), ticket.getName()) &&
+                Objects.equals(getNumber(), ticket.getNumber()) &&
                 Objects.equals(getPatient(), ticket.getPatient()) &&
                 Objects.equals(getAppointment(), ticket.getAppointment()) &&
                 Objects.equals(getCommission(), ticket.getCommission());
@@ -97,6 +77,6 @@ public class Ticket {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getPatient(), getAppointment(), getCommission());
+        return Objects.hash(getId(), getNumber(), getPatient(), getAppointment(), getCommission());
     }
 }

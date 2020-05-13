@@ -23,16 +23,8 @@ public class AddPatientToCommissionDtoRequest {
         return patientId;
     }
 
-    public void setPatientId(int patientId) {
-        this.patientId = patientId;
-    }
-
     public Integer[] getDoctorIds() {
         return doctorIds;
-    }
-
-    public void setDoctorIds(Integer[] doctorIds) {
-        this.doctorIds = doctorIds;
     }
 
     public String getRoom() {
@@ -61,9 +53,5 @@ public class AddPatientToCommissionDtoRequest {
 
     public String getDuration() {
         return duration;
-    }
-
-    public void setDuration(String duration) {
-        this.duration = duration;
     }
 }

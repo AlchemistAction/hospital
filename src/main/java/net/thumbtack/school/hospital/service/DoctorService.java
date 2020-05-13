@@ -1,18 +1,20 @@
 package net.thumbtack.school.hospital.service;
 
+import net.thumbtack.school.hospital.dao.dao.DoctorDao;
+import net.thumbtack.school.hospital.dao.dao.PatientDao;
+import net.thumbtack.school.hospital.dto.internal.AppointmentForDto;
+import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
+import net.thumbtack.school.hospital.dto.internal.PatientInfo;
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;
 import net.thumbtack.school.hospital.dto.request.AddPatientToCommissionDtoRequest;
-import net.thumbtack.school.hospital.dto.request.UpdateScheduleDtoRequest;
 import net.thumbtack.school.hospital.dto.request.DeleteDoctorScheduleDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
+import net.thumbtack.school.hospital.dto.request.UpdateScheduleDtoRequest;
 import net.thumbtack.school.hospital.dto.response.AddPatientToCommissionDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
-import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
 import net.thumbtack.school.hospital.model.*;
 import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
-import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
-import net.thumbtack.school.hospital.mybatis.dao.PatientDao;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,15 +44,18 @@ public class DoctorService {
         List<DaySchedule> schedule = createSchedule(registerDoctorDtoRequest.getWeekSchedule(),
                 registerDoctorDtoRequest.getWeekDaysSchedule(), registerDoctorDtoRequest.getDateStart(),
                 registerDoctorDtoRequest.getDateEnd(), registerDoctorDtoRequest.getDuration());
-
         Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
         doctor.setSchedule(schedule);
         doctor.setUserType(UserType.DOCTOR);
 
         doctor = doctorDao.insert(doctor);
+        doctor.getSchedule()
+                .stream()
+                .sorted(Comparator.comparing(DaySchedule::getDate))
+                .forEach(daySchedule -> daySchedule.getAppointmentList()
+                        .sort(Comparator.comparing(Appointment::getTimeStart)));
 
-        Map<String, Map<String, Patient>> scheduleForResponse = createScheduleForResponse(doctor.getSchedule());
-
+        Map<String, List<AppointmentForDto>> scheduleForResponse = createScheduleForResponse(doctor.getSchedule());
         ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
         result.setSchedule(scheduleForResponse);
 
@@ -59,28 +64,21 @@ public class DoctorService {
 
     public ReturnDoctorDtoResponse updateSchedule(UpdateScheduleDtoRequest updateScheduleDtoRequest, int id)
             throws HospitalException {
-
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
         LocalDate startDate = LocalDate.parse(updateScheduleDtoRequest.getDateStart(), formatter);
         LocalDate endDate = LocalDate.parse(updateScheduleDtoRequest.getDateEnd(), formatter);
 
         List<DaySchedule> newSchedule = createSchedule(updateScheduleDtoRequest.getWeekSchedule(),
                 updateScheduleDtoRequest.getWeekDaysSchedule(), updateScheduleDtoRequest.getDateStart(),
                 updateScheduleDtoRequest.getDateEnd(), updateScheduleDtoRequest.getDuration());
-
         Doctor doctor = doctorDao.getById(id);
-
         List<DaySchedule> scheduleFromDb = doctor.getSchedule();
 
         boolean isOutOfReach = endDate.isBefore(scheduleFromDb.get(0).getDate()) ||
                 startDate.isAfter(scheduleFromDb.get(doctor.getSchedule().size() - 1).getDate());
-
         if (isOutOfReach) {
-
             List<DaySchedule> newScheduleFromDb = doctorDao.insertSchedule(newSchedule, doctor);
             doctor.getSchedule().addAll(newScheduleFromDb);
-
         } else {
             List<DaySchedule> datesToChange = scheduleFromDb.stream().
                     filter(dayScheduleFromDb -> dayScheduleFromDb.getDate().isAfter(startDate) &&
@@ -88,240 +86,211 @@ public class DoctorService {
 
             boolean hasFreeDate = datesToChange.stream().anyMatch(dayScheduleFromDb -> dayScheduleFromDb.getAppointmentList()
                     .stream().allMatch(appointment -> appointment.getState().equals(AppointmentState.FREE)));
-
             if (hasFreeDate) {
-
                 int doctorId = doctor.getId();
-
                 datesToChange.forEach(dayScheduleFromDb -> {
+                    boolean isFree = dayScheduleFromDb.getAppointmentList().stream().
+                            allMatch(appointment -> appointment.getState().equals(AppointmentState.FREE));
+                    if (isFree) {
+                        Optional<DaySchedule> optionalNewDaySchedule = newSchedule.stream().
+                                filter(daySchedule -> daySchedule.getDate().
+                                        equals(dayScheduleFromDb.getDate())).findFirst();
+                        if (optionalNewDaySchedule.isPresent()) {
+                            DaySchedule newDaySchedule = doctorDao.updateDaySchedule(
+                                    doctorId, dayScheduleFromDb, optionalNewDaySchedule.get());
 
-                            boolean isFree = dayScheduleFromDb.getAppointmentList().stream().
-                                    allMatch(appointment -> appointment.getState().equals(AppointmentState.FREE));
-
-                            if (isFree) {
-                                Optional<DaySchedule> optionalNewDaySchedule = newSchedule.stream().
-                                        filter(daySchedule -> daySchedule.getDate().
-                                                equals(dayScheduleFromDb.getDate())).findFirst();
-
-                                if (optionalNewDaySchedule.isPresent()) {
-
-                                    DaySchedule newDaySchedule = doctorDao.updateDaySchedule(
-                                            doctorId, dayScheduleFromDb, optionalNewDaySchedule.get());
-
-                                    scheduleFromDb.remove(dayScheduleFromDb);
-                                    scheduleFromDb.add(newDaySchedule);
-                                }
-                            }
+                            scheduleFromDb.remove(dayScheduleFromDb);
+                            scheduleFromDb.add(newDaySchedule);
                         }
-                );
+                    }
+                });
                 doctor.setSchedule(scheduleFromDb);
             } else {
                 throw new HospitalException(HospitalErrorCode.CAN_NOT_UPDATE_SCHEDULE);
             }
         }
+        Map<String, List<AppointmentForDto>> scheduleForResponse = createScheduleForResponse(doctor.getSchedule());
+        ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+        result.setSchedule(scheduleForResponse);
+        return result;
+    }
 
-        Map<String, Map<String, Patient>> scheduleForResponse = createScheduleForResponse(doctor.getSchedule());
+    public ReturnDoctorDtoResponse getDoctor(int doctorId) {
+        Doctor doctor = doctorDao.getById(doctorId);
 
+        doctor.getSchedule()
+                .stream()
+                .sorted(Comparator.comparing(DaySchedule::getDate))
+                .forEach(daySchedule -> daySchedule.getAppointmentList()
+                        .sort(Comparator.comparing(Appointment::getTimeStart)));
+
+        Map<String, List<AppointmentForDto>> scheduleForResponse = createScheduleForResponse(doctor.getSchedule());
         ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
         result.setSchedule(scheduleForResponse);
 
         return result;
     }
 
-    public ReturnDoctorDtoResponse getDoctor(int doctorId) {
-
-        Doctor doctor = doctorDao.getById(doctorId);
-
-        ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
-        result.setSchedule(new HashMap<>());
-        return result;
-    }
-
     public List<ReturnDoctorDtoResponse> getAllDoctors(String speciality) {
-
-        List<Doctor> doctorList = doctorDao.getAll();
-
+        List<Doctor> doctorList;
+        if (speciality.equals("null")) {
+            doctorList = doctorDao.getAll();
+        } else {
+            doctorList = doctorDao.getAllBySpeciality(speciality);
+        }
         List<ReturnDoctorDtoResponse> resultList = new ArrayList<>();
-
         for (Doctor doctor : doctorList) {
             ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
             result.setSchedule(new HashMap<>());
             resultList.add(result);
         }
-
         return resultList;
     }
 
     public void deleteDoctorScheduleSinceDate(DeleteDoctorScheduleDtoRequest dtoRequest, int id) throws HospitalException {
-
         Doctor doctor = doctorDao.getById(id);
-
         if (doctor == null) {
             throw new HospitalException(HospitalErrorCode.WRONG_ID);
         }
-
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
         LocalDate lastDateOfWork = LocalDate.parse(dtoRequest.getDate(), formatter);
-
         doctorDao.deleteScheduleSinceDate(id, lastDateOfWork);
     }
 
-    public List<Doctor> addPatientToCommission(
+    public AddPatientToCommissionDtoResponse addPatientToCommission(
             AddPatientToCommissionDtoRequest dtoRequest, int id) throws HospitalException {
-    	// REVU слишком длинный метод. Выделите части как private  методы
-
         Set<Integer> doctorIds = new HashSet<>(Arrays.asList(dtoRequest.getDoctorIds()));
         doctorIds.add(id);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate dateOfCommission = LocalDate.parse(dtoRequest.getDate(), formatter);
-
         LocalTime startOfCommission = LocalTime.parse(dtoRequest.getTime());
         LocalTime endOfCommission = startOfCommission.plusMinutes(LocalTime.parse(dtoRequest.getDuration()).getMinute());
 
         Patient patient = patientDao.getById(dtoRequest.getPatientId());
-
         List<Ticket> ticketList = patientDao.getAllTickets(patient);
-
-        if (!(ticketList == null)) {
-            for (Ticket ticket : ticketList) {
-                if (!(ticket.getAppointment() == null)) {
-                    if (ticket.getAppointment().getDaySchedule().getDate().equals(dateOfCommission)) {
-                        if (ticket.getAppointment().getTimeEnd().isAfter(startOfCommission) &&
-                                ticket.getAppointment().getTimeStart().isBefore(endOfCommission)) {
-                            throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
-                        }
-                    }
-                } else {
-                    if (ticket.getCommission().getDate().equals(dateOfCommission)) {
-                        if (ticket.getCommission().getTimeEnd().isAfter(startOfCommission) &&
-                                ticket.getCommission().getTimeStart().isBefore(endOfCommission)) {
-                            throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
-                        }
-                    }
-                }
-            }
-        }
+        checkPatientTickets(dateOfCommission, startOfCommission, endOfCommission, ticketList);
 
         List<Doctor> doctorList = new ArrayList<>();
-
         for (int doctorId : doctorIds) {
             Doctor doctor = doctorDao.getById(doctorId);
             doctorList.add(doctor);
         }
+        String ticketNumber = createTicketNumber(doctorIds, dateOfCommission, startOfCommission);
+        Commission commission = new Commission(dateOfCommission, startOfCommission, endOfCommission,
+                dtoRequest.getRoom(), doctorList, new Ticket(ticketNumber, patient));
 
-        // REVU проверка не есть корректный метод
-        // REVU проверили,и что ? А если между проверкой и doctorDao.insertCommission(commission);
-        // другой пациент займет это время ?
-        // нельзя так
-        // надо найти все Appointmente всех докторов комиссии, которые нужно захватить для комиссии
-        // и поставить им всем ScheduleType.COMISSION, если они ScheduleType.FREE
-        // и определить, сколько поставилось (mapper.update вернет это значение)
-        // если поставилось столько, сколько ставили - значит, все были FREE и можно продолжать
-        // а иначе rollback
-       for (Doctor doctor : doctorList) {
-            for (DaySchedule daySchedule : doctor.getSchedule()) {
-                if (daySchedule.getDate().equals(dateOfCommission)) {
-                    for (Appointment appointment : daySchedule.getAppointmentList()) {
-                        if (appointment.getTimeEnd().isAfter(startOfCommission) &&
-                                appointment.getTimeStart().isBefore(endOfCommission)) {
-                            if (!appointment.getState().equals(AppointmentState.FREE)) {
-                                throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
-                            }
-                        }
+        changeAllAppointmentsState(dateOfCommission, startOfCommission, endOfCommission, doctorList, commission);
+        doctorDao.insertCommission(commission);
+
+        return new AddPatientToCommissionDtoResponse(ticketNumber,
+                patient.getId(), dtoRequest.getDoctorIds(), dtoRequest.getRoom(), dtoRequest.getDate(),
+                dtoRequest.getDate(), dtoRequest.getDuration());
+    }
+
+    private void changeAllAppointmentsState(
+            LocalDate dateOfCommission, LocalTime startOfCommission,
+            LocalTime endOfCommission, List<Doctor> doctorList, Commission commission) throws HospitalException {
+
+        List<Appointment> appointments = new ArrayList<>();
+        for (Doctor doctor : doctorList) {
+            doctor.getCommissionList().add(commission);
+            Optional<DaySchedule> daySchedule = doctor.getSchedule()
+                    .stream()
+                    .filter(d -> d.getDate().equals(dateOfCommission))
+                    .findFirst();
+
+            if (daySchedule.isPresent()) {
+                List<Appointment> appointmentList = daySchedule.get().getAppointmentList()
+                        .stream()
+                        .filter(a -> (a.getTimeEnd().isAfter(startOfCommission) &&
+                                a.getTimeStart().isBefore(endOfCommission)))
+                        .collect(Collectors.toList());
+
+                for (Appointment appointment : appointmentList) {
+                    if (!appointment.getState().equals(AppointmentState.FREE)) {
+                        throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
                     }
+                    appointment.setState(AppointmentState.COMMISSION);
+                    appointments.add(appointment);
                 }
             }
         }
+        doctorDao.changeAllAppointmentsState(appointments);
+    }
 
+    private String createTicketNumber(Set<Integer> doctorIds, LocalDate dateOfCommission, LocalTime startOfCommission) {
         StringBuilder sb = new StringBuilder();
         for (int doctorId : doctorIds) {
             sb.append(doctorId);
         }
 
-        String ticketName = "CD" + sb.toString() +
+        return "CD" + sb.toString() +
                 dateOfCommission.toString().replace("-", "") +
                 startOfCommission.toString().replace(":", "");
+    }
 
-        Commission commission = new Commission(dateOfCommission, startOfCommission, endOfCommission,
-                dtoRequest.getRoom(), doctorList, new Ticket(ticketName, patient));
-
-        doctorDao.insertCommission(commission);
-
-        for (Doctor doctor : doctorList) {
-
-            doctor.getCommissionList().add(commission);
-
-            Optional<DaySchedule> daySchedule = doctor.getSchedule().stream().
-                    filter(d -> d.getDate().equals(dateOfCommission)).findFirst();
-
-            if (daySchedule.isPresent()) {
-
-                List<Appointment> appointmentList = daySchedule.get().getAppointmentList().stream().
-                        filter(a -> (a.getTimeEnd().isAfter(startOfCommission) &&
-                                a.getTimeStart().isBefore(endOfCommission))).collect(Collectors.toList());
-
-                for (Appointment appointment : appointmentList) {
-
-                    appointment.setState(AppointmentState.COMMISSION);
-
-                    doctorDao.changeAppointmentState(appointment);
+    private void checkPatientTickets(LocalDate dateOfCommission, LocalTime startOfCommission,
+                                     LocalTime endOfCommission, List<Ticket> ticketList) throws HospitalException {
+        if (!(ticketList == null)) {
+            for (Ticket ticket : ticketList) {
+                if (!(ticket.getAppointment() == null)) {
+                    checkAppointment(dateOfCommission, startOfCommission, endOfCommission,
+                            ticket.getAppointment().getDaySchedule().getDate(), ticket.getAppointment().getTimeEnd(),
+                            ticket.getAppointment().getTimeStart());
+                } else {
+                    checkAppointment(dateOfCommission, startOfCommission, endOfCommission,
+                            ticket.getCommission().getDate(), ticket.getCommission().getTimeEnd(),
+                            ticket.getCommission().getTimeStart());
                 }
             }
         }
+    }
 
-
-        AddPatientToCommissionDtoResponse dtoResponse = new AddPatientToCommissionDtoResponse(ticketName,
-                patient.getId(), dtoRequest.getDoctorIds(), dtoRequest.getRoom(), dtoRequest.getDate(),
-                dtoRequest.getDate(), dtoRequest.getDuration());
-
-        return doctorList;
+    private void checkAppointment(LocalDate dateOfCommission, LocalTime startOfCommission, LocalTime endOfCommission,
+                                  LocalDate date, LocalTime timeEnd, LocalTime timeStart) throws HospitalException {
+        if (date.equals(dateOfCommission)) {
+            if (timeEnd.isAfter(startOfCommission) &&
+                    timeStart.isBefore(endOfCommission)) {
+                throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
+            }
+        }
     }
 
     private List<DaySchedule> createSchedule(WeekSchedule weekSchedule, DayScheduleForDto[] weekDaysSchedule,
                                              String startDate, String endDate, String durationFromDto) {
 
         List<LocalDate> dateListForAllPeriod = getDatesForAllPeriod(startDate, endDate);
-
         List<DaySchedule> schedule = new ArrayList<>();
 
         if (weekSchedule != null) {
-
             EnumSet<DayOfWeek> weekDays = Arrays.stream(weekSchedule.getWeekDays()).
                     map(s -> DayOfWeek.valueOf(s.toUpperCase())).
                     collect(Collectors.toCollection(() -> EnumSet.noneOf(DayOfWeek.class)));
 
             for (LocalDate date : dateListForAllPeriod) {
-            	// REVU уберите пустые строки. На экране меньше видно строк с кодом
                 if (weekDays.contains(date.getDayOfWeek())) {
-
                     List<Appointment> appointmentList = getAppointments(weekSchedule.getTimeStart(),
                             weekSchedule.getTimeEnd(), durationFromDto);
-
                     DaySchedule daySchedule = new DaySchedule(date, appointmentList);
                     schedule.add(daySchedule);
                 }
             }
-            return schedule;
-
         } else {
 
             for (DayScheduleForDto dayScheduleForDto : weekDaysSchedule) {
-
                 for (LocalDate date : dateListForAllPeriod) {
-
                     if (date.getDayOfWeek().name().toLowerCase().equals(dayScheduleForDto.getWeekDay().toLowerCase())) {
+
                         List<Appointment> appointmentList = getAppointments(dayScheduleForDto.getTimeStart(),
                                 dayScheduleForDto.getTimeEnd(), durationFromDto);
-
                         DaySchedule daySchedule = new DaySchedule(date, appointmentList);
                         schedule.add(daySchedule);
                     }
                 }
             }
-            return schedule;
         }
+        return schedule;
     }
 
     private List<Appointment> getAppointments(String startOfWork, String endOfWork, String durationFromDto) {
@@ -329,15 +298,11 @@ public class DoctorService {
         LocalTime start = LocalTime.parse(startOfWork);
         LocalTime end = LocalTime.parse(endOfWork);
         LocalTime duration = LocalTime.parse(durationFromDto);
-
-
         List<Appointment> appointmentList = new ArrayList<>();
 
         for (LocalTime time = start; time.isBefore(end); time = time.plusMinutes(duration.getMinute())) {
-
             Appointment appointment = new Appointment(time, time.plusMinutes(duration.getMinute()),
                     AppointmentState.FREE);
-
             appointmentList.add(appointment);
         }
         return appointmentList;
@@ -345,15 +310,11 @@ public class DoctorService {
 
     private List<LocalDate> getDatesForAllPeriod(String startDate, String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
         LocalDate start = LocalDate.parse(startDate, formatter);
         LocalDate end = LocalDate.parse(endDate, formatter);
-
         DayOfWeek sat = DayOfWeek.of(6);
         DayOfWeek sund = DayOfWeek.of(7);
-
         EnumSet<DayOfWeek> weekEnd = EnumSet.of(sat, sund);
-
         List<LocalDate> dateList = new ArrayList<>();
 
         for (LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
@@ -364,38 +325,27 @@ public class DoctorService {
         return dateList;
     }
 
-    private Map<String, Map<String, Patient>> createScheduleForResponse(List<DaySchedule> schedule) {
-
-        schedule.sort(Comparator.comparing(DaySchedule::getDate));
-        schedule.forEach(daySchedule -> daySchedule.getAppointmentList().
-                sort(Comparator.comparing(Appointment::getTimeStart)));
+    private Map<String, List<AppointmentForDto>> createScheduleForResponse(List<DaySchedule> schedule) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
-        Map<String, Map<String, Patient>> fullMap = new TreeMap<>();
-
-        // REVU а нельзя ли было получить данные упорядоченно по дате и времени, и не упорядочивать с помощью TreeMap ?
+        Map<String, List<AppointmentForDto>> fullMap = new HashMap<>();
         for (DaySchedule daySchedule : schedule) {
 
-            Map<String, Patient> timeMap = new TreeMap<>();
-
+            List<AppointmentForDto> appList = new ArrayList<>();
             for (Appointment appointment : daySchedule.getAppointmentList()) {
 
                 if (appointment.getTicket() == null) {
-
-                    timeMap.put(appointment.getTimeStart().toString(), null);
-
+                    appList.add(new AppointmentForDto(appointment.getTimeStart().toString()));
                 } else {
-
                     Patient patient = patientDao.getById(appointment.getTicket().getId());
-                    timeMap.put(appointment.getTimeStart().toString(), patient);
+                    PatientInfo patientInfo = new PatientInfo(patient.getId(), patient.getFirstName(),
+                            patient.getLastName(), patient.getPatronymic(), patient.getEmail(), patient.getAddress(),
+                            patient.getPhone());
+                    appList.add(new AppointmentForDto(appointment.getTimeStart().toString(), patientInfo));
                 }
             }
-
-            fullMap.put(daySchedule.getDate().format(formatter), timeMap);
+            fullMap.put(daySchedule.getDate().format(formatter), appList);
         }
         return fullMap;
     }
-
-
 }

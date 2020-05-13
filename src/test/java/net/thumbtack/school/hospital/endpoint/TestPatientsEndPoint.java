@@ -3,8 +3,9 @@ package net.thumbtack.school.hospital.endpoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thumbtack.school.hospital.dto.request.RegisterPatientDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
-import net.thumbtack.school.hospital.model.*;
+import net.thumbtack.school.hospital.model.Patient;
 import net.thumbtack.school.hospital.service.PatientService;
+import net.thumbtack.school.hospital.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -35,6 +36,8 @@ public class TestPatientsEndPoint {
     private ObjectMapper mapper;
     @MockBean
     private PatientService patientService;
+    @MockBean
+    private UserService userService;
 
     @Test
     public void testRegisterDoctor() throws Exception {

@@ -6,6 +6,7 @@ import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
 import net.thumbtack.school.hospital.service.PatientService;
+import net.thumbtack.school.hospital.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,16 +16,19 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/patients")
 public class PatientsEndPoint {
 
     private PatientService patientService;
+    private UserService userService;
 
     @Autowired
-    public PatientsEndPoint(PatientService patientService) {
+    public PatientsEndPoint(PatientService patientService, UserService userService) {
         this.patientService = patientService;
+        this.userService = userService;
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE,
@@ -33,24 +37,23 @@ public class PatientsEndPoint {
             HttpServletResponse response,
             @Valid @RequestBody RegisterPatientDtoRequest registerPatientDtoRequest) {
 
+        String uuid = UUID.randomUUID().toString();
+        Cookie cookie = new Cookie("JAVASESSIONID", uuid);
+        response.addCookie(cookie);
+
         ReturnPatientDtoResponse dtoResponse = patientService.registerPatient(registerPatientDtoRequest);
-
-        // REVU зачем это ? В ТЗ сказано, какую cookie возвращать
-        Cookie cookie1 = new Cookie("userId", String.valueOf(dtoResponse.getId()));
-        Cookie cookie2 = new Cookie("userType", String.valueOf(UserType.PATIENT));
-        response.addCookie(cookie1);
-        response.addCookie(cookie2);
-
+        userService.setSession(dtoResponse.getId(), uuid);
         return dtoResponse;
     }
 
     @GetMapping(value = "/{patientId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ReturnPatientDtoResponse getPatient(
-            @CookieValue(value = "userId", defaultValue = "-1") int id,
-            @CookieValue(value = "userType", defaultValue = "user") String userType,
+            @CookieValue(value = "JAVASESSIONID", defaultValue = "-1") String JAVASESSIONID,
             @PathVariable("patientId") int patientId) {
 
-        if (userType.equals("ADMIN") || userType.equals("DOCTOR")) {
+        UserType userType = userService.getUserTypeBySession(JAVASESSIONID);
+
+        if (userType.equals(UserType.ADMIN) || userType.equals(UserType.DOCTOR)) {
             return patientService.getPatient(patientId);
         }
         throw new ResponseStatusException(
@@ -60,10 +63,16 @@ public class PatientsEndPoint {
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     public ReturnPatientDtoResponse updatePatient(
-            @CookieValue(value = "userId", defaultValue = "-1") int id,
-            @CookieValue(value = "userType", defaultValue = "user") String userType,
+            @CookieValue(value = "JAVASESSIONID", defaultValue = "-1") String JAVASESSIONID,
             @Valid @RequestBody UpdatePatientDtoRequest updateAdminDtoRequest) throws HospitalException {
 
-        return patientService.updatePatient(updateAdminDtoRequest, id);
+        UserType userType = userService.getUserTypeBySession(JAVASESSIONID);
+        if (userType.equals(UserType.PATIENT)) {
+            int id = userService.getIdBySession(JAVASESSIONID);
+            return patientService.updatePatient(updateAdminDtoRequest, id);
+        } else {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "You are not allowed to do this operation");
+        }
     }
 }

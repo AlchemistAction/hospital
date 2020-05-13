@@ -6,6 +6,7 @@ import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
 import net.thumbtack.school.hospital.service.AdminService;
+import net.thumbtack.school.hospital.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,20 +20,22 @@ import javax.validation.Valid;
 public class AdminsEndPoint {
 
     private AdminService adminService;
+    private UserService userService;
 
     @Autowired
-    public AdminsEndPoint(AdminService adminService) {
+    public AdminsEndPoint(AdminService adminService, UserService userService) {
         this.adminService = adminService;
+        this.userService = userService;
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     public ReturnAdminDtoResponse registerAdmin(
-            @CookieValue(value = "userId", defaultValue = "-1") int id,
-            @CookieValue(value = "userType", defaultValue = "user") String userType,
+            @CookieValue(value = "JAVASESSIONID", defaultValue = "-1") String JAVASESSIONID,
             @Valid @RequestBody RegisterAdminDtoRequest registerAdminDtoRequest) {
 
-        if (userType.equals(String.valueOf(UserType.ADMIN))) {
+        UserType userType = userService.getUserTypeBySession(JAVASESSIONID);
+        if (userType.equals(UserType.ADMIN)) {
             return adminService.registerAdmin(registerAdminDtoRequest);
         } else {
             throw new ResponseStatusException(
@@ -43,11 +46,17 @@ public class AdminsEndPoint {
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     public ReturnAdminDtoResponse updateAdmin(
-            @CookieValue(value = "userId", defaultValue = "-1") int id,
-            @CookieValue(value = "userType", defaultValue = "user") String userType,
+            @CookieValue(value = "JAVASESSIONID", defaultValue = "-1") String JAVASESSIONID,
             @Valid @RequestBody UpdateAdminDtoRequest updateAdminDtoRequest) throws HospitalException {
 
-        return adminService.updateAdmin(updateAdminDtoRequest, id);
+        UserType userType = userService.getUserTypeBySession(JAVASESSIONID);
+        if (userType.equals(UserType.ADMIN)) {
+            int id = userService.getIdBySession(JAVASESSIONID);
+            return adminService.updateAdmin(updateAdminDtoRequest, id);
+        } else {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "You are not allowed to do this operation");
+        }
     }
 
 }

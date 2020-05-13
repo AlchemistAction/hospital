@@ -1,6 +1,7 @@
 package net.thumbtack.school.hospital.model;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 
 public class Doctor extends User {
 
@@ -30,28 +31,9 @@ public class Doctor extends User {
         this.commissionList = commissionList;
     }
 
-    public Doctor(int id, UserType userType, String firstName, String lastName, String patronymic, String login,
-                  String password, String speciality, String room) {
-        this(id, userType, firstName, lastName, patronymic, login, password,
-                speciality, room, new ArrayList<>(), new ArrayList<>());
-    }
-
     public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login,
                   String password, String speciality, String room, List<DaySchedule> schedule) {
         this(0, userType, firstName, lastName, patronymic, login, password, speciality, room, schedule);
-    }
-
-    public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login,
-                  String password, String speciality, String room,
-                  List<DaySchedule> schedule, List<Commission> commissionList) {
-        this(0, userType, firstName, lastName, patronymic, login, password,
-                speciality, room, schedule, commissionList);
-    }
-
-    public Doctor(UserType userType, String firstName, String lastName, String patronymic, String login,
-                  String password, String speciality, String room) {
-        this(0, userType, firstName, lastName, patronymic, login, password, speciality, room,
-                new ArrayList<>(), new ArrayList<>());
     }
 
     public String getSpeciality() {

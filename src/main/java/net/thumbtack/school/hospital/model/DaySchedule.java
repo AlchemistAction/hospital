@@ -14,13 +14,6 @@ public class DaySchedule {
     public DaySchedule() {
     }
 
-    public DaySchedule(int id, LocalDate date, Doctor doctor, List<Appointment> appointmentList) {
-        this.id = id;
-        this.date = date;
-        this.doctor = doctor;
-        this.appointmentList = appointmentList;
-    }
-
     public DaySchedule(int id, LocalDate date, List<Appointment> appointmentList) {
         this.id = id;
         this.date = date;

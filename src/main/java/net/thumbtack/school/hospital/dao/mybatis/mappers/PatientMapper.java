@@ -1,9 +1,9 @@
-package net.thumbtack.school.hospital.mybatis.mappers;
+package net.thumbtack.school.hospital.dao.mybatis.mappers;
 
 import net.thumbtack.school.hospital.model.Patient;
 import net.thumbtack.school.hospital.model.Ticket;
 import org.apache.ibatis.annotations.*;
-
+@Mapper
 public interface PatientMapper {
 
     @Insert("INSERT INTO patient (id, email, address, phone)" +
@@ -17,6 +17,14 @@ public interface PatientMapper {
             @Result(property = "id", column = "id"),
     })
     Patient getById(int id);
+
+    @Select("SELECT user.id, user.userType, firstName, lastName, patronymic, login, password, email, address, phone"
+            + " FROM user, patient"
+            + " WHERE user.login = #{login} and patient.id = user.id")
+    @Results({
+            @Result(property = "id", column = "id"),
+    })
+    Patient getByLogin(String login);
 
     @Update("UPDATE user, patient SET firstName = #{patient.firstName}, lastName = #{patient.lastName}," +
             " patronymic = #{patient.patronymic}, password = #{patient.password}, email = #{patient.email}," +
@@ -33,5 +41,6 @@ public interface PatientMapper {
 
     @Delete("delete from user WHERE userType = 'PATIENT'")
     void deleteAll();
+
 
 }

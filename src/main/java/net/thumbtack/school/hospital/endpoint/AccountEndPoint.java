@@ -1,11 +1,15 @@
 package net.thumbtack.school.hospital.endpoint;
 
 import net.thumbtack.school.hospital.dto.response.ReturnUserDtoResponse;
+import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
 import net.thumbtack.school.hospital.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -21,8 +25,10 @@ public class AccountEndPoint {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ReturnUserDtoResponse getInfo(
-            @CookieValue(value = "userId", defaultValue = "-1") int id,
-            @CookieValue(value = "userType", defaultValue = "user") String userType) throws HospitalException {
+            @CookieValue(value = "JAVASESSIONID", defaultValue = "-1") String JAVASESSIONID) throws HospitalException {
+
+        UserType userType = userService.getUserTypeBySession(JAVASESSIONID);
+        int id = userService.getIdBySession(JAVASESSIONID);
 
         return userService.getInfo(id, userType);
     }

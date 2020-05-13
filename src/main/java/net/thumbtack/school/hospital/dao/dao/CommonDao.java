@@ -1,4 +1,4 @@
-package net.thumbtack.school.hospital.mybatis.dao;
+package net.thumbtack.school.hospital.dao.dao;
 
 import org.springframework.stereotype.Component;
 

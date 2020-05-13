@@ -77,10 +77,6 @@ public class GetAllTicketsDtoResponse {
         return doctorId;
     }
 
-    public void setDoctorId(int doctorId) {
-        this.doctorId = doctorId;
-    }
-
     public String getFirstName() {
         return firstName;
     }
@@ -111,14 +107,6 @@ public class GetAllTicketsDtoResponse {
 
     public void setSpeciality(String speciality) {
         this.speciality = speciality;
-    }
-
-    public List<DoctorInfo> getDoctorList() {
-        return list;
-    }
-
-    public void setDoctorList(List<DoctorInfo> list) {
-        this.list = list;
     }
 
     @Override

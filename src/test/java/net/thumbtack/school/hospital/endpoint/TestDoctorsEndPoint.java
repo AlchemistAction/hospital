@@ -1,11 +1,12 @@
 package net.thumbtack.school.hospital.endpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.thumbtack.school.hospital.dao.dao.DoctorDao;
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;
 import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
 import net.thumbtack.school.hospital.model.*;
-import net.thumbtack.school.hospital.mybatis.dao.DoctorDao;
 import net.thumbtack.school.hospital.service.DoctorService;
+import net.thumbtack.school.hospital.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -27,6 +28,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -45,6 +47,8 @@ public class TestDoctorsEndPoint {
     private DoctorDao doctorDao;
     @MockBean
     private DoctorService doctorService;
+    @MockBean
+    private UserService userService;
 
     @Test
     public void testRegisterDoctor() throws Exception {
@@ -64,10 +68,11 @@ public class TestDoctorsEndPoint {
         doctor.setSchedule(schedule);
         doctor.setId(3);
 
-       when(doctorDao.insert(any())).thenReturn(doctor);
+        when(userService.getUserTypeBySession(anyString())).thenReturn(UserType.ADMIN);
+        when(doctorDao.insert(any())).thenReturn(doctor);
 
         MvcResult result = mvc.perform(post("/api/doctors")
-                .contentType(MediaType.APPLICATION_JSON).cookie(new Cookie("userType", "ADMIN"))
+                .contentType(MediaType.APPLICATION_JSON).cookie(new Cookie("JAVASESSIONID", "123"))
                 .content(mapper.writeValueAsString(registerDoctorDtoRequest)))
                 .andReturn();
 

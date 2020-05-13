@@ -1,7 +1,7 @@
-package net.thumbtack.school.hospital.mybatis.daoimpl;
+package net.thumbtack.school.hospital.dao.mybatis.daoimpl;
 
 
-import net.thumbtack.school.hospital.mybatis.dao.CommonDao;
+import net.thumbtack.school.hospital.dao.dao.CommonDao;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

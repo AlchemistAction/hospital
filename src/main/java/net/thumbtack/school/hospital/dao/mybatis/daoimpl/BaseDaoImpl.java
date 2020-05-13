@@ -1,8 +1,8 @@
-package net.thumbtack.school.hospital.mybatis.daoimpl;
+package net.thumbtack.school.hospital.dao.mybatis.daoimpl;
 
 
-import net.thumbtack.school.hospital.mybatis.mappers.*;
-import net.thumbtack.school.hospital.mybatis.utils.MyBatisUtils;
+import net.thumbtack.school.hospital.dao.mybatis.mappers.*;
+import net.thumbtack.school.hospital.dao.mybatis.utils.MyBatisUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +43,10 @@ public class BaseDaoImpl {
 
     protected PatientMapper getPatientMapper(SqlSession sqlSession) {
         return sqlSession.getMapper(PatientMapper.class);
+    }
+
+    protected SessionMapper getSessionMapper(SqlSession sqlSession) {
+        return sqlSession.getMapper(SessionMapper.class);
     }
 
     protected TicketMapper getTicketMapper(SqlSession sqlSession) {

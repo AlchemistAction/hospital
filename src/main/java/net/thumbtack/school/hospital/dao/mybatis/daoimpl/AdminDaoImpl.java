@@ -1,9 +1,9 @@
 // package net.thumbtack.school.hospital.daoimpl.mybatis;
-package net.thumbtack.school.hospital.mybatis.daoimpl;
+package net.thumbtack.school.hospital.dao.mybatis.daoimpl;
 
 
+import net.thumbtack.school.hospital.dao.dao.AdminDao;
 import net.thumbtack.school.hospital.model.Admin;
-import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +38,17 @@ public class AdminDaoImpl extends BaseDaoImpl implements AdminDao {
             return getAdminMapper(sqlSession).getById(id);
         } catch (RuntimeException ex) {
             LOGGER.info("Can't get Admin {}, {}", id, ex);
+            throw ex;
+        }
+    }
+
+    @Override
+    public Admin getByLogin(String login) {
+        LOGGER.debug("DAO get Admin by login {}", login);
+        try (SqlSession sqlSession = getSession()) {
+            return getAdminMapper(sqlSession).getByLogin(login);
+        } catch (RuntimeException ex) {
+            LOGGER.info("Can't get Admin {}, {}", login, ex);
             throw ex;
         }
     }

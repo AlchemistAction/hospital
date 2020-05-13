@@ -30,39 +30,19 @@ public class UpdateScheduleDtoRequest {
         return dateStart;
     }
 
-    public void setDateStart(String dateStart) {
-        this.dateStart = dateStart;
-    }
-
     public String getDateEnd() {
         return dateEnd;
-    }
-
-    public void setDateEnd(String dateEnd) {
-        this.dateEnd = dateEnd;
     }
 
     public WeekSchedule getWeekSchedule() {
         return weekSchedule;
     }
 
-    public void setWeekSchedule(WeekSchedule weekSchedule) {
-        this.weekSchedule = weekSchedule;
-    }
-
     public DayScheduleForDto[] getWeekDaysSchedule() {
         return weekDaysSchedule;
     }
 
-    public void setWeekDaysSchedule(DayScheduleForDto[] weekDaysSchedule) {
-        this.weekDaysSchedule = weekDaysSchedule;
-    }
-
     public String getDuration() {
         return duration;
-    }
-
-    public void setDuration(String duration) {
-        this.duration = duration;
     }
 }

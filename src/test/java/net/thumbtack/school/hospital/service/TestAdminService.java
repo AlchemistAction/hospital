@@ -1,18 +1,18 @@
 package net.thumbtack.school.hospital.service;
 
+import net.thumbtack.school.hospital.dao.dao.AdminDao;
+import net.thumbtack.school.hospital.dao.mybatis.daoimpl.AdminDaoImpl;
 import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
-import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
-import net.thumbtack.school.hospital.mybatis.daoimpl.AdminDaoImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 
@@ -63,5 +63,20 @@ public class TestAdminService {
 
         assertEquals("newPassword", newAdmin.getPassword());
         assertEquals("newLastName", newAdmin.getLastName());
+    }
+
+    @Test(expected = HospitalException.class)
+    public void testUpdateAdminFail() throws HospitalException {
+        UpdateAdminDtoRequest updateAdminDtoRequest = new UpdateAdminDtoRequest("name",
+                "newLastName", "patronymic", "regularAdmin", "oldPasswordWrong",
+                "newPassword");
+
+        Admin oldAdmin = new Admin(UserType.ADMIN, "name", "oldLastNAme",
+                "patronymic", "adminLogin", "oldPassword", "regularAdmin");
+
+
+        when(adminDao.getById(anyInt())).thenReturn(oldAdmin);
+
+        adminService.updateAdmin(updateAdminDtoRequest, oldAdmin.getId());
     }
 }

@@ -1,13 +1,13 @@
-package net.thumbtack.school.hospital.mybatis.mappers;
+package net.thumbtack.school.hospital.dao.mybatis.mappers;
 
-import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Commission;
 import net.thumbtack.school.hospital.model.Doctor;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-
+@Mapper
 public interface CommissionDoctorMapper {
 
     @Insert({"<script>",

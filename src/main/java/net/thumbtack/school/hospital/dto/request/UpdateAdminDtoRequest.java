@@ -47,23 +47,11 @@ public class UpdateAdminDtoRequest {
         return position;
     }
 
-    public void setPosition(String position) {
-        this.position = position;
-    }
-
     public String getOldPassword() {
         return oldPassword;
     }
 
-    public void setOldPassword(String oldPassword) {
-        this.oldPassword = oldPassword;
-    }
-
     public String getNewPassword() {
         return newPassword;
-    }
-
-    public void setNewPassword(String newPassword) {
-        this.newPassword = newPassword;
     }
 }

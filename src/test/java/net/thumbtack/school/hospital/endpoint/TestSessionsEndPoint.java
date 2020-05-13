@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -45,7 +46,7 @@ public class TestSessionsEndPoint {
         Admin admin = modelMapper.map(registerAdminDtoRequest, Admin.class);
         admin.setId(13);
 
-        when(userService.login(any())).thenReturn(modelMapper.map(admin, ReturnAdminDtoResponse.class));
+        when(userService.login(any(), anyString())).thenReturn(modelMapper.map(admin, ReturnAdminDtoResponse.class));
 
         MvcResult result = mvc.perform(post("/api/sessions")
                 .contentType(MediaType.APPLICATION_JSON)

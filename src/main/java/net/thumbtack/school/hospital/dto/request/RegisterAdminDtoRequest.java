@@ -7,9 +7,9 @@ import javax.validation.constraints.NotNull;
 public class RegisterAdminDtoRequest {
 
 
-    @Name
+    @Name(field = "First name")
     private String firstName;
-    @Name
+    @Name(field = "Last name")
     private String lastName;
 
     private String patronymic;

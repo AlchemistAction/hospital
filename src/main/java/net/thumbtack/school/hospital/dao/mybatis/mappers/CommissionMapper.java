@@ -1,6 +1,5 @@
-package net.thumbtack.school.hospital.mybatis.mappers;
+package net.thumbtack.school.hospital.dao.mybatis.mappers;
 
-import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Commission;
 import net.thumbtack.school.hospital.model.Doctor;
 import net.thumbtack.school.hospital.model.Ticket;
@@ -9,7 +8,7 @@ import org.apache.ibatis.mapping.FetchType;
 
 import java.time.LocalDate;
 import java.util.List;
-
+@Mapper
 public interface CommissionMapper {
 
     @Insert("INSERT INTO commission (date, timeStart, timeEnd, room_id)" +
@@ -24,10 +23,10 @@ public interface CommissionMapper {
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "doctorList", column = "id", javaType = List.class,
-                    many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.DoctorMapper.getByCommission",
+                    many = @Many(select = "net.thumbtack.school.hospital.dao.mybatis.mappers.DoctorMapper.getByCommission",
                             fetchType = FetchType.LAZY)),
             @Result(property = "ticket", column = "id", javaType = Ticket.class,
-                    one = @One(select = "net.thumbtack.school.hospital.mybatis.mappers.TicketMapper.getByCommission",
+                    one = @One(select = "net.thumbtack.school.hospital.dao.mybatis.mappers.TicketMapper.getByCommission",
                             fetchType = FetchType.LAZY)),
     })
     Commission getByDoctor(@Param("doctor") Doctor doctor);
@@ -38,7 +37,7 @@ public interface CommissionMapper {
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "doctorList", column = "id", javaType = List.class,
-                    many = @Many(select = "net.thumbtack.school.hospital.mybatis.mappers.DoctorMapper.getByCommission",
+                    many = @Many(select = "net.thumbtack.school.hospital.dao.mybatis.mappers.DoctorMapper.getByCommission",
                             fetchType = FetchType.LAZY)),
     })
     Commission getByTicket(@Param("ticket") Ticket ticket);

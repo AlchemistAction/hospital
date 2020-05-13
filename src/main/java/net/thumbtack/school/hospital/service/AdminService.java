@@ -1,5 +1,6 @@
 package net.thumbtack.school.hospital.service;
 
+import net.thumbtack.school.hospital.dao.dao.AdminDao;
 import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
@@ -7,7 +8,6 @@ import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
 import net.thumbtack.school.hospital.model.exception.HospitalException;
-import net.thumbtack.school.hospital.mybatis.dao.AdminDao;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,22 +26,17 @@ public class AdminService {
     public ReturnAdminDtoResponse registerAdmin(RegisterAdminDtoRequest registerAdminDtoRequest) {
 
         Admin admin = modelMapper.map(registerAdminDtoRequest, Admin.class);
-
         admin.setUserType(UserType.ADMIN);
-
         admin = adminDao.insert(admin);
-
         return modelMapper.map(admin, ReturnAdminDtoResponse.class);
     }
 
     public ReturnAdminDtoResponse updateAdmin(UpdateAdminDtoRequest updateAdminDtoRequest, int id) throws HospitalException {
 
         Admin admin = adminDao.getById(id);
-
         if (!admin.getPassword().equals(updateAdminDtoRequest.getOldPassword())) {
             throw new HospitalException(HospitalErrorCode.WRONG_PASSWORD);
         }
-
         admin.setFirstName(updateAdminDtoRequest.getFirstName());
         admin.setLastName(updateAdminDtoRequest.getLastName());
         admin.setPatronymic(updateAdminDtoRequest.getPatronymic());
@@ -49,7 +44,6 @@ public class AdminService {
         admin.setPassword(updateAdminDtoRequest.getNewPassword());
 
         admin = adminDao.update(admin);
-
         return modelMapper.map(admin, ReturnAdminDtoResponse.class);
     }
 }

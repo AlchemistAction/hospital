@@ -1,23 +1,22 @@
 package net.thumbtack.school.hospital.dao;
 
-import static org.junit.Assert.*;
-
+import net.thumbtack.school.hospital.dao.dao.*;
+import net.thumbtack.school.hospital.dao.mybatis.daoimpl.*;
+import net.thumbtack.school.hospital.dao.mybatis.utils.MyBatisUtils;
 import net.thumbtack.school.hospital.model.*;
-import net.thumbtack.school.hospital.mybatis.dao.*;
-import net.thumbtack.school.hospital.mybatis.daoimpl.*;
-import net.thumbtack.school.hospital.mybatis.utils.MyBatisUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
 import java.util.List;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 public class TestBase {
 
     protected AdminDao adminDao = new AdminDaoImpl();
     protected DoctorDao doctorDao = new DoctorDaoImpl();
     protected UserDao userDao = new UserDaoImpl();
+    protected TicketDao ticketDao = new TicketDaoImpl();
     protected PatientDao patientDao = new PatientDaoImpl();
 
     private static boolean setUpIsDone = false;
@@ -38,6 +37,7 @@ public class TestBase {
         adminDao.deleteAllExceptOne();
         doctorDao.deleteAll();
         patientDao.deleteAll();
+        userDao.deleteAllSessions();
     }
 
     protected Admin insertAdmin(UserType userType, String firstName, String lastName, String patronymic,
@@ -123,7 +123,7 @@ public class TestBase {
 
     protected void checkTicketFields(Ticket ticket1, Ticket ticket2) {
         assertEquals(ticket1.getId(), ticket2.getId());
-        assertEquals(ticket1.getName(), ticket2.getName());
+        assertEquals(ticket1.getNumber(), ticket2.getNumber());
         assertEquals(ticket1.getPatient(), ticket2.getPatient());
     }
 

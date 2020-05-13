@@ -1,14 +1,13 @@
-package net.thumbtack.school.hospital.mybatis.mappers;
+package net.thumbtack.school.hospital.dao.mybatis.mappers;
 
 import net.thumbtack.school.hospital.model.Appointment;
-import net.thumbtack.school.hospital.model.Commission;
 import net.thumbtack.school.hospital.model.DaySchedule;
 import net.thumbtack.school.hospital.model.Ticket;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.mapping.FetchType;
 
 import java.util.List;
-
+@Mapper
 public interface AppointmentMapper {
 
     @Insert({"<script>",
@@ -25,10 +24,10 @@ public interface AppointmentMapper {
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "daySchedule", column = "id", javaType = DaySchedule.class,
-                    one = @One(select = "net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper.getByAppointment",
+                    one = @One(select = "net.thumbtack.school.hospital.dao.mybatis.mappers.DayScheduleMapper.getByAppointment",
                             fetchType = FetchType.LAZY)),
             @Result(property = "ticket", column = "id", javaType = Ticket.class,
-                    one = @One(select = "net.thumbtack.school.hospital.mybatis.mappers.TicketMapper.getByAppointment",
+                    one = @One(select = "net.thumbtack.school.hospital.dao.mybatis.mappers.TicketMapper.getByAppointment",
                             fetchType = FetchType.LAZY)),
     })
     List<Appointment> getByDaySchedule(@Param("daySchedule") DaySchedule daySchedule);
@@ -38,12 +37,23 @@ public interface AppointmentMapper {
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "daySchedule", column = "id", javaType = DaySchedule.class,
-                    one = @One(select = "net.thumbtack.school.hospital.mybatis.mappers.DayScheduleMapper.getByAppointment",
+                    one = @One(select = "net.thumbtack.school.hospital.dao.mybatis.mappers.DayScheduleMapper.getByAppointment",
                             fetchType = FetchType.LAZY)),
-               })
+    })
     Appointment getByTicket(@Param("ticket") Ticket ticket);
 
     @Update("UPDATE appointment SET state = #{appointment.state} WHERE appointment.id = #{appointment.id}")
-    void changeState(@Param("appointment") Appointment appointment);
+    Integer changeState(@Param("appointment") Appointment appointment);
+
+    @Insert({"<script>",
+            "<foreach item='item' collection='list' separator=','>",
+            "UPDATE appointment",
+            "<set>",
+                    "state = #{item.state}",
+            "</set>",
+            "WHERE appointment.id = #{item.id}",
+            "</foreach>",
+            "</script>"})
+    Integer changeAllState(@Param("list") List<Appointment> appointments);
 }
 
