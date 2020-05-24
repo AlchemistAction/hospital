@@ -4,6 +4,9 @@ public class DeleteDoctorScheduleDtoRequest {
 
     private String date;
 
+    public DeleteDoctorScheduleDtoRequest() {
+    }
+
     public DeleteDoctorScheduleDtoRequest(String date) {
         this.date = date;
     }

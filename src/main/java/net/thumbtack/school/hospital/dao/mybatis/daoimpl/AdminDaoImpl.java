@@ -1,4 +1,3 @@
-// package net.thumbtack.school.hospital.daoimpl.mybatis;
 package net.thumbtack.school.hospital.dao.mybatis.daoimpl;
 
 
@@ -22,7 +21,7 @@ public class AdminDaoImpl extends BaseDaoImpl implements AdminDao {
                 getUserMapper(sqlSession).insert(admin);
                 getAdminMapper(sqlSession).insert(admin);
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't insert Admin {}, {}", admin, ex);
+                LOGGER.debug("Can't insert Admin {}, {}", admin, ex);
                 sqlSession.rollback();
                 throw ex;
             }
@@ -36,9 +35,6 @@ public class AdminDaoImpl extends BaseDaoImpl implements AdminDao {
         LOGGER.debug("DAO get Admin by Id {}", id);
         try (SqlSession sqlSession = getSession()) {
             return getAdminMapper(sqlSession).getById(id);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get Admin {}, {}", id, ex);
-            throw ex;
         }
     }
 
@@ -47,9 +43,6 @@ public class AdminDaoImpl extends BaseDaoImpl implements AdminDao {
         LOGGER.debug("DAO get Admin by login {}", login);
         try (SqlSession sqlSession = getSession()) {
             return getAdminMapper(sqlSession).getByLogin(login);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get Admin {}, {}", login, ex);
-            throw ex;
         }
     }
 
@@ -60,7 +53,7 @@ public class AdminDaoImpl extends BaseDaoImpl implements AdminDao {
             try {
                 getAdminMapper(sqlSession).updateAdmin(admin);
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't change Admin {} {} ", admin, ex);
+                LOGGER.debug("Can't change Admin {} {} ", admin, ex);
                 sqlSession.rollback();
                 throw ex;
             }
@@ -76,7 +69,7 @@ public class AdminDaoImpl extends BaseDaoImpl implements AdminDao {
             try {
                 getAdminMapper(sqlSession).deleteAllExceptOne();
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't delete all Admins {}", ex);
+                LOGGER.debug("Can't delete all Admins {}", ex);
                 sqlSession.rollback();
                 throw ex;
             }

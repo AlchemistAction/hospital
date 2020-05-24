@@ -5,8 +5,9 @@ import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Commission;
 import net.thumbtack.school.hospital.model.DaySchedule;
 import net.thumbtack.school.hospital.model.Doctor;
-import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
-import net.thumbtack.school.hospital.model.exception.HospitalException;
+import net.thumbtack.school.hospital.validator.ErrorModel;
+import net.thumbtack.school.hospital.validator.exception.HospitalErrorCode;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,19 +22,24 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
     private static final Logger LOGGER = LoggerFactory.getLogger(DoctorDaoImpl.class);
 
     @Override
-    public Doctor insert(Doctor doctor) {
+    public Doctor insert(Doctor doctor) throws HospitalException {
         LOGGER.debug("DAO Doctor Insert with Schedule {} ", doctor);
         try (SqlSession sqlSession = getSession()) {
             try {
                 getUserMapper(sqlSession).insert(doctor);
-                getDoctorMapper(sqlSession).insert(doctor);
+                int res = getDoctorMapper(sqlSession).insert(doctor);
 
+                if (res == 0) {
+                    sqlSession.rollback();
+                    throw new HospitalException(new ErrorModel(HospitalErrorCode.WRONG_SPECIALITY,
+                            "speciality", "Wrong speciality: " + doctor.getSpeciality()));
+                }
                 getDayScheduleMapper(sqlSession).batchInsert(doctor, doctor.getSchedule());
 
                 doctor.getSchedule().forEach(daySchedule ->
                         getAppointmentMapper(sqlSession).batchInsert(daySchedule, daySchedule.getAppointmentList()));
 
-            } catch (RuntimeException ex) {
+            } catch (RuntimeException | HospitalException ex) {
                 LOGGER.info("Can't insert Doctor with Schedule {}, {}", doctor, ex);
                 sqlSession.rollback();
                 throw ex;
@@ -92,7 +98,7 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
 
                 getCommissionMapper(sqlSession).insert(commission);
 
-                getCommissionDoctoMapper(sqlSession).batchInsert(commission, commission.getDoctorList());
+                getCommissionDoctorMapper(sqlSession).batchInsert(commission, commission.getDoctorList());
 
                 getTicketMapper(sqlSession).insertForCommission(commission, commission.getTicket(),
                         commission.getTicket().getPatient());
@@ -112,9 +118,6 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
         LOGGER.debug("DAO get Doctor by Id {}", id);
         try (SqlSession sqlSession = getSession()) {
             return getDoctorMapper(sqlSession).getById(id);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get Doctor {}, {}", id, ex);
-            throw ex;
         }
     }
 
@@ -123,9 +126,6 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
         LOGGER.debug("DAO get Doctor by login {}", login);
         try (SqlSession sqlSession = getSession()) {
             return getDoctorMapper(sqlSession).getByLogin(login);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get Doctor {}, {}", login, ex);
-            throw ex;
         }
     }
 
@@ -134,9 +134,6 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
         LOGGER.debug("DAO get all Doctors lazy");
         try (SqlSession sqlSession = getSession()) {
             return getDoctorMapper(sqlSession).getAllLazy();
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get All Doctors Lazy {}", ex);
-            throw ex;
         }
     }
 
@@ -145,21 +142,18 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
         LOGGER.debug("DAO get all Doctors lazy");
         try (SqlSession sqlSession = getSession()) {
             return getDoctorMapper(sqlSession).getAllBySpeciality(speciality);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get All Doctors Lazy {}", ex);
-            throw ex;
         }
     }
 
     @Override
     public void deleteScheduleSinceDate(int id, LocalDate lastDateOfWork) {
-        LOGGER.debug("DAO delete all DaySchedules since {}", lastDateOfWork);
+        LOGGER.debug("DAO delete all DaySchedules since {}, {}", id, lastDateOfWork);
         try (SqlSession sqlSession = getSession()) {
             try {
-                getDayScheduleMapper(sqlSession).deleteAllSinceDate(lastDateOfWork);
+                getDayScheduleMapper(sqlSession).deleteAllSinceDate(id, lastDateOfWork);
                 getCommissionMapper(sqlSession).deleteAllByDoctorSinceDate(id, lastDateOfWork);
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't delete all DaySchedules since {}, {}", lastDateOfWork, ex);
+                LOGGER.info("Can't delete all DaySchedules since {}, {}, {}", id, lastDateOfWork, ex);
                 sqlSession.rollback();
                 throw ex;
             }
@@ -168,13 +162,13 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
     }
 
     @Override
-    public void changeAppointmentState(Appointment appointment) {
-        LOGGER.debug("DAO change Appointment state {}", appointment);
+    public void changeAppointmentStateToAppointmentOrCommission(Appointment appointment) {
+        LOGGER.debug("DAO change Appointment state to Appointment Or Commission {}", appointment);
         try (SqlSession sqlSession = getSession()) {
             try {
-                getAppointmentMapper(sqlSession).changeState(appointment);
+                getAppointmentMapper(sqlSession).changeStateToAppointmentOrCommission(appointment);
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't change Appointment state {}, {}", appointment, ex);
+                LOGGER.info("Can't change Appointment state to Appointment Or Commission {}, {}", appointment, ex);
                 sqlSession.rollback();
                 throw ex;
             }
@@ -183,21 +177,40 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
     }
 
     @Override
-    public void changeAllAppointmentsState(List<Appointment> appointments) throws HospitalException {
+    public void changeAllAppointmentsStateToAppointmentOrCommission(List<Appointment> appointments) throws HospitalException {
         LOGGER.debug("DAO change all Appointments state {}", appointments);
         try (SqlSession sqlSession = getSession()) {
             try {
-                int numberOfChanges = getAppointmentMapper(sqlSession).changeAllState(appointments);
-                if (appointments.size() != numberOfChanges) {
+                int numberOfChanges = appointments.size();
+                for (Appointment appointment : appointments) {
+                    int res = getAppointmentMapper(sqlSession).changeStateToAppointmentOrCommission(appointment);
+                    numberOfChanges = numberOfChanges - res;
+                }
+                if (numberOfChanges != 0) {
                     sqlSession.rollback();
-                    throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
+                    throw new HospitalException(new ErrorModel(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION,
+                            "doctorIds", "Can not start Commission. Some doctors have no free time"));
                 }
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't change all Appointments state {}, {}", appointments, ex);
+                LOGGER.debug("Can't change all Appointments state {}, {}", appointments, ex);
                 sqlSession.rollback();
                 throw ex;
             }
+            sqlSession.commit();
+        }
+    }
 
+    @Override
+    public void changeAppointmentStateToFree(Appointment appointment) {
+        LOGGER.debug("DAO change Appointment state to Free {}", appointment);
+        try (SqlSession sqlSession = getSession()) {
+            try {
+                getAppointmentMapper(sqlSession).changeStateToFree(appointment);
+            } catch (RuntimeException ex) {
+                LOGGER.debug("Can't change Appointment state to Free {}, {}", appointment, ex);
+                sqlSession.rollback();
+                throw ex;
+            }
             sqlSession.commit();
         }
     }
@@ -209,7 +222,7 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
             try {
                 getDoctorMapper(sqlSession).delete(doctor);
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't delete Doctor {} {}", doctor, ex);
+                LOGGER.debug("Can't delete Doctor {} {}", doctor, ex);
                 sqlSession.rollback();
                 throw ex;
             }
@@ -225,13 +238,11 @@ public class DoctorDaoImpl extends BaseDaoImpl implements DoctorDao {
                 getDoctorMapper(sqlSession).deleteAll();
                 getCommissionMapper(sqlSession).deleteAll();
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't delete all Doctors {}", ex);
+                LOGGER.debug("Can't delete all Doctors {}", ex);
                 sqlSession.rollback();
                 throw ex;
             }
             sqlSession.commit();
         }
     }
-
-
 }

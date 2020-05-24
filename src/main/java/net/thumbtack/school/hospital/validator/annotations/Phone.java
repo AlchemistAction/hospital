@@ -1,22 +1,19 @@
-package net.thumbtack.school.hospital.validator;
-
+package net.thumbtack.school.hospital.validator.annotations;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = NameValidator.class)
+@Constraint(validatedBy = PhoneValidator.class)
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Name {
-    String message() default "{field}: '${validatedValue}'";
+public @interface Phone {
+    String message() default "Incorrect {field}: '${validatedValue}'";
 
     String field() default " ";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
-
-
 }

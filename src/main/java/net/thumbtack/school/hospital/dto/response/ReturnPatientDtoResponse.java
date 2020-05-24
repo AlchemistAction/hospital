@@ -12,14 +12,6 @@ public class ReturnPatientDtoResponse extends ReturnUserDtoResponse {
     public ReturnPatientDtoResponse() {
     }
 
-    public ReturnPatientDtoResponse(int id, String firstName, String lastName, String patronymic, String email,
-                                    String address, String phone) {
-        super(id, firstName, lastName, patronymic);
-        this.email = email;
-        this.address = address;
-        this.phone = phone;
-    }
-
     public String getEmail() {
         return email;
     }

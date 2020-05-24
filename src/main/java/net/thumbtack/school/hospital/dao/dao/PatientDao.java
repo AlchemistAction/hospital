@@ -3,11 +3,10 @@ package net.thumbtack.school.hospital.dao.dao;
 import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Patient;
 import net.thumbtack.school.hospital.model.Ticket;
-import net.thumbtack.school.hospital.model.exception.HospitalException;
-import org.springframework.stereotype.Component;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 
 import java.util.List;
-@Component
+
 public interface PatientDao {
 
     Patient insert(Patient patient);

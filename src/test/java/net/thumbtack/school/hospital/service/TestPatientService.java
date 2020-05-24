@@ -12,9 +12,10 @@ import net.thumbtack.school.hospital.dto.request.RegisterPatientDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdatePatientDtoRequest;
 import net.thumbtack.school.hospital.dto.response.AddPatientToAppointmentDtoResponse;
 import net.thumbtack.school.hospital.dto.response.GetAllTicketsDtoResponse;
+import net.thumbtack.school.hospital.dto.response.GetTicketDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
 import net.thumbtack.school.hospital.model.*;
-import net.thumbtack.school.hospital.model.exception.HospitalException;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
@@ -24,6 +25,7 @@ import java.time.LocalTime;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class TestPatientService {
@@ -32,7 +34,7 @@ public class TestPatientService {
     private DoctorDao doctorDao;
     private TicketDao ticketDao;
     private PatientService patientService;
-    private ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Before
     public void setUp() {
@@ -43,7 +45,7 @@ public class TestPatientService {
     }
 
     @Test
-    public void testRegisterPatient() {
+    public void testRegisterPatient() throws HospitalException {
         RegisterPatientDtoRequest registerPatientDtoRequest = new RegisterPatientDtoRequest("name",
                 "surname", "patronymic", "patientLogin", "password111",
                 "111@mail.ru", "c.Omsk", "232323");
@@ -54,8 +56,8 @@ public class TestPatientService {
         when(patientDao.insert(any())).thenReturn(patient);
 
         ReturnPatientDtoResponse returnPatientDtoResponse = patientService.registerPatient(registerPatientDtoRequest);
-
-        assertEquals(2, returnPatientDtoResponse.getId());
+        ReturnPatientDtoResponse result = modelMapper.map(patient, ReturnPatientDtoResponse.class);
+        assertEquals(result, returnPatientDtoResponse);
     }
 
     @Test
@@ -165,40 +167,11 @@ public class TestPatientService {
         AddPatientToAppointmentDtoResponse result = patientService.addPatientToAppointment(
                 addPatientToAppointmentDtoRequest, patient.getId());
 
-        assertEquals("D14202002041120", result.getTicket());
-    }
+        AddPatientToAppointmentDtoResponse expected = new AddPatientToAppointmentDtoResponse("D14202002041120",
+                doctor2, "2020-02-04", "11:20");
 
-//    @Test
-//    public void testAddPatientToAppointmentFail() {
-//        AddPatientToAppointmentDtoRequest addPatientToAppointmentDtoRequest = new AddPatientToAppointmentDtoRequest(
-//                13, "13-04-2020", "10:00");
-//
-//        List<DaySchedule> schedule = new LinkedList<>(Arrays.asList(
-//                new DaySchedule(LocalDate.of(2020, 4, 13),
-//                        Collections.singletonList(
-//                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.APPOINTMENT))),
-//                new DaySchedule(LocalDate.of(2020, 4, 15),
-//                        Collections.singletonList(
-//                                new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:30"), AppointmentState.APPOINTMENT)))));
-//
-//        Doctor doctor = new Doctor(13, UserType.DOCTOR, "name", "surname",
-//                "patronymic", "doctorLogin", "doctorPass", "хирург",
-//                "100", schedule);
-//
-//        Patient patient = new Patient(2, UserType.PATIENT, "name", "surname",
-//                "patronymic", "Login", "oldPassword", "email@mail.ru",
-//                "address", "8-900-000-00-00");
-//
-//        when(patientDao.getById(anyInt())).thenReturn(patient);
-//        when(doctorDao.getById(anyInt())).thenReturn(doctor);
-//
-//        try {
-//            patientService.addPatientToAppointment(addPatientToAppointmentDtoRequest, patient.getId());
-//            fail();
-//        } catch (HospitalException ex) {
-//            assertEquals(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_APPOINTMENT, ex.getErrorCode());
-//        }
-//    }
+        assertEquals(expected, result);
+    }
 
     @Test
     public void testCancelAppointment() throws HospitalException {
@@ -397,14 +370,14 @@ public class TestPatientService {
         when(patientDao.getById(anyInt())).thenReturn(patient);
         when(patientDao.getAllTickets(any())).thenReturn(ticketList);
 
-        List<GetAllTicketsDtoResponse> result = patientService.getAllTickets(patient.getId());
+        GetAllTicketsDtoResponse result = patientService.getAllTickets(patient.getId());
 
-        GetAllTicketsDtoResponse response1 = new GetAllTicketsDtoResponse(ticketForAppointment.getNumber(),
+        GetTicketDtoResponse response1 = new GetTicketDtoResponse(ticketForAppointment.getNumber(),
                 doctor2.getRoom(), doctor2.getSchedule().get(1).getDate().toString(),
                 ticketForAppointment.getAppointment().getTimeStart().toString(), doctor2.getId(),
                 doctor2.getFirstName(), doctor2.getLastName(), doctor2.getPatronymic(), doctor2.getSpeciality());
 
-        GetAllTicketsDtoResponse response2 = new GetAllTicketsDtoResponse(ticketForCommission.getNumber(),
+        GetTicketDtoResponse response2 = new GetTicketDtoResponse(ticketForCommission.getNumber(),
                 doctor1.getRoom(), commission.getDate().toString(), commission.getTimeStart().toString(),
                 Arrays.asList(
                         new DoctorInfo(doctor1.getId(), doctor1.getFirstName(), doctor1.getLastName(),
@@ -412,9 +385,9 @@ public class TestPatientService {
                         new DoctorInfo(doctor2.getId(), doctor2.getFirstName(), doctor2.getLastName(),
                                 doctor2.getPatronymic(), doctor2.getSpeciality())));
 
-        List<GetAllTicketsDtoResponse> expectedList = Arrays.asList(response1, response2);
+        List<GetTicketDtoResponse> expectedList = Arrays.asList(response1, response2);
 
-        assertEquals(expectedList, result);
+        assertEquals(expectedList, result.getResponseList());
     }
 
     private void checkDoctorFields(Doctor doctor1, Doctor doctor2) {

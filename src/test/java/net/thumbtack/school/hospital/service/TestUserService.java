@@ -21,8 +21,8 @@ import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.Doctor;
 import net.thumbtack.school.hospital.model.Patient;
 import net.thumbtack.school.hospital.model.UserType;
-import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
-import net.thumbtack.school.hospital.model.exception.HospitalException;
+import net.thumbtack.school.hospital.validator.exception.HospitalErrorCode;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
@@ -122,22 +122,17 @@ public class TestUserService {
         assertEquals(expected, dtoResponse);
     }
 
-    @Test
-    public void testLoginFail1() {
+    @Test(expected = HospitalException.class)
+    public void testLoginFail1() throws HospitalException {
 
         when(userDao.getUserTypeByLogin(any())).thenReturn(null);
 
         LoginDtoRequest loginDtoRequest = new LoginDtoRequest("adminLogin", "adminPassword");
-        try {
-            userService.login(loginDtoRequest, "uuid");
-            fail();
-        } catch (HospitalException ex) {
-            assertEquals(HospitalErrorCode.WRONG_LOGIN, ex.getErrorCode());
-        }
+        userService.login(loginDtoRequest, "uuid");
     }
 
-    @Test
-    public void testLoginFail2() {
+    @Test(expected = HospitalException.class)
+    public void testLoginFail2() throws HospitalException {
 
         RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest("name",
                 "surname", "patronymic", "regularAdmin", "adminLogin",
@@ -152,11 +147,6 @@ public class TestUserService {
         when(userDao.getUserTypeByLogin(any())).thenReturn(UserType.ADMIN);
 
         LoginDtoRequest loginDtoRequest = new LoginDtoRequest("adminLogin", "adminPasswordWrong");
-        try {
             userService.login(loginDtoRequest, "uuid");
-            fail();
-        } catch (HospitalException ex) {
-            assertEquals(HospitalErrorCode.WRONG_PASSWORD, ex.getErrorCode());
-        }
     }
 }

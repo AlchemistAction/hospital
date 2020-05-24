@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.mapping.FetchType;
 
 import java.util.List;
+
 @Mapper
 public interface DoctorMapper {
 
@@ -56,6 +57,12 @@ public interface DoctorMapper {
             + " JOIN speciality on speciality.id = speciality_id" +
             " JOIN room on room.id = room_id WHERE user.id in" +
             " (select doctor_id from commission_doctor where commission_id = #{commission.id})")
+    @Results({
+            @Result(property = "id", column = "id"),
+            @Result(property = "schedule", column = "id", javaType = List.class,
+                    many = @Many(select = "net.thumbtack.school.hospital.dao.mybatis.mappers.DayScheduleMapper.getByDoctor",
+                            fetchType = FetchType.LAZY)),
+    })
     List<Doctor> getByCommission(@Param("commission") Commission commission);
 
     @Select("SELECT user.id, user.userType, firstName, lastName, patronymic, login, password,"

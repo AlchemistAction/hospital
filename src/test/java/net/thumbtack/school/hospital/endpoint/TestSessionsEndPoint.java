@@ -1,6 +1,7 @@
 package net.thumbtack.school.hospital.endpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.thumbtack.school.hospital.dto.request.LoginDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
@@ -18,17 +19,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = SessionsEndPoint.class)
 @ComponentScan("net.thumbtack.school.hospital")
 public class TestSessionsEndPoint {
-
-    private final ModelMapper modelMapper = new ModelMapper();
 
     @Autowired
     private MockMvc mvc;
@@ -39,21 +41,19 @@ public class TestSessionsEndPoint {
 
     @Test
     public void testLogin() throws Exception {
-        RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest("рома",
-                "ромагов", "patronymic", "regularAdmin", "adminLogin",
-                "adminPassword");
-
-        Admin admin = modelMapper.map(registerAdminDtoRequest, Admin.class);
-        admin.setId(13);
-
-        when(userService.login(any(), anyString())).thenReturn(modelMapper.map(admin, ReturnAdminDtoResponse.class));
+        LoginDtoRequest loginDtoRequest = new LoginDtoRequest("patientLogin", "password");
 
         MvcResult result = mvc.perform(post("/api/sessions")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(registerAdminDtoRequest)))
+                .content(mapper.writeValueAsString(loginDtoRequest)))
                 .andReturn();
 
         assertEquals(result.getResponse().getStatus(), 200);
+    }
+
+    @Test
+    public void testLogout() throws Exception {
+      mvc.perform(delete("/api/sessions")).andExpect(status().isOk());
     }
 
 }

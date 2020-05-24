@@ -32,7 +32,7 @@ public interface PatientMapper {
     void updatePatient(@Param("patient") Patient patient);
 
     @Select("SELECT user.id, user.userType, firstName, lastName, patronymic, login, password, email, address, phone"
-            + " FROM user, patient"
+            + " FROM user JOIN patient on user.id = patient.id"
             + " WHERE user.id in (select patient_id from ticket where ticket.id = #{ticket.id})")
     @Results({
             @Result(property = "id", column = "id"),

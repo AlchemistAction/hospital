@@ -4,18 +4,21 @@ import net.thumbtack.school.hospital.dao.dao.DoctorDao;
 import net.thumbtack.school.hospital.dao.dao.PatientDao;
 import net.thumbtack.school.hospital.dto.internal.AppointmentForDto;
 import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
-import net.thumbtack.school.hospital.dto.internal.PatientInfo;
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;
 import net.thumbtack.school.hospital.dto.request.AddPatientToCommissionDtoRequest;
 import net.thumbtack.school.hospital.dto.request.DeleteDoctorScheduleDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdateScheduleDtoRequest;
 import net.thumbtack.school.hospital.dto.response.AddPatientToCommissionDtoResponse;
+import net.thumbtack.school.hospital.dto.response.GetAllDoctorsDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
 import net.thumbtack.school.hospital.model.*;
-import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
-import net.thumbtack.school.hospital.model.exception.HospitalException;
+import net.thumbtack.school.hospital.validator.ErrorModel;
+import net.thumbtack.school.hospital.validator.exception.HospitalErrorCode;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +32,10 @@ import java.util.stream.Collectors;
 @Service
 public class DoctorService {
 
-    private DoctorDao doctorDao;
-    private PatientDao patientDao;
-    private ModelMapper modelMapper = new ModelMapper();
+    private final DoctorDao doctorDao;
+    private final PatientDao patientDao;
+    private final ModelMapper modelMapper = new ModelMapper();
+    private static final Logger LOGGER = LoggerFactory.getLogger(DoctorService.class);
 
     @Autowired
     public DoctorService(DoctorDao doctorDao, PatientDao patientDao) {
@@ -39,22 +43,29 @@ public class DoctorService {
         this.patientDao = patientDao;
     }
 
-    public ReturnDoctorDtoResponse registerDoctor(RegisterDoctorDtoRequest registerDoctorDtoRequest) {
-
+    public ReturnDoctorDtoResponse registerDoctor(RegisterDoctorDtoRequest registerDoctorDtoRequest) throws HospitalException {
+        LOGGER.info("Doctor Service register new Doctor {} ", registerDoctorDtoRequest);
         List<DaySchedule> schedule = createSchedule(registerDoctorDtoRequest.getWeekSchedule(),
                 registerDoctorDtoRequest.getWeekDaysSchedule(), registerDoctorDtoRequest.getDateStart(),
                 registerDoctorDtoRequest.getDateEnd(), registerDoctorDtoRequest.getDuration());
         Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
         doctor.setSchedule(schedule);
         doctor.setUserType(UserType.DOCTOR);
-
-        doctor = doctorDao.insert(doctor);
-        doctor.getSchedule()
-                .stream()
-                .sorted(Comparator.comparing(DaySchedule::getDate))
-                .forEach(daySchedule -> daySchedule.getAppointmentList()
-                        .sort(Comparator.comparing(Appointment::getTimeStart)));
-
+        try {
+            doctor = doctorDao.insert(doctor);
+        } catch (RuntimeException ex) {
+            String massage = ex.getMessage();
+            if (massage.contains("room")) {
+                LOGGER.debug("Doctor Service cant register new Doctor, wrong room {}, {}",
+                        registerDoctorDtoRequest.getRoom(), ex);
+                throw new HospitalException(new ErrorModel(HospitalErrorCode.DUPLICATE_ROOM, "room",
+                        "Room: " + "'" + registerDoctorDtoRequest.getRoom() + "'" + " is already occupied"));
+            } else
+                LOGGER.debug("Doctor Service cant register new Doctor, duplicate login {}, {}",
+                        registerDoctorDtoRequest.getLogin(), ex);
+            throw new HospitalException(new ErrorModel(HospitalErrorCode.DUPLICATE_USER, "login",
+                    "User with login: " + "'" + registerDoctorDtoRequest.getLogin() + "'" + " already exist"));
+        }
         Map<String, List<AppointmentForDto>> scheduleForResponse = createScheduleForResponse(doctor.getSchedule());
         ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
         result.setSchedule(scheduleForResponse);
@@ -64,6 +75,13 @@ public class DoctorService {
 
     public ReturnDoctorDtoResponse updateSchedule(UpdateScheduleDtoRequest updateScheduleDtoRequest, int id)
             throws HospitalException {
+        LOGGER.info("Doctor Service update schedule {}, {}", updateScheduleDtoRequest, id);
+        Doctor doctor = doctorDao.getById(id);
+        if (doctor == null) {
+            LOGGER.debug("Doctor Service cant update schedule, wrong ID {}, {}", updateScheduleDtoRequest, id);
+            throw new HospitalException(new ErrorModel(HospitalErrorCode.WRONG_ID, "id",
+                    "There is no doctor with ID: " + id));
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate startDate = LocalDate.parse(updateScheduleDtoRequest.getDateStart(), formatter);
         LocalDate endDate = LocalDate.parse(updateScheduleDtoRequest.getDateEnd(), formatter);
@@ -71,7 +89,7 @@ public class DoctorService {
         List<DaySchedule> newSchedule = createSchedule(updateScheduleDtoRequest.getWeekSchedule(),
                 updateScheduleDtoRequest.getWeekDaysSchedule(), updateScheduleDtoRequest.getDateStart(),
                 updateScheduleDtoRequest.getDateEnd(), updateScheduleDtoRequest.getDuration());
-        Doctor doctor = doctorDao.getById(id);
+
         List<DaySchedule> scheduleFromDb = doctor.getSchedule();
 
         boolean isOutOfReach = endDate.isBefore(scheduleFromDb.get(0).getDate()) ||
@@ -84,29 +102,29 @@ public class DoctorService {
                     filter(dayScheduleFromDb -> dayScheduleFromDb.getDate().isAfter(startDate) &&
                             dayScheduleFromDb.getDate().isBefore(endDate)).collect(Collectors.toList());
 
-            boolean hasFreeDate = datesToChange.stream().anyMatch(dayScheduleFromDb -> dayScheduleFromDb.getAppointmentList()
-                    .stream().allMatch(appointment -> appointment.getState().equals(AppointmentState.FREE)));
+            boolean hasFreeDate = datesToChange.stream()
+                    .allMatch(dayScheduleFromDb -> dayScheduleFromDb.getAppointmentList()
+                            .stream()
+                            .allMatch(appointment -> appointment.getState().equals(AppointmentState.FREE)));
             if (hasFreeDate) {
                 int doctorId = doctor.getId();
                 datesToChange.forEach(dayScheduleFromDb -> {
-                    boolean isFree = dayScheduleFromDb.getAppointmentList().stream().
-                            allMatch(appointment -> appointment.getState().equals(AppointmentState.FREE));
-                    if (isFree) {
-                        Optional<DaySchedule> optionalNewDaySchedule = newSchedule.stream().
-                                filter(daySchedule -> daySchedule.getDate().
-                                        equals(dayScheduleFromDb.getDate())).findFirst();
-                        if (optionalNewDaySchedule.isPresent()) {
-                            DaySchedule newDaySchedule = doctorDao.updateDaySchedule(
-                                    doctorId, dayScheduleFromDb, optionalNewDaySchedule.get());
+                    Optional<DaySchedule> optionalNewDaySchedule = newSchedule.stream().
+                            filter(daySchedule -> daySchedule.getDate().
+                                    equals(dayScheduleFromDb.getDate())).findFirst();
+                    if (optionalNewDaySchedule.isPresent()) {
+                        DaySchedule newDaySchedule = doctorDao.updateDaySchedule(
+                                doctorId, dayScheduleFromDb, optionalNewDaySchedule.get());
 
-                            scheduleFromDb.remove(dayScheduleFromDb);
-                            scheduleFromDb.add(newDaySchedule);
-                        }
+                        scheduleFromDb.remove(dayScheduleFromDb);
+                        scheduleFromDb.add(newDaySchedule);
                     }
                 });
                 doctor.setSchedule(scheduleFromDb);
             } else {
-                throw new HospitalException(HospitalErrorCode.CAN_NOT_UPDATE_SCHEDULE);
+                LOGGER.debug("Doctor Service cant update schedule, no free date {}, {}", updateScheduleDtoRequest, id);
+                throw new HospitalException(new ErrorModel(HospitalErrorCode.CAN_NOT_UPDATE_SCHEDULE,
+                        "schedule", "All dates are already occupied"));
             }
         }
         Map<String, List<AppointmentForDto>> scheduleForResponse = createScheduleForResponse(doctor.getSchedule());
@@ -115,50 +133,102 @@ public class DoctorService {
         return result;
     }
 
-    public ReturnDoctorDtoResponse getDoctor(int doctorId) {
+    public ReturnDoctorDtoResponse getDoctor(int doctorId, String schedule, String startDate, String endDate,
+                                             int id, UserType userType) throws HospitalException {
+        LOGGER.info("Doctor Service get Doctor {}, {}, {}, {}, {}, {}",
+                doctorId, schedule, startDate, endDate, id, userType);
         Doctor doctor = doctorDao.getById(doctorId);
+        if (doctor == null) {
+            LOGGER.debug("Doctor Service cant get Doctor, wrong ID {}", doctorId);
+            throw new HospitalException(new ErrorModel(HospitalErrorCode.WRONG_ID, "id",
+                    "There is no doctor with ID: " + doctorId));
+        }
+        if (schedule.equals("no")) {
+            ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+            result.setSchedule(new HashMap<>());
+            return result;
+        }
+        LocalDate start = getStartDateForResponse(startDate);
+        LocalDate end = getEndDateForResponse(endDate);
 
-        doctor.getSchedule()
-                .stream()
-                .sorted(Comparator.comparing(DaySchedule::getDate))
-                .forEach(daySchedule -> daySchedule.getAppointmentList()
-                        .sort(Comparator.comparing(Appointment::getTimeStart)));
+        List<DaySchedule> newSchedule = getScheduleWithinDatePeriod(doctor.getSchedule(), start, end);
+        doctor.setSchedule(newSchedule);
 
+        if (userType.equals(UserType.PATIENT)) {
+            deleteOtherPatientInfo(id, doctor);
+        }
         Map<String, List<AppointmentForDto>> scheduleForResponse = createScheduleForResponse(doctor.getSchedule());
         ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
         result.setSchedule(scheduleForResponse);
-
         return result;
     }
 
-    public List<ReturnDoctorDtoResponse> getAllDoctors(String speciality) {
+    public GetAllDoctorsDtoResponse getAllDoctors(String speciality, String schedule, String startDate,
+                                                  String endDate, int id, UserType userType) {
+        LOGGER.info("Doctor Service get all Doctors {}, {}, {}, {}, {}, {}",
+                speciality, schedule, startDate, endDate, id, userType);
         List<Doctor> doctorList;
-        if (speciality.equals("null")) {
+        if (speciality.equals("no")) {
             doctorList = doctorDao.getAll();
         } else {
             doctorList = doctorDao.getAllBySpeciality(speciality);
         }
         List<ReturnDoctorDtoResponse> resultList = new ArrayList<>();
+        if (schedule.equals("no")) {
+            for (Doctor doctor : doctorList) {
+                ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+                result.setSchedule(new HashMap<>());
+                resultList.add(result);
+            }
+            return new GetAllDoctorsDtoResponse(resultList);
+        }
+        LocalDate start = getStartDateForResponse(startDate);
+        LocalDate end = getEndDateForResponse(endDate);
+
         for (Doctor doctor : doctorList) {
+            List<DaySchedule> newSchedule = getScheduleWithinDatePeriod(doctor.getSchedule(), start, end);
+            doctor.setSchedule(newSchedule);
+            if (userType.equals(UserType.PATIENT)) {
+                deleteOtherPatientInfo(id, doctor);
+            }
+            Map<String, List<AppointmentForDto>> scheduleForResponse = createScheduleForResponse(doctor.getSchedule());
             ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
-            result.setSchedule(new HashMap<>());
+            result.setSchedule(scheduleForResponse);
             resultList.add(result);
         }
-        return resultList;
+        return new GetAllDoctorsDtoResponse(resultList);
     }
 
     public void deleteDoctorScheduleSinceDate(DeleteDoctorScheduleDtoRequest dtoRequest, int id) throws HospitalException {
+        LOGGER.info("Doctor Service delete Doctor schedule since date {}, {}", dtoRequest, id);
         Doctor doctor = doctorDao.getById(id);
         if (doctor == null) {
-            throw new HospitalException(HospitalErrorCode.WRONG_ID);
+            LOGGER.debug("Doctor Service cant delete Doctor schedule since date, wrong ID {}", id);
+            throw new HospitalException(new ErrorModel(HospitalErrorCode.WRONG_ID, "id",
+                    "There is no doctor with ID: " + id));
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate lastDateOfWork = LocalDate.parse(dtoRequest.getDate(), formatter);
+
+        massagePatientsAboutCancelledAppointment(doctor);
         doctorDao.deleteScheduleSinceDate(id, lastDateOfWork);
+    }
+
+    private void massagePatientsAboutCancelledAppointment(Doctor doctor) {
+        doctor.getSchedule().stream()
+                .flatMap(daySchedule -> daySchedule.getAppointmentList().stream())
+                .forEach(appointment -> {
+                    if (appointment.getTicket() != null) {
+                        Patient patient = appointment.getTicket().getPatient();
+                        LOGGER.info("Massage about cancelled appointment was sent to patient email {} and phone {}",
+                                patient.getEmail(), patient.getPhone());
+                    }
+                });
     }
 
     public AddPatientToCommissionDtoResponse addPatientToCommission(
             AddPatientToCommissionDtoRequest dtoRequest, int id) throws HospitalException {
+        LOGGER.info("Doctor Service add Patient To Commission {}, {}", dtoRequest, id);
         Set<Integer> doctorIds = new HashSet<>(Arrays.asList(dtoRequest.getDoctorIds()));
         doctorIds.add(id);
 
@@ -180,7 +250,7 @@ public class DoctorService {
         Commission commission = new Commission(dateOfCommission, startOfCommission, endOfCommission,
                 dtoRequest.getRoom(), doctorList, new Ticket(ticketNumber, patient));
 
-        changeAllAppointmentsState(dateOfCommission, startOfCommission, endOfCommission, doctorList, commission);
+        changeAllAppointmentsState(dateOfCommission, startOfCommission, endOfCommission, doctorList);
         doctorDao.insertCommission(commission);
 
         return new AddPatientToCommissionDtoResponse(ticketNumber,
@@ -188,13 +258,50 @@ public class DoctorService {
                 dtoRequest.getDate(), dtoRequest.getDuration());
     }
 
+    private LocalDate getStartDateForResponse(String startDate) {
+        if (startDate.equals("no")) {
+            return LocalDate.now();
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        return LocalDate.parse(startDate, formatter);
+    }
+
+    private LocalDate getEndDateForResponse(String endDate) {
+        if (endDate.equals("no")) {
+            final int twoMonths = 60;
+            return LocalDate.now().plusDays(twoMonths);
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        return LocalDate.parse(endDate, formatter);
+    }
+
+    private List<DaySchedule> getScheduleWithinDatePeriod(List<DaySchedule> schedule, LocalDate start, LocalDate end) {
+        return schedule.stream()
+                .filter(daySchedule -> daySchedule.getDate().isAfter(start.minusDays(1)) &&
+                        daySchedule.getDate().isBefore(end.plusDays(1)))
+                .collect(Collectors.toList());
+    }
+
+    private void deleteOtherPatientInfo(int id, Doctor doctor) {
+        doctor.getSchedule().stream()
+                .flatMap(daySchedule -> daySchedule.getAppointmentList().stream())
+                .forEach(appointment -> {
+                    if (appointment.getTicket() != null) {
+                        Patient patient = appointment.getTicket().getPatient();
+                        if (patient.getId() != id) {
+                            appointment.getTicket().setPatient(null);
+                        }
+                    }
+                });
+    }
+
     private void changeAllAppointmentsState(
             LocalDate dateOfCommission, LocalTime startOfCommission,
-            LocalTime endOfCommission, List<Doctor> doctorList, Commission commission) throws HospitalException {
+            LocalTime endOfCommission, List<Doctor> doctorList) throws HospitalException {
 
         List<Appointment> appointments = new ArrayList<>();
+
         for (Doctor doctor : doctorList) {
-            doctor.getCommissionList().add(commission);
             Optional<DaySchedule> daySchedule = doctor.getSchedule()
                     .stream()
                     .filter(d -> d.getDate().equals(dateOfCommission))
@@ -209,14 +316,18 @@ public class DoctorService {
 
                 for (Appointment appointment : appointmentList) {
                     if (!appointment.getState().equals(AppointmentState.FREE)) {
-                        throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
+                        LOGGER.debug("Doctor Service cant add Patient To Commission. Doctor with ID {} has no free time",
+                                doctor.getId());
+                        throw new HospitalException(new ErrorModel(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION,
+                                "doctorIds", "Doctor with ID: " + doctor.getId() +
+                                " has no free time for commission"));
                     }
                     appointment.setState(AppointmentState.COMMISSION);
                     appointments.add(appointment);
                 }
             }
         }
-        doctorDao.changeAllAppointmentsState(appointments);
+        doctorDao.changeAllAppointmentsStateToAppointmentOrCommission(appointments);
     }
 
     private String createTicketNumber(Set<Integer> doctorIds, LocalDate dateOfCommission, LocalTime startOfCommission) {
@@ -252,7 +363,9 @@ public class DoctorService {
         if (date.equals(dateOfCommission)) {
             if (timeEnd.isAfter(startOfCommission) &&
                     timeStart.isBefore(endOfCommission)) {
-                throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION);
+                LOGGER.debug("Doctor Service cant add Patient To Commission. Patient has no free time");
+                throw new HospitalException(new ErrorModel(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION,
+                        "patientId", "Patient has no free time for commission"));
             }
         }
     }
@@ -327,8 +440,13 @@ public class DoctorService {
 
     private Map<String, List<AppointmentForDto>> createScheduleForResponse(List<DaySchedule> schedule) {
 
+        schedule.sort(Comparator.comparing(DaySchedule::getDate));
+
+        schedule.forEach(daySchedule -> daySchedule.getAppointmentList()
+                .sort(Comparator.comparing(Appointment::getTimeStart)));
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        Map<String, List<AppointmentForDto>> fullMap = new HashMap<>();
+        Map<String, List<AppointmentForDto>> fullMap = new LinkedHashMap<>();
         for (DaySchedule daySchedule : schedule) {
 
             List<AppointmentForDto> appList = new ArrayList<>();
@@ -337,11 +455,15 @@ public class DoctorService {
                 if (appointment.getTicket() == null) {
                     appList.add(new AppointmentForDto(appointment.getTimeStart().toString()));
                 } else {
-                    Patient patient = patientDao.getById(appointment.getTicket().getId());
-                    PatientInfo patientInfo = new PatientInfo(patient.getId(), patient.getFirstName(),
-                            patient.getLastName(), patient.getPatronymic(), patient.getEmail(), patient.getAddress(),
-                            patient.getPhone());
-                    appList.add(new AppointmentForDto(appointment.getTimeStart().toString(), patientInfo));
+                    Patient patient = appointment.getTicket().getPatient();
+                    if (patient == null) {
+                        appList.add(new AppointmentForDto(appointment.getTimeStart().toString(),
+                                "Already occupied"));
+                    } else {
+                        appList.add(new AppointmentForDto(appointment.getTimeStart().toString(), patient.getId(),
+                                patient.getFirstName(), patient.getLastName(), patient.getPatronymic(),
+                                patient.getEmail(), patient.getAddress(), patient.getPhone()));
+                    }
                 }
             }
             fullMap.put(daySchedule.getDate().format(formatter), appList);

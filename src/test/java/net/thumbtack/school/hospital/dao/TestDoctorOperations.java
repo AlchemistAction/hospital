@@ -1,6 +1,7 @@
 package net.thumbtack.school.hospital.dao;
 
 import net.thumbtack.school.hospital.model.*;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.junit.Test;
 
 
@@ -29,15 +30,45 @@ public class TestDoctorOperations extends TestBase {
 
             Doctor doctorFromDB = doctorDao.getById(doctor.getId());
             checkDoctorFields(doctor, doctorFromDB);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | HospitalException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testGetDoctorByLogin() {
+        try {
+            List<DaySchedule> schedule = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
+
+            Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
+                    "patronymic", "doctorLogin", "doctorPass", "хирург",
+                    "100", schedule);
+
+            Doctor doctorFromDB = doctorDao.getByLogin(doctor.getLogin());
+            checkDoctorFields(doctor, doctorFromDB);
+        } catch (RuntimeException | HospitalException e) {
             fail();
         }
     }
 
     @Test(expected = RuntimeException.class)
-    public void testInsertDoctorWithNullFirstName() {
+    public void testInsertDoctorWithNullFirstName() throws HospitalException {
         Doctor doctor = new Doctor(UserType.DOCTOR, null, "patronymic",
                 null, "doctorLogin", "doctorPass", "хирург", "100",
+                new ArrayList<>());
+        doctorDao.insert(doctor);
+    }
+
+    @Test(expected = HospitalException.class)
+    public void testInsertDoctorWithWrongRoom() throws HospitalException {
+        Doctor doctor = new Doctor(UserType.DOCTOR, "name", "patronymic",
+                null, "doctorLogin", "doctorPass", "хирург", "3",
                 new ArrayList<>());
         doctorDao.insert(doctor);
     }
@@ -88,7 +119,7 @@ public class TestDoctorOperations extends TestBase {
             checkDoctorFields(doctorList.get(1), doctorListFromDb.get(1));
             checkDoctorFields(doctorList.get(2), doctorListFromDb.get(2));
 
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | HospitalException e) {
             fail();
         }
     }
@@ -138,7 +169,7 @@ public class TestDoctorOperations extends TestBase {
             checkDoctorFields(doctorList.get(0), doctorListFromDb.get(0));
             checkDoctorFields(doctorList.get(1), doctorListFromDb.get(1));
 
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | HospitalException e) {
             fail();
         }
     }
@@ -161,9 +192,80 @@ public class TestDoctorOperations extends TestBase {
             doctorDao.delete(doctor);
             Doctor doctorFromDB = doctorDao.getById(doctor.getId());
             assertNull(doctorFromDB);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | HospitalException e) {
             fail();
         }
+    }
+
+    @Test
+    public void testChangeAppointmentState() {
+        try {
+            List<DaySchedule> schedule = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
+
+            Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
+                    "patronymic", "doctorLogin", "doctorPass", "хирург",
+                    "100", schedule);
+
+            doctor.getSchedule().get(0).getAppointmentList().get(0).setState(AppointmentState.COMMISSION);
+
+            doctorDao.changeAppointmentStateToAppointmentOrCommission(doctor.getSchedule().get(0).getAppointmentList().get(0));
+            Doctor doctorFromDB = doctorDao.getById(doctor.getId());
+            checkDoctorFields(doctor, doctorFromDB);
+        } catch (RuntimeException | HospitalException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testChangeAllAppointmentsState() {
+        try {
+            List<DaySchedule> schedule = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
+
+            Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
+                    "patronymic", "doctorLogin", "doctorPass", "хирург",
+                    "100", schedule);
+
+            doctor.getSchedule().get(0).getAppointmentList().get(0).setState(AppointmentState.COMMISSION);
+            doctor.getSchedule().get(0).getAppointmentList().get(1).setState(AppointmentState.COMMISSION);
+
+            doctorDao.changeAllAppointmentsStateToAppointmentOrCommission(doctor.getSchedule().get(0).getAppointmentList());
+            Doctor doctorFromDB = doctorDao.getById(doctor.getId());
+            checkDoctorFields(doctor, doctorFromDB);
+        } catch (RuntimeException | HospitalException e) {
+            fail();
+        }
+    }
+
+    @Test(expected = HospitalException.class)
+    public void testChangeAllAppointmentsStateFail() throws HospitalException {
+            List<DaySchedule> schedule = Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1), Arrays.asList(
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.COMMISSION),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.FREE))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), Arrays.asList(
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.FREE),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.FREE))));
+
+            Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
+                    "patronymic", "doctorLogin", "doctorPass", "хирург",
+                    "100", schedule);
+
+            doctor.getSchedule().get(0).getAppointmentList().get(0).setState(AppointmentState.COMMISSION);
+            doctor.getSchedule().get(0).getAppointmentList().get(1).setState(AppointmentState.COMMISSION);
+
+            doctorDao.changeAllAppointmentsStateToAppointmentOrCommission(doctor.getSchedule().get(0).getAppointmentList());
     }
 
     @Test
@@ -197,7 +299,7 @@ public class TestDoctorOperations extends TestBase {
 
             Doctor doctorFromDB = doctorDao.getById(doctor.getId());
             checkDoctorFields(doctor, doctorFromDB);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | HospitalException e) {
             fail();
         }
     }
@@ -232,7 +334,7 @@ public class TestDoctorOperations extends TestBase {
             doctorFromDB.getSchedule().sort(Comparator.comparing(DaySchedule::getDate));
 
             checkDoctorFields(doctor, doctorFromDB);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | HospitalException e) {
             fail();
         }
     }
@@ -314,7 +416,7 @@ public class TestDoctorOperations extends TestBase {
 
             Doctor doctorFromDB = doctorDao.getById(doctor1.getId());
             checkDoctorFields(doctor1, doctorFromDB);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | HospitalException e) {
             fail();
         }
     }

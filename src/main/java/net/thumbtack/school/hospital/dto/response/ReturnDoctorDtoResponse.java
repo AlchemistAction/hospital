@@ -15,22 +15,6 @@ public class ReturnDoctorDtoResponse extends ReturnUserDtoResponse {
     public ReturnDoctorDtoResponse() {
     }
 
-    public ReturnDoctorDtoResponse(int id, String firstName, String lastName, String patronymic, String speciality,
-                                   String room, Map<String, List<AppointmentForDto>> schedule) {
-        super(id, firstName, lastName, patronymic);
-        this.speciality = speciality;
-        this.room = room;
-        this.schedule = schedule;
-    }
-
-    public ReturnDoctorDtoResponse(int id, String firstName, String lastName, String patronymic, String speciality,
-                                   String room) {
-        super(id, firstName, lastName, patronymic);
-        this.speciality = speciality;
-        this.room = room;
-
-    }
-
     public String getSpeciality() {
         return speciality;
     }

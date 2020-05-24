@@ -4,6 +4,7 @@ import net.thumbtack.school.hospital.dao.dao.*;
 import net.thumbtack.school.hospital.dao.mybatis.daoimpl.*;
 import net.thumbtack.school.hospital.dao.mybatis.utils.MyBatisUtils;
 import net.thumbtack.school.hospital.model.*;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -50,7 +51,7 @@ public class TestBase {
 
     protected Doctor insertDoctor(UserType userType, String firstName, String lastName, String patronymic,
                                   String login, String password, String speciality, String room,
-                                  List<DaySchedule> schedule) {
+                                  List<DaySchedule> schedule) throws HospitalException {
         Doctor doctor = new Doctor(userType, firstName, lastName, patronymic, login, password,
                 speciality, room, schedule);
 

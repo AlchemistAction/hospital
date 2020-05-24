@@ -13,7 +13,7 @@ public interface AppointmentMapper {
     @Insert({"<script>",
             "INSERT INTO appointment (day_schedule_id, timeStart, timeEnd, state) VALUES",
             "<foreach item='item' collection='list' separator=','>",
-            "( #{daySchedule.id}, #{item.timeStart}, #{item.timeEnd}, #{item.state})",
+            "(#{daySchedule.id}, #{item.timeStart}, #{item.timeEnd}, #{item.state})",
             "</foreach>",
             "</script>"})
     @Options(useGeneratedKeys = true, keyProperty = "list.id", keyColumn = "appointment.id")
@@ -42,18 +42,10 @@ public interface AppointmentMapper {
     })
     Appointment getByTicket(@Param("ticket") Ticket ticket);
 
-    @Update("UPDATE appointment SET state = #{appointment.state} WHERE appointment.id = #{appointment.id}")
-    Integer changeState(@Param("appointment") Appointment appointment);
+    @Update("UPDATE appointment SET state = #{appointment.state} WHERE appointment.id = #{appointment.id} and state = 'FREE'")
+    Integer changeStateToAppointmentOrCommission(@Param("appointment") Appointment appointment);
 
-    @Insert({"<script>",
-            "<foreach item='item' collection='list' separator=','>",
-            "UPDATE appointment",
-            "<set>",
-                    "state = #{item.state}",
-            "</set>",
-            "WHERE appointment.id = #{item.id}",
-            "</foreach>",
-            "</script>"})
-    Integer changeAllState(@Param("list") List<Appointment> appointments);
+    @Update("UPDATE appointment SET state = #{appointment.state} WHERE appointment.id = #{appointment.id}")
+    Integer changeStateToFree(@Param("appointment") Appointment appointment);
 }
 

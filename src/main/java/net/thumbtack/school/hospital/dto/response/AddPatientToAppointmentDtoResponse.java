@@ -1,5 +1,9 @@
 package net.thumbtack.school.hospital.dto.response;
 
+import net.thumbtack.school.hospital.model.Doctor;
+
+import java.util.Objects;
+
 public class AddPatientToAppointmentDtoResponse {
 
     private String ticket;
@@ -12,15 +16,17 @@ public class AddPatientToAppointmentDtoResponse {
     private String date;
     private String time;
 
-    public AddPatientToAppointmentDtoResponse(String ticket, int doctorId, String firstName, String lastName,
-                                              String patronymic, String speciality, String room, String date, String time) {
+    public AddPatientToAppointmentDtoResponse() {
+    }
+
+    public AddPatientToAppointmentDtoResponse(String ticket, Doctor doctor, String date, String time) {
         this.ticket = ticket;
-        this.doctorId = doctorId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.patronymic = patronymic;
-        this.speciality = speciality;
-        this.room = room;
+        this.doctorId = doctor.getId();
+        this.firstName = doctor.getFirstName();
+        this.lastName = doctor.getLastName();
+        this.patronymic = doctor.getPatronymic();
+        this.speciality = doctor.getSpeciality();
+        this.room = doctor.getRoom();
         this.date = date;
         this.time = time;
     }
@@ -87,5 +93,26 @@ public class AddPatientToAppointmentDtoResponse {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AddPatientToAppointmentDtoResponse)) return false;
+        AddPatientToAppointmentDtoResponse that = (AddPatientToAppointmentDtoResponse) o;
+        return doctorId == that.doctorId &&
+                Objects.equals(getTicket(), that.getTicket()) &&
+                Objects.equals(getFirstName(), that.getFirstName()) &&
+                Objects.equals(getLastName(), that.getLastName()) &&
+                Objects.equals(getPatronymic(), that.getPatronymic()) &&
+                Objects.equals(getSpeciality(), that.getSpeciality()) &&
+                Objects.equals(getRoom(), that.getRoom()) &&
+                Objects.equals(getDate(), that.getDate()) &&
+                Objects.equals(getTime(), that.getTime());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTicket(), doctorId, getFirstName(), getLastName(), getPatronymic(), getSpeciality(), getRoom(), getDate(), getTime());
     }
 }

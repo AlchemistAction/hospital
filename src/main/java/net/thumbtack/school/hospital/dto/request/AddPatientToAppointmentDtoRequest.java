@@ -7,6 +7,9 @@ public class AddPatientToAppointmentDtoRequest {
     private String date;
     private String time;
 
+    public AddPatientToAppointmentDtoRequest() {
+    }
+
     public AddPatientToAppointmentDtoRequest(String speciality, String date, String time) {
         this.speciality = speciality;
         this.date = date;
@@ -21,6 +24,10 @@ public class AddPatientToAppointmentDtoRequest {
 
     public int getDoctorId() {
         return doctorId;
+    }
+
+    public void setDoctorId(int doctorId) {
+        this.doctorId = doctorId;
     }
 
     public String getSpeciality() {

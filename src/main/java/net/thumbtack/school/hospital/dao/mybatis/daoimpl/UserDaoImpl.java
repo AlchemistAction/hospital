@@ -20,7 +20,7 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
             try {
                 getUserMapper(sqlSession).delete(user);
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't delete User {} {}", user, ex);
+                LOGGER.debug("Can't delete User {} {}", user, ex);
                 sqlSession.rollback();
                 throw ex;
             }
@@ -33,9 +33,6 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
         LOGGER.debug("DAO UserType by Login {}", login);
         try (SqlSession sqlSession = getSession()) {
             return getUserMapper(sqlSession).getByLogin(login);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't getUserType by Login {}, {}", login, ex);
-            throw ex;
         }
     }
 
@@ -46,7 +43,7 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
             try {
                 getSessionMapper(sqlSession).insert(id, uuid);
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't set Session {}, {}, {}", id, uuid, ex);
+                LOGGER.debug("Can't set Session {}, {}, {}", id, uuid, ex);
                 sqlSession.rollback();
                 throw ex;
             }
@@ -61,7 +58,7 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
             try {
                 getSessionMapper(sqlSession).delete(uuid);
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't delete SessionId {} {}", uuid, ex);
+                LOGGER.debug("Can't delete SessionId {} {}", uuid, ex);
                 sqlSession.rollback();
                 throw ex;
             }
@@ -74,9 +71,6 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
         LOGGER.debug("DAO get UserType by uuid {}", uuid);
         try (SqlSession sqlSession = getSession()) {
             return getUserMapper(sqlSession).getUserTypeBySession(uuid);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get UserType by uuid {}, {}", uuid, ex);
-            throw ex;
         }
     }
 
@@ -85,9 +79,6 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
         LOGGER.debug("DAO get ID by uuid {}", uuid);
         try (SqlSession sqlSession = getSession()) {
             return getSessionMapper(sqlSession).getIdBySession(uuid);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get ID by uuid {}, {}", uuid, ex);
-            throw ex;
         }
     }
 
@@ -98,7 +89,7 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
             try {
                 getSessionMapper(sqlSession).deleteAll();
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't delete all Sessions {}", ex);
+                LOGGER.debug("Can't delete all Sessions {}", ex);
                 sqlSession.rollback();
                 throw ex;
             }

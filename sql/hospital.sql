@@ -136,5 +136,3 @@ INSERT INTO user
  insert into admin
  VALUES(LAST_INSERT_ID(),"superAdmin");
 commit;
-
-select*from session;

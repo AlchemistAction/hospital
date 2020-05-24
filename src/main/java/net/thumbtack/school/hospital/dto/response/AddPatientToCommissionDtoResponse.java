@@ -1,5 +1,8 @@
 package net.thumbtack.school.hospital.dto.response;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class AddPatientToCommissionDtoResponse {
 
     private String ticket;
@@ -19,6 +22,9 @@ public class AddPatientToCommissionDtoResponse {
         this.date = date;
         this.time = time;
         this.duration = duration;
+    }
+
+    public AddPatientToCommissionDtoResponse() {
     }
 
     public String getTicket() {
@@ -75,5 +81,26 @@ public class AddPatientToCommissionDtoResponse {
 
     public void setDuration(String duration) {
         this.duration = duration;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AddPatientToCommissionDtoResponse)) return false;
+        AddPatientToCommissionDtoResponse that = (AddPatientToCommissionDtoResponse) o;
+        return getPatientId() == that.getPatientId() &&
+                Objects.equals(getTicket(), that.getTicket()) &&
+                Arrays.equals(getDoctorIds(), that.getDoctorIds()) &&
+                Objects.equals(getRoom(), that.getRoom()) &&
+                Objects.equals(getDate(), that.getDate()) &&
+                Objects.equals(getTime(), that.getTime()) &&
+                Objects.equals(getDuration(), that.getDuration());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(getTicket(), getPatientId(), getRoom(), getDate(), getTime(), getDuration());
+        result = 31 * result + Arrays.hashCode(getDoctorIds());
+        return result;
     }
 }

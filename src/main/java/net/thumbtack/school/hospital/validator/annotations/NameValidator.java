@@ -1,4 +1,4 @@
-package net.thumbtack.school.hospital.validator;
+package net.thumbtack.school.hospital.validator.annotations;
 
 
 import net.thumbtack.school.hospital.ApplicationProperties;

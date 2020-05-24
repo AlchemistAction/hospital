@@ -17,9 +17,6 @@ public class TicketDaoImpl extends BaseDaoImpl implements TicketDao {
         LOGGER.debug("DAO get Ticket by number {}", ticketNumber);
         try (SqlSession sqlSession = getSession()) {
             return getTicketMapper(sqlSession).getByNumber(ticketNumber);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get Ticket by number {}, {}", ticketNumber, ex);
-            throw ex;
         }
     }
 
@@ -30,7 +27,7 @@ public class TicketDaoImpl extends BaseDaoImpl implements TicketDao {
             try {
                 getTicketMapper(sqlSession).delete(ticket);
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't delete Ticket {} {}", ticket, ex);
+                LOGGER.debug("Can't delete Ticket {} {}", ticket, ex);
                 sqlSession.rollback();
                 throw ex;
             }

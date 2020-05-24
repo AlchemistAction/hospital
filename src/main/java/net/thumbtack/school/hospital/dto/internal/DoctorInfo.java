@@ -10,6 +10,9 @@ public class DoctorInfo {
     private String patronymic;
     private String speciality;
 
+    public DoctorInfo() {
+    }
+
     public DoctorInfo(int doctorId, String firstName, String lastName, String patronymic, String speciality) {
         this.doctorId = doctorId;
         this.firstName = firstName;
@@ -18,11 +21,12 @@ public class DoctorInfo {
         this.speciality = speciality;
     }
 
-    public DoctorInfo() {
-    }
-
     public int getDoctorId() {
         return doctorId;
+    }
+
+    public void setDoctorId(int doctorId) {
+        this.doctorId = doctorId;
     }
 
     public String getFirstName() {

@@ -4,8 +4,9 @@ import net.thumbtack.school.hospital.dao.dao.PatientDao;
 import net.thumbtack.school.hospital.model.Appointment;
 import net.thumbtack.school.hospital.model.Patient;
 import net.thumbtack.school.hospital.model.Ticket;
-import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
-import net.thumbtack.school.hospital.model.exception.HospitalException;
+import net.thumbtack.school.hospital.validator.ErrorModel;
+import net.thumbtack.school.hospital.validator.exception.HospitalErrorCode;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +41,6 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
         LOGGER.debug("DAO get Patient by Id {}", id);
         try (SqlSession sqlSession = getSession()) {
             return getPatientMapper(sqlSession).getById(id);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get Patient {}, {}", id, ex);
-            throw ex;
         }
     }
 
@@ -51,9 +49,6 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
         LOGGER.debug("DAO get Patient by login {}", login);
         try (SqlSession sqlSession = getSession()) {
             return getPatientMapper(sqlSession).getByLogin(login);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get Patient {}, {}", login, ex);
-            throw ex;
         }
     }
 
@@ -78,14 +73,16 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
         LOGGER.debug("DAO add Patient to Appointment {}, {}, {}", appointment, appointment.getTicket(), patient);
         try (SqlSession sqlSession = getSession()) {
             try {
-                int result = getAppointmentMapper(sqlSession).changeState(appointment);
+                int result = getAppointmentMapper(sqlSession).changeStateToAppointmentOrCommission(appointment);
                 if (result != 1) {
                     sqlSession.rollback();
-                    throw new HospitalException(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_APPOINTMENT);
+                    throw new HospitalException(new ErrorModel(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_APPOINTMENT,
+                            "time",
+                            "Appointment on time: " + appointment.getTimeStart() + " is already occupied"));
                 }
                 getTicketMapper(sqlSession).insertForAppointment(appointment, appointment.getTicket(), patient);
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't add Patient to Appointment {}, {}, {}, {}", appointment, appointment.getTicket(),
+                LOGGER.debug("Can't add Patient to Appointment {}, {}, {}, {}", appointment, appointment.getTicket(),
                         patient, ex);
                 sqlSession.rollback();
                 throw ex;
@@ -99,9 +96,6 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
         LOGGER.debug("DAO get all Tickets by Patient {}", patient);
         try (SqlSession sqlSession = getSession()) {
             return getTicketMapper(sqlSession).getAllByPatient(patient);
-        } catch (RuntimeException ex) {
-            LOGGER.info("Can't get all Tickets by Patient {}, {}", patient, ex);
-            throw ex;
         }
     }
 
@@ -112,13 +106,11 @@ public class PatientDaoImpl extends BaseDaoImpl implements PatientDao {
             try {
                 getPatientMapper(sqlSession).deleteAll();
             } catch (RuntimeException ex) {
-                LOGGER.info("Can't delete all Patients {}", ex);
+                LOGGER.debug("Can't delete all Patients {}", ex);
                 sqlSession.rollback();
                 throw ex;
             }
             sqlSession.commit();
         }
     }
-
-
 }

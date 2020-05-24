@@ -18,7 +18,7 @@ public interface CommissionMapper {
     Integer insert(@Param("commission") Commission commission);
 
     @Select("SELECT commission.id, commission.date, commission.timeStart, commission.timeEnd, room" +
-            " FROM commission, room where room.id = room_id and commission.id" +
+            " FROM commission JOIN room on room.id = commission.room_id WHERE commission.id" +
             " in (select commission_id from commission_doctor where doctor_id = #{doctor.id})")
     @Results({
             @Result(property = "id", column = "id"),
@@ -32,7 +32,7 @@ public interface CommissionMapper {
     Commission getByDoctor(@Param("doctor") Doctor doctor);
 
     @Select("SELECT commission.id, commission.date, commission.timeStart, commission.timeEnd, room" +
-            " FROM commission, room where room.id = room_id and commission.id" +
+            " FROM commission JOIN room on room.id = commission.room_id WHERE commission.id" +
             " in (select commission_id from ticket where ticket.id = #{ticket.id})")
     @Results({
             @Result(property = "id", column = "id"),

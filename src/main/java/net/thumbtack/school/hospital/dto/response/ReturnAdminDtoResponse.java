@@ -9,13 +9,12 @@ public class ReturnAdminDtoResponse extends ReturnUserDtoResponse {
     public ReturnAdminDtoResponse() {
     }
 
-    public ReturnAdminDtoResponse(int id, String firstName, String lastName, String patronymic, String position) {
-        super(id, firstName, lastName, patronymic);
-        this.position = position;
-    }
-
     public String getPosition() {
         return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     @Override

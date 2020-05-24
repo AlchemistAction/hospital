@@ -1,73 +1,31 @@
 package net.thumbtack.school.hospital.dto.request;
 
-import net.thumbtack.school.hospital.validator.Name;
 
-public class RegisterPatientDtoRequest {
+import net.thumbtack.school.hospital.validator.annotations.Phone;
 
-    @Name
-    private String firstName;
-    @Name
-    private String lastName;
-    private String patronymic;
-    private String login;
-    private String password;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+public class RegisterPatientDtoRequest extends RegisterUserDtoRequest {
+
+    @Email
     private String email;
+    @NotBlank
+    @NotNull
     private String address;
+    @Phone(field = "Phone")
     private String phone;
 
     public RegisterPatientDtoRequest(String firstName, String lastName, String patronymic, String login,
                                      String password, String email, String address, String phone) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.patronymic = patronymic;
-        this.login = login;
-        this.password = password;
+        super(firstName, lastName, patronymic, login, password);
         this.email = email;
         this.address = address;
         this.phone = phone;
     }
 
     public RegisterPatientDtoRequest() {
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getPatronymic() {
-        return patronymic;
-    }
-
-    public void setPatronymic(String patronymic) {
-        this.patronymic = patronymic;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getEmail() {

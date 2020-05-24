@@ -1,7 +1,7 @@
 package net.thumbtack.school.hospital.dao;
 
 import net.thumbtack.school.hospital.model.*;
-import net.thumbtack.school.hospital.model.exception.HospitalException;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -52,6 +52,43 @@ public class TestDoctorPatientOperations extends TestBase {
         } catch (RuntimeException | HospitalException e) {
             fail();
         }
+    }
+
+    @Test(expected = HospitalException.class)
+    public void testAddPatientToAppointmentFail() throws HospitalException {
+
+            List<DaySchedule> schedule = new LinkedList<>(Arrays.asList(
+                    new DaySchedule(LocalDate.of(2020, 1, 1), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:19"), AppointmentState.APPOINTMENT),
+                            new Appointment(LocalTime.parse("10:20"), LocalTime.parse("10:39"), AppointmentState.APPOINTMENT)))),
+                    new DaySchedule(LocalDate.of(2020, 2, 2), new LinkedList<>(Arrays.asList(
+                            new Appointment(LocalTime.parse("11:00"), LocalTime.parse("11:19"), AppointmentState.APPOINTMENT),
+                            new Appointment(LocalTime.parse("11:20"), LocalTime.parse("11:39"), AppointmentState.APPOINTMENT))))));
+            Doctor doctor = insertDoctor(UserType.DOCTOR, "name", "surname",
+                    "patronymic", "doctorLogin", "doctorPass", "хирург",
+                    "100", schedule);
+            Doctor doctorFromDB = doctorDao.getById(doctor.getId());
+
+            Patient patient = insertPatient(UserType.PATIENT, "name1", "surname1",
+                    "patronymic1", "patientLogin", "patientPass", "email@mail.ru",
+                    "address", "8-900-000-00-00");
+
+            Appointment appointmentFromDb = doctorFromDB.getSchedule().get(0).getAppointmentList().get(0);
+
+            Appointment appointment = new Appointment(appointmentFromDb.getId(), appointmentFromDb.getTimeStart(),
+                    appointmentFromDb.getTimeEnd(), AppointmentState.APPOINTMENT, doctorFromDB.getSchedule().get(0),
+                    new Ticket("ticketName", patient));
+
+            schedule.get(0).getAppointmentList().remove(0);
+            schedule.get(0).getAppointmentList().add(appointment);
+            schedule.get(0).getAppointmentList().sort(Comparator.comparing(Appointment::getTimeStart));
+
+            doctor.setSchedule(schedule);
+
+            patientDao.addPatientToAppointment(doctor.getSchedule().get(0).getAppointmentList().get(0), patient);
+
+            doctorFromDB = doctorDao.getById(doctor.getId());
+            checkDoctorFields(doctor, doctorFromDB);
     }
 
     @Test
@@ -153,7 +190,7 @@ public class TestDoctorPatientOperations extends TestBase {
             checkDoctorFields(doctorList.get(0), doctorListFromDb.get(0));
             checkDoctorFields(doctorList.get(1), doctorListFromDb.get(1));
 
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | HospitalException e) {
             fail();
         }
     }

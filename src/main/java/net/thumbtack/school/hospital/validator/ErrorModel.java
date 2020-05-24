@@ -1,6 +1,6 @@
 package net.thumbtack.school.hospital.validator;
 
-import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
+import net.thumbtack.school.hospital.validator.exception.HospitalErrorCode;
 import org.springframework.validation.FieldError;
 
 import java.util.Objects;
@@ -13,6 +13,12 @@ public class ErrorModel {
 
     public ErrorModel(String errorCode, String field, String massage) {
         this.errorCode = errorCode;
+        this.field = field;
+        this.massage = massage;
+    }
+
+    public ErrorModel(HospitalErrorCode hospitalErrorCode, String field, String massage) {
+        this.errorCode = hospitalErrorCode.toString();
         this.field = field;
         this.massage = massage;
     }

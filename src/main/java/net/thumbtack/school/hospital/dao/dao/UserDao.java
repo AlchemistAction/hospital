@@ -2,9 +2,8 @@ package net.thumbtack.school.hospital.dao.dao;
 
 import net.thumbtack.school.hospital.model.User;
 import net.thumbtack.school.hospital.model.UserType;
-import org.springframework.stereotype.Component;
 
-@Component
+
 public interface UserDao {
 
     void delete(User user);

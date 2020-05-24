@@ -2,6 +2,7 @@ package net.thumbtack.school.hospital.endpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
+import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.UserType;
@@ -24,10 +25,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import javax.servlet.http.Cookie;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = AdminsEndPoint.class)
@@ -48,8 +49,8 @@ public class TestAdminsEndPoint {
     @Test
     public void testRegisterAdmin() throws Exception {
         RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest("рома",
-                "ромагов", "patronymic", "regularAdmin", "adminLogin",
-                "adminPassword");
+                "ромагов", "романович", "regularAdmin", "adminlog",
+                "adminpass");
 
         Admin admin = modelMapper.map(registerAdminDtoRequest, Admin.class);
         admin.setId(13);
@@ -62,14 +63,14 @@ public class TestAdminsEndPoint {
                 .content(mapper.writeValueAsString(registerAdminDtoRequest)))
                 .andReturn();
 
-        assertEquals(result.getResponse().getStatus(), 200);
+        assertEquals(200, result.getResponse().getStatus());
     }
 
     @Test
-    public void testRegisterAdminFail() throws Exception {
+    public void testRegisterAdminFail1() throws Exception {
         RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest(null,
-                "романов", "patronymic", "regularAdmin", "adminLogin",
-                "adminPassword");
+                "романов", "романович", "regularAdmin", "adminLog",
+                "adminPass");
 
         when(userService.getUserTypeBySession(anyString())).thenReturn(UserType.ADMIN);
 
@@ -77,13 +78,83 @@ public class TestAdminsEndPoint {
                 .contentType(MediaType.APPLICATION_JSON).cookie(new Cookie("JAVASESSIONID", "123"))
                 .content(mapper.writeValueAsString(registerAdminDtoRequest)))
                 .andReturn();
-        assertEquals(result.getResponse().getStatus(), 400);
+        assertEquals(400, result.getResponse().getStatus());
         GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(),
                 GlobalErrorHandler.MyError.class);
 
-        ErrorModel errorModel = new ErrorModel("VALIDATION_ERROR","firstName", "First name: ''");
+        ErrorModel errorModel = new ErrorModel("VALIDATION_ERROR", "firstName", "Incorrect First name: ''");
         assertEquals(errorModel, error.getAllErrors().get(0));
     }
 
+    @Test
+    public void testRegisterAdminFail2() throws Exception {
+        RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest("роман",
+                "романов", "романович", "regularAdmin", "adminLog",
+                "adminPass");
 
+        when(userService.getUserTypeBySession(anyString())).thenReturn(UserType.DOCTOR);
+
+        MvcResult result = mvc.perform(post("/api/admins")
+                .contentType(MediaType.APPLICATION_JSON).cookie(new Cookie("JAVASESSIONID", "123"))
+                .content(mapper.writeValueAsString(registerAdminDtoRequest)))
+                .andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+        GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(),
+                GlobalErrorHandler.MyError.class);
+
+        ErrorModel errorModel = new ErrorModel("WRONG_USER_TYPE", "no field",
+                "Only admins are allowed to register other admins");
+        assertEquals(errorModel, error.getAllErrors().get(0));
+    }
+
+    @Test
+    public void testUpdateAdmin() throws Exception {
+        RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest("рома",
+                "ромагов", "романович", "regularAdmin", "adminlog",
+                "adminpass");
+        Admin admin = modelMapper.map(registerAdminDtoRequest, Admin.class);
+        admin.setId(13);
+
+        UpdateAdminDtoRequest updateAdminDtoRequest = new UpdateAdminDtoRequest("стас",
+                "иванов", "купецович", "regularAdmin", "oldPassword",
+                "newPassword");
+
+        when(userService.getUserTypeBySession(anyString())).thenReturn(UserType.ADMIN);
+        when(adminService.updateAdmin(any(), anyInt())).thenReturn(modelMapper.map(admin, ReturnAdminDtoResponse.class));
+
+        MvcResult result = mvc.perform(put("/api/admins")
+                .contentType(MediaType.APPLICATION_JSON).cookie(new Cookie("JAVASESSIONID", "123"))
+                .content(mapper.writeValueAsString(updateAdminDtoRequest)))
+                .andReturn();
+
+        assertEquals(200, result.getResponse().getStatus());
+    }
+    @Test
+    public void testUpdateAdminFail() throws Exception {
+        RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest("рома",
+                "ромагов", "романович", "regularAdmin", "adminlog",
+                "adminpass");
+        Admin admin = modelMapper.map(registerAdminDtoRequest, Admin.class);
+        admin.setId(13);
+
+        UpdateAdminDtoRequest updateAdminDtoRequest = new UpdateAdminDtoRequest("стас",
+                "иванов", "купецович", "regularAdmin", "oldPassword",
+                "newPassword");
+
+        when(userService.getUserTypeBySession(anyString())).thenReturn(UserType.DOCTOR);
+        when(adminService.updateAdmin(any(), anyInt())).thenReturn(modelMapper.map(admin, ReturnAdminDtoResponse.class));
+
+        MvcResult result = mvc.perform(put("/api/admins")
+                .contentType(MediaType.APPLICATION_JSON).cookie(new Cookie("JAVASESSIONID", "123"))
+                .content(mapper.writeValueAsString(updateAdminDtoRequest)))
+                .andReturn();
+
+        assertEquals(400, result.getResponse().getStatus());
+        GlobalErrorHandler.MyError error = mapper.readValue(result.getResponse().getContentAsString(),
+                GlobalErrorHandler.MyError.class);
+
+        ErrorModel errorModel = new ErrorModel("WRONG_USER_TYPE", "no field",
+                "Admin can update his own info only");
+        assertEquals(errorModel, error.getAllErrors().get(0));
+    }
 }

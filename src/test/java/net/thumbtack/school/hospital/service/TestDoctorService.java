@@ -8,33 +8,34 @@ import net.thumbtack.school.hospital.dto.internal.AppointmentForDto;
 import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;
 import net.thumbtack.school.hospital.dto.request.AddPatientToCommissionDtoRequest;
+import net.thumbtack.school.hospital.dto.request.DeleteDoctorScheduleDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdateScheduleDtoRequest;
+import net.thumbtack.school.hospital.dto.response.AddPatientToCommissionDtoResponse;
+import net.thumbtack.school.hospital.dto.response.GetAllDoctorsDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
 import net.thumbtack.school.hospital.model.*;
-import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
-import net.thumbtack.school.hospital.model.exception.HospitalException;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class TestDoctorService {
 
     private DoctorDao doctorDao;
     private PatientDao patientDao;
     private DoctorService doctorService;
-    private ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Before
     public void setUp() {
@@ -44,10 +45,10 @@ public class TestDoctorService {
     }
 
     @Test
-    public void testRegisterDoctorWithWeekSchedule() {
+    public void testRegisterDoctorWithWeekSchedule() throws HospitalException {
         RegisterDoctorDtoRequest registerDoctorDtoRequest = new RegisterDoctorDtoRequest("name",
                 "surname", "patronymic", "хирург", "100", "doctorLogin",
-                "doctorPassword", "13-04-2020", "16-04-2020",
+                "doctorPassword", "12-04-2020", "16-04-2020",
                 new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
 
         List<DaySchedule> schedule = Collections.singletonList(
@@ -71,12 +72,14 @@ public class TestDoctorService {
 
         resultMap.put("13-04-2020", appList);
 
-        assertEquals(3, returnDoctorDtoResponse.getId());
-        assertEquals(resultMap, returnDoctorDtoResponse.getSchedule());
+        ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+        result.setSchedule(resultMap);
+
+        assertEquals(result, returnDoctorDtoResponse);
     }
 
     @Test
-    public void testRegisterDoctorWithWeekDaySchedule() {
+    public void testRegisterDoctorWithWeekDaySchedule() throws HospitalException {
         RegisterDoctorDtoRequest registerDoctorDtoRequest = new RegisterDoctorDtoRequest("name",
                 "surname", "patronymic", "хирург", "100", "doctorLogin",
                 "doctorPassword", "13-04-2020", "16-04-2020",
@@ -113,6 +116,346 @@ public class TestDoctorService {
         resultMap.put("14-04-2020", appList2);
 
         assertEquals(resultMap, returnDoctorDtoResponse.getSchedule());
+    }
+
+    @Test
+    public void testGetDoctorWithoutSchedule() throws HospitalException {
+        RegisterDoctorDtoRequest registerDoctorDtoRequest = new RegisterDoctorDtoRequest("name",
+                "surname", "patronymic", "хирург", "100", "doctorLogin",
+                "doctorPassword", "12-04-2020", "16-04-2020",
+                new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
+
+        List<DaySchedule> schedule = Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 4, 13),
+                        Arrays.asList(
+                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.APPOINTMENT),
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))));
+
+        Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
+        doctor.setSchedule(schedule);
+        doctor.setId(3);
+
+        Patient patient = new Patient(UserType.PATIENT, "name", "surname",
+                "patronymic", "Login", "oldPassword", "email@mail.ru",
+                "address", "8-900-000-00-00");
+
+        doctor.getSchedule().get(0).getAppointmentList().get(0).setTicket(new Ticket("123", patient));
+
+        when(doctorDao.getById(anyInt())).thenReturn(doctor);
+
+        ReturnDoctorDtoResponse returnDoctorDtoResponse = doctorService.getDoctor(doctor.getId(),
+                "no", "no", "no", 5, UserType.ADMIN);
+
+        Map<String, List<AppointmentForDto>> resultMap = new HashMap<>();
+
+        ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+        result.setSchedule(resultMap);
+
+        assertEquals(result, returnDoctorDtoResponse);
+    }
+
+    @Test
+    public void testGetDoctorForPatient() throws HospitalException {
+        RegisterDoctorDtoRequest registerDoctorDtoRequest = new RegisterDoctorDtoRequest("name",
+                "surname", "patronymic", "хирург", "100", "doctorLogin",
+                "doctorPassword", "12-04-2020", "16-04-2020",
+                new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
+
+        List<DaySchedule> schedule = Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 4, 13),
+                        Arrays.asList(
+                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.FREE),
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.APPOINTMENT))));
+
+        Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
+        doctor.setSchedule(schedule);
+        doctor.setId(3);
+
+        Patient patient1 = new Patient(17, UserType.PATIENT, "name", "surname",
+                "patronymic", "Login", "oldPassword", "email@mail.ru",
+                "address", "8-900-000-00-00");
+
+        Patient patient2 = new Patient(18, UserType.PATIENT, "name1", "surname1",
+                "patronymic1", "Login1", "oldPassword1", "email@mail.ru1",
+                "address1", "8-900-000-00-0022");
+
+        doctor.getSchedule().get(0).getAppointmentList().get(1).setTicket(new Ticket("1121", patient2));
+
+        when(doctorDao.getById(anyInt())).thenReturn(doctor);
+
+        ReturnDoctorDtoResponse returnDoctorDtoResponse = doctorService.getDoctor(doctor.getId(),
+                "yes", "10-04-2020", "17-04-2020", 17, UserType.PATIENT);
+
+        Map<String, List<AppointmentForDto>> resultMap = new LinkedHashMap<>();
+        List<AppointmentForDto> appList1 = new ArrayList<>();
+        appList1.add(new AppointmentForDto("10:00"));
+        appList1.add(new AppointmentForDto("10:30", "Already occupied"));
+
+        resultMap.put("13-04-2020", appList1);
+
+        ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+        result.setSchedule(resultMap);
+
+        assertEquals(result, returnDoctorDtoResponse);
+    }
+
+    @Test
+    public void testGetDoctorWithSchedule1() throws HospitalException {
+        RegisterDoctorDtoRequest registerDoctorDtoRequest = new RegisterDoctorDtoRequest("name",
+                "surname", "patronymic", "хирург", "100", "doctorLogin",
+                "doctorPassword", "12-04-2020", "16-04-2020",
+                new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
+
+        List<DaySchedule> schedule = Arrays.asList(
+                new DaySchedule(LocalDate.of(2020, 5, 18),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
+                new DaySchedule(LocalDate.of(2020, 5, 19),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
+                new DaySchedule(LocalDate.now(),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
+                new DaySchedule(LocalDate.now().plusDays(1),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
+                new DaySchedule(LocalDate.now().plusDays(2),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))));
+
+        Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
+        doctor.setSchedule(schedule);
+        doctor.setId(3);
+
+        Patient patient = new Patient(UserType.PATIENT, "name", "surname",
+                "patronymic", "Login", "oldPassword", "email@mail.ru",
+                "address", "8-900-000-00-00");
+
+        doctor.getSchedule().get(3).getAppointmentList().get(0).setTicket(new Ticket("123", patient));
+
+        when(doctorDao.getById(anyInt())).thenReturn(doctor);
+
+        ReturnDoctorDtoResponse returnDoctorDtoResponse = doctorService.getDoctor(doctor.getId(),
+                "yes", "no", "no", 5, UserType.ADMIN);
+
+        Map<String, List<AppointmentForDto>> resultMap = new LinkedHashMap<>();
+        List<AppointmentForDto> appList1 = new ArrayList<>();
+        appList1.add(new AppointmentForDto("10:30"));
+
+        List<AppointmentForDto> appList2 = new ArrayList<>();
+        appList2.add(new AppointmentForDto("10:30", patient.getId(), patient.getFirstName(), patient.getLastName(), patient.getPatronymic(),
+                patient.getEmail(), patient.getAddress(), patient.getPhone()));
+
+        List<AppointmentForDto> appList3 = new ArrayList<>();
+        appList3.add(new AppointmentForDto("10:30"));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        resultMap.put(formatter.format(LocalDate.now()), appList1);
+        resultMap.put(formatter.format(LocalDate.now().plusDays(1)), appList2);
+        resultMap.put(formatter.format(LocalDate.now().plusDays(2)), appList3);
+
+        ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+        result.setSchedule(resultMap);
+
+        assertEquals(result, returnDoctorDtoResponse);
+    }
+
+    @Test
+    public void testGetDoctorWithSchedule2() throws HospitalException {
+        RegisterDoctorDtoRequest registerDoctorDtoRequest = new RegisterDoctorDtoRequest("name",
+                "surname", "patronymic", "хирург", "100", "doctorLogin",
+                "doctorPassword", "12-04-2020", "16-04-2020",
+                new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
+
+        List<DaySchedule> schedule = Arrays.asList(
+                new DaySchedule(LocalDate.of(2020, 5, 18),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
+                new DaySchedule(LocalDate.of(2020, 5, 19),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
+                new DaySchedule(LocalDate.now(),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
+                new DaySchedule(LocalDate.now().plusDays(1),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
+                new DaySchedule(LocalDate.now().plusDays(2),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))));
+
+        Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
+        doctor.setSchedule(schedule);
+        doctor.setId(3);
+
+        when(doctorDao.getById(anyInt())).thenReturn(doctor);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        ReturnDoctorDtoResponse returnDoctorDtoResponse = doctorService.getDoctor(doctor.getId(),
+                "yes", "no", formatter.format(LocalDate.now().plusDays(1)), 5, UserType.ADMIN);
+
+        Map<String, List<AppointmentForDto>> resultMap = new LinkedHashMap<>();
+        List<AppointmentForDto> appList1 = new ArrayList<>();
+        appList1.add(new AppointmentForDto("10:30"));
+
+        List<AppointmentForDto> appList2 = new ArrayList<>();
+        appList2.add(new AppointmentForDto("10:30"));
+
+        resultMap.put(formatter.format(LocalDate.now()), appList1);
+        resultMap.put(formatter.format(LocalDate.now().plusDays(1)), appList2);
+
+        ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+        result.setSchedule(resultMap);
+
+        assertEquals(result, returnDoctorDtoResponse);
+    }
+
+    @Test
+    public void testGetAllDoctorsWithoutSchedule() {
+        RegisterDoctorDtoRequest registerDoctorDtoRequest = new RegisterDoctorDtoRequest("name",
+                "surname", "patronymic", "хирург", "100", "doctorLogin",
+                "doctorPassword", "12-04-2020", "16-04-2020",
+                new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
+
+        List<DaySchedule> schedule = Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 4, 13),
+                        Arrays.asList(
+                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.APPOINTMENT),
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.APPOINTMENT))));
+
+        Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
+        doctor.setSchedule(schedule);
+        doctor.setId(3);
+
+        RegisterDoctorDtoRequest registerDoctorDtoRequest2 = new RegisterDoctorDtoRequest("name3",
+                "surname2", "patronym2ic", "хиру2рг", "1020", "doc2torLogin",
+                "doctorPass2word", "12-04-2020", "16-04-2020",
+                new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
+
+        List<DaySchedule> schedule2 = Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 4, 13),
+                        Arrays.asList(
+                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.APPOINTMENT),
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.APPOINTMENT))));
+
+        Doctor doctor2 = modelMapper.map(registerDoctorDtoRequest2, Doctor.class);
+        doctor.setSchedule(schedule2);
+        doctor.setId(4);
+
+        List<Doctor> doctorList = Arrays.asList(doctor, doctor2);
+        when(doctorDao.getAll()).thenReturn(doctorList);
+
+        GetAllDoctorsDtoResponse dtoResponse = doctorService.getAllDoctors("no",
+                "no", "10-04-2020", "17-04-2020", 17, UserType.DOCTOR);
+
+        Map<String, List<AppointmentForDto>> resultMap = new HashMap<>();
+
+        ReturnDoctorDtoResponse result1 = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+        result1.setSchedule(resultMap);
+
+        ReturnDoctorDtoResponse result2 = modelMapper.map(doctor2, ReturnDoctorDtoResponse.class);
+        result2.setSchedule(resultMap);
+
+        List<ReturnDoctorDtoResponse> result = Arrays.asList(result1, result2);
+
+        assertEquals(result, dtoResponse.getList());
+    }
+
+    @Test
+    public void testGetAllDoctorsWithSchedule() {
+        RegisterDoctorDtoRequest registerDoctorDtoRequest = new RegisterDoctorDtoRequest("name",
+                "surname", "patronymic", "хирург", "100", "doctorLogin",
+                "doctorPassword", "12-04-2020", "16-04-2020",
+                new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
+
+        List<DaySchedule> schedule = Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 4, 13),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.APPOINTMENT))));
+
+        Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
+        doctor.setSchedule(schedule);
+        doctor.setId(3);
+
+        RegisterDoctorDtoRequest registerDoctorDtoRequest2 = new RegisterDoctorDtoRequest("name2",
+                "surna2me", "pa2tronymic", "хиру2рг", "1200", "doct2orLogin",
+                "doctor2Password", "12-04-2020", "16-04-2020",
+                new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
+
+        List<DaySchedule> schedule2 = Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 4, 14),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.APPOINTMENT))));
+
+        Doctor doctor2 = modelMapper.map(registerDoctorDtoRequest2, Doctor.class);
+        doctor2.setSchedule(schedule2);
+        doctor2.setId(4);
+
+        List<Doctor> doctorList = Arrays.asList(doctor, doctor2);
+        when(doctorDao.getAll()).thenReturn(doctorList);
+
+        GetAllDoctorsDtoResponse dtoResponse = doctorService.getAllDoctors("no",
+                "yes", "10-04-2020", "17-04-2020", 17, UserType.DOCTOR);
+
+
+        Map<String, List<AppointmentForDto>> resultMap1 = new HashMap<>();
+        List<AppointmentForDto> appList1 = new ArrayList<>();
+        appList1.add(new AppointmentForDto("10:30"));
+
+        resultMap1.put("13-04-2020", appList1);
+
+        ReturnDoctorDtoResponse result1 = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
+        result1.setSchedule(resultMap1);
+
+        Map<String, List<AppointmentForDto>> resultMap2 = new HashMap<>();
+        List<AppointmentForDto> appList2 = new ArrayList<>();
+        appList2.add(new AppointmentForDto("10:30"));
+
+        resultMap2.put("14-04-2020", appList2);
+
+        ReturnDoctorDtoResponse result2 = modelMapper.map(doctor2, ReturnDoctorDtoResponse.class);
+        result2.setSchedule(resultMap2);
+
+        List<ReturnDoctorDtoResponse> result = Arrays.asList(result1, result2);
+
+        assertEquals(result, dtoResponse.getList());
+    }
+
+    @Test
+    public void testDeleteDoctorSinceDate() throws HospitalException {
+        RegisterDoctorDtoRequest registerDoctorDtoRequest = new RegisterDoctorDtoRequest("name",
+                "surname", "patronymic", "хирург", "100", "doctorLogin",
+                "doctorPassword", "12-04-2020", "16-04-2020",
+                new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
+
+        List<DaySchedule> schedule = Collections.singletonList(
+                new DaySchedule(LocalDate.of(2020, 4, 13),
+                        Arrays.asList(
+                                new Appointment(LocalTime.parse("10:00"), LocalTime.parse("10:30"), AppointmentState.APPOINTMENT),
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))));
+
+        Doctor doctor = modelMapper.map(registerDoctorDtoRequest, Doctor.class);
+        doctor.setSchedule(schedule);
+        doctor.setId(3);
+
+        when(doctorDao.getById(anyInt())).thenReturn(doctor);
+
+        DeleteDoctorScheduleDtoRequest dtoRequest = new DeleteDoctorScheduleDtoRequest("01-01-2020");
+
+        doctorService.deleteDoctorScheduleSinceDate(dtoRequest, doctor.getId());
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate lastDateOfWork = LocalDate.parse(dtoRequest.getDate(), formatter);
+        verify(doctorDao, times(1)).deleteScheduleSinceDate(doctor.getId(), lastDateOfWork);
+    }
+
+    @Test(expected = HospitalException.class)
+    public void testDeleteDoctorSinceDateFail() throws HospitalException {
+        DeleteDoctorScheduleDtoRequest dtoRequest = new DeleteDoctorScheduleDtoRequest("01-01-2020");
+
+        doctorService.deleteDoctorScheduleSinceDate(dtoRequest, 3);
     }
 
     @Test
@@ -219,8 +562,8 @@ public class TestDoctorService {
         assertEquals(resultMap, returnDoctorDtoResponse.getSchedule());
     }
 
-    @Test
-    public void testInsertNewScheduleFail() {
+    @Test(expected = HospitalException.class)
+    public void testInsertNewScheduleFail() throws HospitalException {
 
         UpdateScheduleDtoRequest updateScheduleDtoRequest = new UpdateScheduleDtoRequest(
                 "14-04-2020",
@@ -244,12 +587,7 @@ public class TestDoctorService {
 
         when(doctorDao.getById(anyInt())).thenReturn(doctor);
 
-        try {
-            doctorService.updateSchedule(updateScheduleDtoRequest, doctor.getId());
-            fail();
-        } catch (HospitalException ex) {
-            assertEquals(HospitalErrorCode.CAN_NOT_UPDATE_SCHEDULE, ex.getErrorCode());
-        }
+        doctorService.updateSchedule(updateScheduleDtoRequest, doctor.getId());
     }
 
     @Test
@@ -333,15 +671,16 @@ public class TestDoctorService {
         AddPatientToCommissionDtoRequest dtoRequest = new AddPatientToCommissionDtoRequest(patient.getId(),
                 new Integer[]{13, 14}, "100", "01-01-2020", "10:15", "00:20");
 
-//        List<Doctor> doctorListFromService =
-                doctorService.addPatientToCommission(dtoRequest, doctor1.getId());
+        AddPatientToCommissionDtoResponse result = doctorService.addPatientToCommission(dtoRequest, doctor1.getId());
 
-//        checkDoctorFields(expectedList.get(0), doctorListFromService.get(0));
-//        checkDoctorFields(expectedList.get(1), doctorListFromService.get(1));
+        AddPatientToCommissionDtoResponse expected = new AddPatientToCommissionDtoResponse("CD1314202001011015"
+                , patient.getId(), dtoRequest.getDoctorIds(), dtoRequest.getRoom(), dtoRequest.getDate(),
+                dtoRequest.getDate(), dtoRequest.getDuration());
+        assertEquals(expected, result);
     }
 
-    @Test
-    public void testAddPatientToCommissionFail1() {
+    @Test(expected = HospitalException.class)
+    public void testAddPatientToCommissionFail1() throws HospitalException {
 
         Patient patient = new Patient(2, UserType.PATIENT, "name", "surname",
                 "patronymic", "Login", "oldPassword", "email@mail.ru",
@@ -367,16 +706,11 @@ public class TestDoctorService {
         AddPatientToCommissionDtoRequest dtoRequest = new AddPatientToCommissionDtoRequest(patient.getId(),
                 new Integer[]{13, 14}, "100", "01-01-2020", "10:15", "00:20");
 
-        try {
-            doctorService.addPatientToCommission(dtoRequest, patient.getId());
-            fail();
-        } catch (HospitalException ex) {
-            assertEquals(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION, ex.getErrorCode());
-        }
+        doctorService.addPatientToCommission(dtoRequest, patient.getId());
     }
 
-    @Test
-    public void testAddPatientToCommissionFail2() {
+    @Test(expected = HospitalException.class)
+    public void testAddPatientToCommissionFail2() throws HospitalException {
 
         Patient patient = new Patient(2, UserType.PATIENT, "name", "surname",
                 "patronymic", "Login", "oldPassword", "email@mail.ru",
@@ -396,12 +730,7 @@ public class TestDoctorService {
         AddPatientToCommissionDtoRequest dtoRequest = new AddPatientToCommissionDtoRequest(patient.getId(),
                 new Integer[]{13, 14}, "100", "01-01-2020", "10:15", "00:20");
 
-        try {
-            doctorService.addPatientToCommission(dtoRequest, patient.getId());
-            fail();
-        } catch (HospitalException ex) {
-            assertEquals(HospitalErrorCode.CAN_NOT_ADD_PATIENT_TO_COMMISSION, ex.getErrorCode());
-        }
+        doctorService.addPatientToCommission(dtoRequest, patient.getId());
 
     }
 

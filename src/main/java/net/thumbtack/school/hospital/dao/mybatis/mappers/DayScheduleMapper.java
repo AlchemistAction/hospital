@@ -8,6 +8,7 @@ import org.apache.ibatis.mapping.FetchType;
 
 import java.time.LocalDate;
 import java.util.List;
+
 @Mapper
 public interface DayScheduleMapper {
 
@@ -49,6 +50,6 @@ public interface DayScheduleMapper {
     @Delete("DELETE FROM day_schedule WHERE id = #{daySchedule.id}")
     void delete(@Param("daySchedule") DaySchedule daySchedule);
 
-    @Delete("DELETE FROM day_schedule WHERE date >= #{lastDateOfWork}")
-    void deleteAllSinceDate(LocalDate lastDateOfWork);
+    @Delete("DELETE FROM day_schedule WHERE date >= #{lastDateOfWork} and doctor_id = #{id}")
+    void deleteAllSinceDate(@Param("id") int id, @Param("lastDateOfWork") LocalDate lastDateOfWork);
 }

@@ -2,35 +2,36 @@ package net.thumbtack.school.hospital.dto.request;
 
 import net.thumbtack.school.hospital.dto.internal.DayScheduleForDto;
 import net.thumbtack.school.hospital.dto.internal.WeekSchedule;
-import net.thumbtack.school.hospital.validator.Name;
 
-public class RegisterDoctorDtoRequest {
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
-    @Name
-    private String firstName;
-    @Name
-    private String lastName;
-    private String patronymic;
+public class RegisterDoctorDtoRequest extends RegisterUserDtoRequest {
+
+    @NotNull
+    @NotBlank
     private String speciality;
+    @NotNull
+    @NotBlank
     private String room;
-    private String login;
-    private String password;
+    @NotNull
+    @NotBlank
     private String dateStart;
+    @NotNull
+    @NotBlank
     private String dateEnd;
     private WeekSchedule weekSchedule;
     private DayScheduleForDto[] weekDaysSchedule;
+    @NotNull
+    @NotBlank
     private String duration;
 
     public RegisterDoctorDtoRequest(String firstName, String lastName, String patronymic, String speciality,
                                     String room, String login, String password, String dateStart, String dateEnd,
                                     WeekSchedule weekSchedule, String duration) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.patronymic = patronymic;
+        super(firstName, lastName, patronymic, login, password);
         this.speciality = speciality;
         this.room = room;
-        this.login = login;
-        this.password = password;
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
         this.weekSchedule = weekSchedule;
@@ -40,13 +41,9 @@ public class RegisterDoctorDtoRequest {
     public RegisterDoctorDtoRequest(String firstName, String lastName, String patronymic, String speciality,
                                     String room, String login, String password, String dateStart, String dateEnd,
                                     DayScheduleForDto[] weekDaysSchedule, String duration) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.patronymic = patronymic;
+        super(firstName, lastName, patronymic, login, password);
         this.speciality = speciality;
         this.room = room;
-        this.login = login;
-        this.password = password;
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
         this.weekDaysSchedule = weekDaysSchedule;
@@ -54,30 +51,6 @@ public class RegisterDoctorDtoRequest {
     }
 
     public RegisterDoctorDtoRequest() {
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getPatronymic() {
-        return patronymic;
-    }
-
-    public void setPatronymic(String patronymic) {
-        this.patronymic = patronymic;
     }
 
     public String getSpeciality() {
@@ -94,22 +67,6 @@ public class RegisterDoctorDtoRequest {
 
     public void setRoom(String room) {
         this.room = room;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getDateStart() {

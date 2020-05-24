@@ -11,9 +11,12 @@ import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnUserDtoResponse;
 import net.thumbtack.school.hospital.model.User;
 import net.thumbtack.school.hospital.model.UserType;
-import net.thumbtack.school.hospital.model.exception.HospitalErrorCode;
-import net.thumbtack.school.hospital.model.exception.HospitalException;
+import net.thumbtack.school.hospital.validator.ErrorModel;
+import net.thumbtack.school.hospital.validator.exception.HospitalErrorCode;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +24,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
 
-    private DoctorDao doctorDao;
-    private PatientDao patientDao;
-    private AdminDao adminDao;
-    private UserDao userDao;
-    private ModelMapper modelMapper = new ModelMapper();
+    private final DoctorDao doctorDao;
+    private final PatientDao patientDao;
+    private final AdminDao adminDao;
+    private final UserDao userDao;
+    private final ModelMapper modelMapper = new ModelMapper();
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     public UserService(DoctorDao doctorDao, PatientDao patientDao, UserDao userDao, AdminDao adminDao) {
@@ -36,10 +40,12 @@ public class UserService {
     }
 
     public ReturnUserDtoResponse login(LoginDtoRequest loginDtoRequest, String uuid) throws HospitalException {
-
+        LOGGER.info("User Service login {}, {}", loginDtoRequest, uuid);
         UserType userType = userDao.getUserTypeByLogin(loginDtoRequest.getLogin());
         if (userType == null) {
-            throw new HospitalException(HospitalErrorCode.WRONG_LOGIN);
+            LOGGER.debug("User Service cant login. wrong login {}, {}", loginDtoRequest, uuid);
+            throw new HospitalException(new ErrorModel(HospitalErrorCode.WRONG_LOGIN,
+                    "login", "There is no user with login: " + loginDtoRequest.getLogin()));
         }
         switch (userType) {
             case ADMIN:
@@ -61,21 +67,27 @@ public class UserService {
 
                 return modelMapper.map(patient, ReturnPatientDtoResponse.class);
             default:
-                throw new HospitalException(HospitalErrorCode.CAN_NOT_FIND_USER);
+                LOGGER.debug("User Service cant login {}, {}", loginDtoRequest, uuid);
+                throw new HospitalException(new ErrorModel(HospitalErrorCode.CAN_NOT_FIND_USER,
+                        "no field", "Something went wrong. Try Again"));
         }
     }
 
     private void checkPassword(String password, String passwordFromDb) throws HospitalException {
         if (!password.equals(passwordFromDb)) {
-            throw new HospitalException(HospitalErrorCode.WRONG_PASSWORD);
+            LOGGER.debug("User Service cant login. wrong password {}", password);
+            throw new HospitalException(new ErrorModel(HospitalErrorCode.WRONG_PASSWORD,
+                    "password", "Passwords don't match"));
         }
     }
 
     public void setSession(int id, String uuid) {
+        LOGGER.info("User Service set session {}, {}", id, uuid);
         userDao.setSession(id, uuid);
     }
 
     public ReturnUserDtoResponse getInfo(int id, UserType userType) throws HospitalException {
+        LOGGER.info("User Service get info {}, {}", id, userType);
         switch (userType) {
             case ADMIN:
                 User admin = adminDao.getById(id);
@@ -87,19 +99,24 @@ public class UserService {
                 User patient = patientDao.getById(id);
                 return modelMapper.map(patient, ReturnPatientDtoResponse.class);
             default:
-                throw new HospitalException(HospitalErrorCode.CAN_NOT_FIND_USER);
+                LOGGER.debug("User Service cant get info. wrong ID {}, {}", id, userType);
+                throw new HospitalException(new ErrorModel(HospitalErrorCode.CAN_NOT_FIND_USER,
+                        "id", "There is no user with ID: " + id));
         }
     }
 
     public void logout(String uuid) {
+        LOGGER.info("User Service logout {}", uuid);
         userDao.endSession(uuid);
     }
 
     public UserType getUserTypeBySession(String uuid) {
-       return userDao.getUserTypeBySession(uuid);
+        LOGGER.info("User Service getUserTypeBySession {}", uuid);
+        return userDao.getUserTypeBySession(uuid);
     }
 
     public Integer getIdBySession(String uuid) {
+        LOGGER.info("User Service getIdBySession {}", uuid);
         return userDao.getIdBySession(uuid);
     }
 }

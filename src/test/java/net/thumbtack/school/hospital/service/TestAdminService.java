@@ -7,7 +7,7 @@ import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.UserType;
-import net.thumbtack.school.hospital.model.exception.HospitalException;
+import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
@@ -29,7 +29,7 @@ public class TestAdminService {
     }
 
     @Test
-    public void testRegisterAdmin() {
+    public void testRegisterAdmin() throws HospitalException {
         RegisterAdminDtoRequest registerAdminDtoRequest = new RegisterAdminDtoRequest("name",
                 "surname", "patronymic", "regularAdmin", "adminLogin",
                 "adminPassword");
@@ -40,8 +40,9 @@ public class TestAdminService {
         when(adminDao.insert(any())).thenReturn(admin);
 
         ReturnAdminDtoResponse returnAdminDtoResponse = adminService.registerAdmin(registerAdminDtoRequest);
+        ReturnAdminDtoResponse result = modelMapper.map(admin, ReturnAdminDtoResponse.class);
 
-        assertEquals(13, returnAdminDtoResponse.getId());
+        assertEquals(result, returnAdminDtoResponse);
     }
 
     @Test
@@ -73,7 +74,6 @@ public class TestAdminService {
 
         Admin oldAdmin = new Admin(UserType.ADMIN, "name", "oldLastNAme",
                 "patronymic", "adminLogin", "oldPassword", "regularAdmin");
-
 
         when(adminDao.getById(anyInt())).thenReturn(oldAdmin);
 

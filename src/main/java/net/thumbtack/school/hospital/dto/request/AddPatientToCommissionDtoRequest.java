@@ -9,6 +9,9 @@ public class AddPatientToCommissionDtoRequest {
     private String time;
     private String duration;
 
+    public AddPatientToCommissionDtoRequest() {
+    }
+
     public AddPatientToCommissionDtoRequest(int patientId, Integer[] doctorIds, String room, String date, String time,
                                             String duration) {
         this.patientId = patientId;
