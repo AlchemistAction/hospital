@@ -9,9 +9,7 @@ import net.thumbtack.school.hospital.dto.request.AddPatientToCommissionDtoReques
 import net.thumbtack.school.hospital.dto.request.DeleteDoctorScheduleDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterDoctorDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdateScheduleDtoRequest;
-import net.thumbtack.school.hospital.dto.response.AddPatientToCommissionDtoResponse;
-import net.thumbtack.school.hospital.dto.response.GetAllDoctorsDtoResponse;
-import net.thumbtack.school.hospital.dto.response.ReturnDoctorDtoResponse;
+import net.thumbtack.school.hospital.dto.response.*;
 import net.thumbtack.school.hospital.model.*;
 import net.thumbtack.school.hospital.validator.ErrorModel;
 import net.thumbtack.school.hospital.validator.exception.HospitalErrorCode;
@@ -214,17 +212,6 @@ public class DoctorService {
         doctorDao.deleteScheduleSinceDate(id, lastDateOfWork);
     }
 
-    private void massagePatientsAboutCancelledAppointment(Doctor doctor) {
-        doctor.getSchedule().stream()
-                .flatMap(daySchedule -> daySchedule.getAppointmentList().stream())
-                .forEach(appointment -> {
-                    if (appointment.getTicket() != null) {
-                        Patient patient = appointment.getTicket().getPatient();
-                        LOGGER.info("Massage about cancelled appointment was sent to patient email {} and phone {}",
-                                patient.getEmail(), patient.getPhone());
-                    }
-                });
-    }
 
     public AddPatientToCommissionDtoResponse addPatientToCommission(
             AddPatientToCommissionDtoRequest dtoRequest, int id) throws HospitalException {
@@ -256,6 +243,56 @@ public class DoctorService {
         return new AddPatientToCommissionDtoResponse(ticketNumber,
                 patient.getId(), dtoRequest.getDoctorIds(), dtoRequest.getRoom(), dtoRequest.getDate(),
                 dtoRequest.getDate(), dtoRequest.getDuration());
+    }
+
+    public UserStatisticsDtoResponse getDoctorStatistics(int doctorId, String startDate, String endDate) throws HospitalException {
+        LOGGER.info("Doctor Service getDoctorStatistics {}, {}, {}", doctorId, startDate, endDate);
+        Doctor doctor = doctorDao.getById(doctorId);
+        if (doctor == null) {
+            LOGGER.debug("Doctor Service cant getDoctorStatistics, wrong ID {}", doctorId);
+            throw new HospitalException(new ErrorModel(HospitalErrorCode.WRONG_ID, "id",
+                    "There is no doctor with ID: " + doctorId));
+        }
+        LocalDate start = getStartDateForResponse(startDate);
+        LocalDate end = getEndDateForResponse(endDate);
+        List<String> resultList = createStatisticsList(doctor, start, end);
+        return new UserStatisticsDtoResponse(resultList);
+    }
+
+    public GetAllDoctorsStatistics getAllDoctorsStatistics(String speciality, String startDate, String endDate) {
+        LOGGER.info("Doctor Service getAllDoctorsStatistics {}, {}, {}", speciality, startDate, endDate);
+        List<Doctor> doctorList;
+        if (speciality.equals("no")) {
+            doctorList = doctorDao.getAll();
+        } else {
+            doctorList = doctorDao.getAllBySpeciality(speciality);
+        }
+        LocalDate start = getStartDateForResponse(startDate);
+        LocalDate end = getEndDateForResponse(endDate);
+
+        List<UserStatisticsDtoResponse> resultList = new ArrayList<>();
+        for (Doctor doctor : doctorList) {
+            List<String> list = createStatisticsList(doctor, start, end);
+            resultList.add(new UserStatisticsDtoResponse(list));
+        }
+        return new GetAllDoctorsStatistics(resultList);
+    }
+
+    private List<String> createStatisticsList(Doctor doctor, LocalDate start, LocalDate end) {
+        int numberOfAppointments = (int) doctor.getSchedule().stream()
+                .filter(daySchedule -> daySchedule.getDate().isBefore(end.plusDays(1))
+                        && daySchedule.getDate().isAfter(start.minusDays(1)))
+                .flatMap(daySchedule -> daySchedule.getAppointmentList().stream())
+                .filter(appointment -> appointment.getTicket() != null).count();
+        int numberOfCommissions = (int) doctor.getCommissionList().stream()
+                .filter(commission -> commission.getDate().isBefore(end.plusDays(1))
+                        && commission.getDate().isAfter(start.minusDays(1))).count();
+
+        List<String> resultList = new ArrayList<>();
+        resultList.add("Doctor ID: " + doctor.getId());
+        resultList.add(numberOfAppointments + " Appointment(s)");
+        resultList.add(numberOfCommissions + " Commission(s)");
+        return resultList;
     }
 
     private LocalDate getStartDateForResponse(String startDate) {
@@ -470,4 +507,17 @@ public class DoctorService {
         }
         return fullMap;
     }
+
+    private void massagePatientsAboutCancelledAppointment(Doctor doctor) {
+        doctor.getSchedule().stream()
+                .flatMap(daySchedule -> daySchedule.getAppointmentList().stream())
+                .forEach(appointment -> {
+                    if (appointment.getTicket() != null) {
+                        Patient patient = appointment.getTicket().getPatient();
+                        LOGGER.info("Massage about cancelled appointment was sent to patient email {} and phone {}",
+                                patient.getEmail(), patient.getPhone());
+                    }
+                });
+    }
+
 }

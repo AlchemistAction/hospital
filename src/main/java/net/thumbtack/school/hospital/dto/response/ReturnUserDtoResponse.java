@@ -1,7 +1,9 @@
 package net.thumbtack.school.hospital.dto.response;
 
-import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.Objects;
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public abstract class ReturnUserDtoResponse {
     private int id;
     private String firstName;

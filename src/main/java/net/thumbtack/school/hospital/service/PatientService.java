@@ -196,7 +196,7 @@ public class PatientService {
         ticketDao.delete(ticket);
     }
 
-    public PatientStatisticsDtoResponse getStatistics(int patientId, String startDate, String endDate) throws HospitalException {
+    public UserStatisticsDtoResponse getPatientStatistics(int patientId, String startDate, String endDate) throws HospitalException {
         LOGGER.info("Patient Service getStatistics {}, {}, {}", patientId, startDate, endDate);
         Patient patient = patientDao.getById(patientId);
         if (patient == null) {
@@ -214,9 +214,11 @@ public class PatientService {
 
         List<String> resultList = new ArrayList<>();
         for (Map.Entry<String, Integer> entry : specialityMap.entrySet()) {
-            resultList.add(entry.getValue() + " appointment(s) to Doctors with speciality: " + entry.getKey());
+            resultList.add(entry.getValue() + " Appointment(s) to Doctors with speciality: " + entry.getKey());
         }
-        return new PatientStatisticsDtoResponse(resultList);
+        int numberOfCommissions = (int) ticketList.stream().filter(ticket -> ticket.getCommission() != null).count();
+        resultList.add(numberOfCommissions + " Commission(s)");
+        return new UserStatisticsDtoResponse(resultList);
     }
 
     private Map<String, Integer> createSpecialityMap(List<Doctor> doctorList) {

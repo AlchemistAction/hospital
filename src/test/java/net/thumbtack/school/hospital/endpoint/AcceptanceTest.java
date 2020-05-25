@@ -541,8 +541,6 @@ public class AcceptanceTest {
                 AddPatientToCommissionDtoResponse.class);
 
         assert dtoResponseCommission1 != null;
-        assertEquals("CD" + firstDoctorId + allDoctors.getList().get(1).getId() +
-                "202006011515", dtoResponseCommission1.getTicket());
 
         //create commission 2
         AddPatientToCommissionDtoRequest dtoRequestCommission2 = new AddPatientToCommissionDtoRequest(
@@ -556,8 +554,6 @@ public class AcceptanceTest {
                 AddPatientToCommissionDtoResponse.class);
 
         assert dtoResponseCommission2 != null;
-        assertEquals("CD" + firstDoctorId + allDoctors.getList().get(2).getId() +
-                "202006021500", dtoResponseCommission2.getTicket());
 
         //create commission fail
         AddPatientToCommissionDtoRequest dtoRequestCommission3 = new AddPatientToCommissionDtoRequest(
@@ -624,14 +620,33 @@ public class AcceptanceTest {
         requestHeadersForFirstAdmin3.add("Cookie", cookie3);
         HttpEntity requestEntityForRegisterFirstAdmin3 = new HttpEntity(requestHeadersForFirstAdmin3);
 
-        PatientStatisticsDtoResponse patientStatisticsDtoResponse = template.getForObject(
+        UserStatisticsDtoResponse userStatisticsDtoResponse = template.getForObject(
                 "http://localhost:8080/api/statistics/patients/" + patient1.getId(),
-                PatientStatisticsDtoResponse.class, requestEntityForRegisterFirstAdmin3);
-        assert patientStatisticsDtoResponse != null;
+                UserStatisticsDtoResponse.class, requestEntityForRegisterFirstAdmin3);
+        assert userStatisticsDtoResponse != null;
         List<String> statistics = Arrays.asList(
-                "1 appointment(s) to Doctors with speciality: терапевт",
-                "1 appointment(s) to Doctors with speciality: хирург",
-                "2 appointment(s) to Doctors with speciality: лор");
-        assertEquals(statistics, patientStatisticsDtoResponse.getStatistics());
+                "1 Appointment(s) to Doctors with speciality: терапевт",
+                "1 Appointment(s) to Doctors with speciality: хирург",
+                "2 Appointment(s) to Doctors with speciality: лор",
+                "1 Commission(s)");
+        assertEquals(statistics, userStatisticsDtoResponse.getStatistics());
+
+        //get doctor statistics
+        UserStatisticsDtoResponse userStatisticsDtoResponse2 = template.getForObject(
+                "http://localhost:8080/api/statistics/doctors/" + firstDoctorId,
+                UserStatisticsDtoResponse.class, requestEntityForRegisterFirstAdmin3);
+        assert userStatisticsDtoResponse2 != null;
+        List<String> statistics2 = Arrays.asList(
+                "Doctor ID: " + firstDoctorId,
+                "2 Appointment(s)",
+                "2 Commission(s)");
+        assertEquals(statistics2, userStatisticsDtoResponse2.getStatistics());
+
+        //get all doctors statistics
+        GetAllDoctorsStatistics getAllDoctorsStatistics = template.getForObject(
+                "http://localhost:8080/api/statistics/doctors",
+                GetAllDoctorsStatistics.class, requestEntityForRegisterFirstAdmin3);
+        assert getAllDoctorsStatistics != null;
+        assertEquals(5, getAllDoctorsStatistics.getStatistics().size());
     }
 }
