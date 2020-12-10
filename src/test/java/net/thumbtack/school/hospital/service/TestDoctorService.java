@@ -205,19 +205,19 @@ public class TestDoctorService {
                 new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
 
         List<DaySchedule> schedule = Arrays.asList(
-                new DaySchedule(LocalDate.of(2020, 5, 18),
+                new DaySchedule(LocalDate.of(2020, 7, 18),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
+                new DaySchedule(LocalDate.of(2020, 7, 19),
                         Collections.singletonList(
                                 new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
                 new DaySchedule(LocalDate.of(2020, 5, 19),
                         Collections.singletonList(
                                 new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
-                new DaySchedule(LocalDate.now(),
+                new DaySchedule(LocalDate.of(2020, 5, 19).plusDays(1),
                         Collections.singletonList(
                                 new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
-                new DaySchedule(LocalDate.now().plusDays(1),
-                        Collections.singletonList(
-                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
-                new DaySchedule(LocalDate.now().plusDays(2),
+                new DaySchedule(LocalDate.of(2020, 5, 19).plusDays(2),
                         Collections.singletonList(
                                 new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))));
 
@@ -249,9 +249,9 @@ public class TestDoctorService {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-        resultMap.put(formatter.format(LocalDate.now()), appList1);
-        resultMap.put(formatter.format(LocalDate.now().plusDays(1)), appList2);
-        resultMap.put(formatter.format(LocalDate.now().plusDays(2)), appList3);
+        resultMap.put(formatter.format(LocalDate.of(2020, 5, 19)), appList1);
+        resultMap.put(formatter.format(LocalDate.of(2020, 5, 19).plusDays(1)), appList2);
+        resultMap.put(formatter.format(LocalDate.of(2020, 5, 19).plusDays(2)), appList3);
 
         ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
         result.setSchedule(resultMap);
@@ -267,19 +267,19 @@ public class TestDoctorService {
                 new WeekSchedule("10:00", "11:00", new String[]{"Monday", "Friday"}), "00:30");
 
         List<DaySchedule> schedule = Arrays.asList(
-                new DaySchedule(LocalDate.of(2020, 5, 18),
+                new DaySchedule(LocalDate.of(2020, 7, 18),
+                        Collections.singletonList(
+                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
+                new DaySchedule(LocalDate.of(2020, 7, 19),
                         Collections.singletonList(
                                 new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
                 new DaySchedule(LocalDate.of(2020, 5, 19),
                         Collections.singletonList(
                                 new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
-                new DaySchedule(LocalDate.now(),
+                new DaySchedule(LocalDate.of(2020, 5, 19).plusDays(1),
                         Collections.singletonList(
                                 new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
-                new DaySchedule(LocalDate.now().plusDays(1),
-                        Collections.singletonList(
-                                new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))),
-                new DaySchedule(LocalDate.now().plusDays(2),
+                new DaySchedule(LocalDate.of(2020, 5, 19).plusDays(2),
                         Collections.singletonList(
                                 new Appointment(LocalTime.parse("10:30"), LocalTime.parse("11:00"), AppointmentState.FREE))));
 
@@ -292,7 +292,7 @@ public class TestDoctorService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
         ReturnDoctorDtoResponse returnDoctorDtoResponse = doctorService.getDoctor(doctor.getId(),
-                "yes", "no", formatter.format(LocalDate.now().plusDays(1)), 5, UserType.ADMIN);
+                "yes", "no", formatter.format(LocalDate.of(2020, 5, 19).plusDays(1)), 5, UserType.ADMIN);
 
         Map<String, List<AppointmentForDto>> resultMap = new LinkedHashMap<>();
         List<AppointmentForDto> appList1 = new ArrayList<>();
@@ -301,8 +301,8 @@ public class TestDoctorService {
         List<AppointmentForDto> appList2 = new ArrayList<>();
         appList2.add(new AppointmentForDto("10:30"));
 
-        resultMap.put(formatter.format(LocalDate.now()), appList1);
-        resultMap.put(formatter.format(LocalDate.now().plusDays(1)), appList2);
+        resultMap.put(formatter.format(LocalDate.of(2020, 5, 19)), appList1);
+        resultMap.put(formatter.format(LocalDate.of(2020, 5, 19).plusDays(1)), appList2);
 
         ReturnDoctorDtoResponse result = modelMapper.map(doctor, ReturnDoctorDtoResponse.class);
         result.setSchedule(resultMap);
