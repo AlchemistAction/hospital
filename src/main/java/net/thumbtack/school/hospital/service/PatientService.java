@@ -294,7 +294,7 @@ public class PatientService {
 
     private LocalDate getStartDateForResponse(String startDate) {
         if (startDate.equals("no")) {
-            return LocalDate.now();
+            return LocalDate.of(2020, 4, 2);
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return LocalDate.parse(startDate, formatter);
@@ -302,8 +302,8 @@ public class PatientService {
 
     private LocalDate getEndDateForResponse(String endDate) {
         if (endDate.equals("no")) {
-            final int twoMonths = 60;
-            return LocalDate.now().plusDays(twoMonths);
+            final int threeMonths = 90;
+            return LocalDate.of(2020, 4, 2).plusDays(threeMonths);
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return LocalDate.parse(endDate, formatter);

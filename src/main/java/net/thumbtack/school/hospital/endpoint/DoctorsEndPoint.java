@@ -86,6 +86,7 @@ public class DoctorsEndPoint {
         }
         Integer id = userService.getIdBySession(JAVASESSIONID);
         UserType userType = userService.getUserTypeBySession(JAVASESSIONID);
+
         return doctorService.getAllDoctors(speciality, schedule, startDate, endDate, id, userType);
     }
 
