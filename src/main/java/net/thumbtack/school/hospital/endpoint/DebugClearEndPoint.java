@@ -5,7 +5,6 @@ import net.thumbtack.school.hospital.dao.dao.DoctorDao;
 import net.thumbtack.school.hospital.dao.dao.PatientDao;
 import net.thumbtack.school.hospital.dao.dao.UserDao;
 import net.thumbtack.school.hospital.dao.mybatis.daoimpl.AdminDaoImpl;
-import net.thumbtack.school.hospital.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

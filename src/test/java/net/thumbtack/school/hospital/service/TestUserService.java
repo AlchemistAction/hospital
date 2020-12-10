@@ -21,14 +21,12 @@ import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.Doctor;
 import net.thumbtack.school.hospital.model.Patient;
 import net.thumbtack.school.hospital.model.UserType;
-import net.thumbtack.school.hospital.validator.exception.HospitalErrorCode;
 import net.thumbtack.school.hospital.validator.exception.HospitalException;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;

@@ -2,9 +2,6 @@ package net.thumbtack.school.hospital.endpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thumbtack.school.hospital.dto.request.AddPatientToAppointmentDtoRequest;
-import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
-import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
-import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.service.PatientService;
 import net.thumbtack.school.hospital.service.UserService;
@@ -24,7 +21,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import javax.servlet.http.Cookie;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

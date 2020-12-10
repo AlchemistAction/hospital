@@ -1,13 +1,9 @@
 package net.thumbtack.school.hospital.endpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.request.RegisterPatientDtoRequest;
-import net.thumbtack.school.hospital.dto.request.UpdateAdminDtoRequest;
 import net.thumbtack.school.hospital.dto.request.UpdatePatientDtoRequest;
-import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
 import net.thumbtack.school.hospital.dto.response.ReturnPatientDtoResponse;
-import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.Patient;
 import net.thumbtack.school.hospital.model.UserType;
 import net.thumbtack.school.hospital.service.PatientService;

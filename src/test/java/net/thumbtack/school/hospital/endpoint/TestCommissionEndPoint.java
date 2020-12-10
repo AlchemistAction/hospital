@@ -2,11 +2,7 @@ package net.thumbtack.school.hospital.endpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.thumbtack.school.hospital.dto.request.AddPatientToCommissionDtoRequest;
-import net.thumbtack.school.hospital.dto.request.RegisterAdminDtoRequest;
-import net.thumbtack.school.hospital.dto.response.ReturnAdminDtoResponse;
-import net.thumbtack.school.hospital.model.Admin;
 import net.thumbtack.school.hospital.model.UserType;
-import net.thumbtack.school.hospital.service.AdminService;
 import net.thumbtack.school.hospital.service.DoctorService;
 import net.thumbtack.school.hospital.service.PatientService;
 import net.thumbtack.school.hospital.service.UserService;
@@ -14,7 +10,6 @@ import net.thumbtack.school.hospital.validator.ErrorModel;
 import net.thumbtack.school.hospital.validator.GlobalErrorHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,7 +24,6 @@ import javax.servlet.http.Cookie;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
